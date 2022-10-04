@@ -1,8 +1,10 @@
 #ifndef __INCLUDE_INSTRUCTION_INSTRUCTION_HH__
 #define __INCLUDE_INSTRUCTION_INSTRUCTION_HH__
 
-struct Instruction {
-  /* data */
-};
+namespace sim {
+
+struct Instruction {};
+
+} // namespace sim
 
 #endif // __INCLUDE_INSTRUCTION_INSTRUCTION_HH__

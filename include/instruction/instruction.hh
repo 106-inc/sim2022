@@ -1,0 +1,8 @@
+#ifndef __INCLUDE_INSTRUCTION_INSTRUCTION_HH__
+#define __INCLUDE_INSTRUCTION_INSTRUCTION_HH__
+
+struct Instruction {
+  /* data */
+};
+
+#endif // __INCLUDE_INSTRUCTION_INSTRUCTION_HH__

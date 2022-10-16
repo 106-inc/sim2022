@@ -9,7 +9,7 @@ endforeach()
 foreach(TARGET ${TARGETS})
   target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/include)
   target_link_libraries(${TARGET} PRIVATE spdlog::spdlog)
-    set_target_properties(${TARGET}
+  set_target_properties(${TARGET}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/"
   )

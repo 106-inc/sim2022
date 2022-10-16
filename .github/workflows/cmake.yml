@@ -18,7 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repo and submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Install spdlog
       run: sudo apt install libspdlog-dev

@@ -1,3 +1,3 @@
-#include "memory.hh"
+#include "memory/memory.hh"
 
 namespace sim {}

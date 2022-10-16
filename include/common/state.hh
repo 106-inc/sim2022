@@ -21,10 +21,10 @@ public:
 };
 
 struct State final {
-  Reg pc;
-  Reg npc;
-  RegFile regs;
-  Memory mem;
+  Reg pc{};
+  Reg npc{};
+  RegFile regs{};
+  Memory mem{};
 };
 
 } // namespace sim

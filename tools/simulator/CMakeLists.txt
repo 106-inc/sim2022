@@ -1,4 +1,3 @@
 add_executable(simulator main.cc)
-
-target_link_libraries(simulator PRIVATE CLI11::CLI11)
+format_target(simulator ${CMAKE_CURRENT_SOURCE_DIR} main.cc)
 

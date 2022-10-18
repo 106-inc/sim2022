@@ -8,8 +8,11 @@ endforeach()
 
 foreach(TARGET ${TARGETS})
   target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+  target_compile_features(${TARGET} INTERFACE cxx_std_20)
+
   target_link_libraries(${TARGET} PRIVATE spdlog::spdlog)
   target_link_libraries(${TARGET} PRIVATE CLI11::CLI11)
+
   apply_compiler_flags(${TARGET} PRIVATE)
   set_target_properties(${TARGET}
     PROPERTIES

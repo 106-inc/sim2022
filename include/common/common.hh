@@ -2,6 +2,7 @@
 #define __INCLUDE_COMMON_COMMON_HH__
 
 #include <cstdint>
+#include <concepts>
 
 namespace sim {
 
@@ -9,10 +10,22 @@ using Word = std::uint32_t;
 using RegVal = Word;
 using Addr = std::uint32_t;
 using RegId = std::size_t;
+/*
+  Except for the 5-bit immediates used in CSR instructions
+  immediates are always sign-extended
+*/
+using immVal = std::int32_t;
 
 constexpr RegId kRegNum = 32;
 constexpr std::uint8_t kBitsInByte = 8;
 constexpr Word kDummyWord = 0;
+constexpr std::uint8_t kXLENInBytes = sizeof(Word);
+
+template <std::unsigned_integral T>
+constexpr auto signCast(T val)
+{
+  return static_cast<std::make_signed_t<T>>(val);
+}
 
 /**
  * @brief Calculate size of a type in bits function

@@ -11,10 +11,12 @@ using Addr = std::uint32_t;
 using RegId = std::size_t;
 
 constexpr RegId kRegNum = 32;
+constexpr std::uint8_t kBitsInByte = 8;
 
 
 enum class OpType
 {
+  UNKNOWN,
   ADD,
   SUB,
   LW,

@@ -6,7 +6,22 @@
 namespace sim {
 
 using Word = std::uint32_t;
-using Reg = Word;
+using RegVal = Word;
+using Addr = std::uint32_t;
+using RegId = std::size_t;
+
+constexpr RegId kRegNum = 32;
+
+
+enum class OpType
+{
+  ADD,
+  SUB,
+  LW,
+  SW,
+  MUL,
+  DIV
+};
 
 } // namespace sim
 

@@ -18,7 +18,7 @@ private:
   Decoder decoder_;
 
   Memory &mem() { return state_.mem; };
-  Word &pc() { return state_.pc; };
+  Addr &pc() { return state_.pc; };
 
 public:
   [[noreturn]] void run();

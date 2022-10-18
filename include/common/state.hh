@@ -10,19 +10,19 @@ namespace sim {
 
 class RegFile final {
 private:
-  std::array<Reg, 32> regs{};
+  std::array<RegVal, kRegNum> regs{};
 
 public:
-  Word get(std::size_t regnum) const { return regs.at(regnum); }
+  Word get(RegId regnum) const { return regs.at(regnum); }
 
-  void set(std::size_t regnum, Word val) {
+  void set(RegId regnum, Word val) {
     regs.at(regnum) = regnum == 0 ? 0 : val;
   }
 };
 
 struct State final {
-  Reg pc{};
-  Reg npc{};
+  Addr pc{};
+  Addr npc{};
   RegFile regs{};
   Memory mem{};
 };

@@ -2,6 +2,7 @@
 #define __INCLUDE_STATE_STATE_HH__
 
 #include <array>
+#include <stdexcept>
 
 #include "common/common.hh"
 #include "memory/memory.hh"
@@ -16,7 +17,9 @@ public:
   Word get(RegId regnum) const { return regs.at(regnum); }
 
   void set(RegId regnum, Word val) {
-    regs.at(regnum) = regnum == 0 ? 0 : val;
+    if (regnum == 0)
+      throw std::runtime_error{"Trying to set value to register x0"};
+    regs.at(regnum) = val;
   }
 };
 

@@ -5,6 +5,8 @@ include(cmake/list_dirs.cmake)
 include(cmake/comp_flags.cmake)
 include(cmake/clang_format.cmake)
 
+option(ENABLE_WERROR "Enable -Werror option (CI)" OFF)
+
 find_package(spdlog REQUIRED)
 message("Found package: spdlog")
 
@@ -19,9 +21,10 @@ list(APPEND TARGETS ${LIBLIST} ${TOOLLIST})
 
 foreach(TARGET ${TARGETS})
   target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/include)
-  target_compile_features(${TARGET} INTERFACE cxx_std_20)
+  target_compile_features(${TARGET} PRIVATE cxx_std_20)
   target_link_libraries(${TARGET} PRIVATE spdlog::spdlog)
   apply_compiler_flags(${TARGET} PRIVATE)
+  if (ENABLE_WERROR)
+    target_compile_options(${TARGET} PRIVATE -Werror)
+  endif()
 endforeach()
-
-

@@ -10,6 +10,8 @@ message("Found package: spdlog")
 
 add_subdirectory(src)
 add_subdirectory(tools)
+
+add_subdirectory(test)
 add_subdirectory(thirdparty)
 
 set(TARGETS)

@@ -1,21 +1,17 @@
 list_dirs(DIRS ${CMAKE_CURRENT_SOURCE_DIR})
-set(TARGETS ${DIRS})
+set(TOOLLIST ${DIRS})
 
 foreach(DIR ${DIRS})
   add_subdirectory(${DIR})
   message("Included subdirectory: ${DIR}")
 endforeach()
 
-foreach(TARGET ${TARGETS})
-  target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/include)
-  target_compile_features(${TARGET} INTERFACE cxx_std_20)
-
-  target_link_libraries(${TARGET} PRIVATE spdlog::spdlog)
-  target_link_libraries(${TARGET} PRIVATE CLI11::CLI11)
-
-  apply_compiler_flags(${TARGET} PRIVATE)
-  set_target_properties(${TARGET}
+foreach(TOOL ${TOOLLIST})
+  target_link_libraries(${TOOL} PRIVATE CLI11::CLI11)
+  set_target_properties(${TOOL}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/"
   )
 endforeach()
+
+set(TOOLLIST "${TOOLLIST}" PARENT_SCOPE)

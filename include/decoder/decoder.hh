@@ -32,6 +32,8 @@ public:
     static_assert(newSize <= sizeofBits<Word>());
 
     auto signBit = getBits<oldSize - 1, oldSize - 1>(word);
+
+    return 0;
   }
 };
 

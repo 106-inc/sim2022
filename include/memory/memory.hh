@@ -3,13 +3,12 @@
 
 #include "common/common.hh"
 
-#include <iostream>
-#include <unordered_map>
-
 namespace sim {
 
+constexpr Word kDummyWord = 0;
+
 class Memory final {
-public:
+private:
   struct MemoryStats {
 
     std::size_t numLoads;
@@ -19,25 +18,13 @@ public:
     MemoryStats() : numLoads(0), numStores(0), numPageFaults(0) {}
   };
 
-private:
   std::unordered_map<AddrType, Word> mem;
   MemoryStats stats;
 
   Word pageFaultHandle(AddrType addr);
 
 public:
-  Memory();
-  Memory(const Memory &) = delete;
-  Memory(Memory &&) = delete;
-  Memory &operator=(const Memory &) = delete;
-  Memory &operator=(Memory &&) = delete;
-
-  Word loadWord(AddrType addr);
-  void storeWord(AddrType addr, Word word);
-
-  std::size_t getCurrMemSize() const;
-  void printMemStats() const;
-  const MemoryStats &getMemStats() const;
+  Word load(std::size_t);
 };
 
 } // namespace sim

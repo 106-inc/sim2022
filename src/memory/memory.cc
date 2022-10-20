@@ -8,11 +8,13 @@ Word Memory::loadWord(AddrType addr) {
 
   stats.numLoads++;
   Word word = kDummyWord;
+
   auto it = mem.find(addr);
   if (it != mem.end())
     word = it->second;
   else
     word = pageFaultHandle(addr);
+
   return word;
 }
 

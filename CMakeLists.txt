@@ -1,9 +1,18 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(SIM2022)
 
 include(cmake/list_dirs.cmake)
+include(cmake/upd_tar_list.cmake)
 include(cmake/comp_flags.cmake)
 include(cmake/clang_format.cmake)
+
+# indicate the tests build
+option(BUILD_TESTS "Build tests" ON)
+
+# Test running stuff
+if (BUILD_TESTS)
+  enable_testing()
+endif()
 
 find_package(spdlog REQUIRED)
 message("Found package: spdlog")

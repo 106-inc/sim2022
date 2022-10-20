@@ -27,7 +27,7 @@ if(BUILD_TESTS)
 
   # Unit tests
   foreach(TEST ${TESTLIST})
-    add_test(NAME "${TEST}" COMMAND ${TEST} --gtest_color=yes WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    add_test(NAME ${TEST} COMMAND ${TEST} --gtest_color=yes)
     set_property(TEST ${TEST} PROPERTY LABELS unit)
   endforeach()
 endif()

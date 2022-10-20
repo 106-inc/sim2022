@@ -8,6 +8,8 @@ include(cmake/clang_format.cmake)
 
 # indicate the tests build
 option(BUILD_TESTS "Build tests" ON)
+# add -Werror option
+option(ENABLE_WERROR "Enable -Werror option (CI)" OFF)
 
 # Test running stuff
 if (BUILD_TESTS)
@@ -31,4 +33,7 @@ foreach(TARGET ${TARGETS})
   target_compile_features(${TARGET} PRIVATE cxx_std_20)
   target_link_libraries(${TARGET} PRIVATE spdlog::spdlog)
   apply_compiler_flags(${TARGET} PRIVATE)
+  if (ENABLE_WERROR)
+    target_compile_options(${TARGET} PRIVATE -Werror)
+  endif()
 endforeach()

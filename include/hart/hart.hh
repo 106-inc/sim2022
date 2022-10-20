@@ -21,7 +21,7 @@ private:
   Word &pc() { return state_.pc; };
 
 public:
-  void run();
+  [[noreturn]] void run();
 };
 
 } // namespace sim

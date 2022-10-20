@@ -118,6 +118,8 @@ template <std::size_t oldSize> Word signExtend(Word word) {
 
 #include "enum.gen.hh"
 
+constexpr Word kDummyWord = 0;
+
 } // namespace sim
 
 #endif // __INCLUDE_COMMON_COMMON_HH__

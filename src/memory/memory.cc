@@ -8,11 +8,11 @@ Word Memory::loadWord(AddrType addr) {
 
   stats.numLoads++;
   Word word = kDummyWord;
-  try {
-    word = mem.at(addr);
-  } catch (const std::out_of_range &) {
+  auto it = mem.find(addr);
+  if (it != mem.end())
+    word = it->second;
+  else
     word = pageFaultHandle(addr);
-  }
   return word;
 }
 

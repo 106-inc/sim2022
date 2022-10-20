@@ -7,6 +7,7 @@ namespace sim {
 
 using Word = std::uint32_t;
 using Reg = Word;
+using AddrType = std::uint32_t;
 
 } // namespace sim
 

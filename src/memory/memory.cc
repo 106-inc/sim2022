@@ -2,6 +2,8 @@
 
 namespace sim {
 
+Memory::Memory() {}
+
 Word Memory::loadWord(AddrType addr) {
 
   stats.numLoads++;
@@ -37,5 +39,7 @@ void Memory::printMemStats() const {
   std::cout << "PageFaults: " << stats.numPageFaults << std::endl;
   std::cout << "End of memory stats." << std::endl;
 }
+
+const Memory::MemoryStats &Memory::getMemStats() const { return stats; }
 
 } // namespace sim

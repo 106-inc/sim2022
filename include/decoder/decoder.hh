@@ -10,7 +10,6 @@ class Decoder final {
 public:
   static Instruction decode(Word binInst);
 
-private:
   template <typename T> static constexpr auto sizeofBits() {
     return sizeof(T) * kBitsInByte;
   }

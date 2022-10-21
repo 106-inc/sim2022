@@ -3,6 +3,7 @@
 
 #include "common/common.hh"
 #include "common/inst.hh"
+#include <type_traits>
 
 namespace sim {
 
@@ -31,9 +32,14 @@ public:
     static_assert(oldSize > 0);
     static_assert(newSize <= sizeofBits<Word>());
 
-    auto signBit = getBits<oldSize - 1, oldSize - 1>(word);
+    using SignedT = std::make_signed_t<Word>;
+    SignedT zeroed = getBits<oldSize - 1, 0>(word);
 
-    return 0;
+    auto maskExt = SignedT(1) << (oldSize - 1);
+    // Because two's complement representation is forced since c++20
+    auto res = (zeroed ^ maskExt) - maskExt;
+
+    return getBits<newSize - 1, 0>(res);
   }
 };
 

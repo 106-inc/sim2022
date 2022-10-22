@@ -32,14 +32,16 @@ public:
     static_assert(oldSize > 0);
     static_assert(newSize <= sizeofBits<Word>());
 
-    using SignedT = std::make_signed_t<Word>;
-    SignedT zeroed = getBits<oldSize - 1, 0>(word);
+    using SignedWord = std::make_signed_t<Word>;
 
-    auto maskExt = SignedT(1) << (oldSize - 1);
-    // Because two's complement representation is forced since c++20
-    auto res = (zeroed ^ maskExt) - maskExt;
+    SignedWord zeroed = getBits<oldSize - 1, 0>(word);
+    struct {
+      SignedWord clamped : oldSize = 0;
+    } clamper{};
+    clamper.clamped = zeroed;
+    zeroed = clamper.clamped;
 
-    return getBits<newSize - 1, 0>(res);
+    return getBits<newSize - 1, 0>(zeroed);
   }
 };
 

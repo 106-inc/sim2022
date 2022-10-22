@@ -19,6 +19,7 @@ endif()
 find_package(spdlog REQUIRED)
 message("Found package: spdlog")
 
+add_subdirectory(scripts)
 add_subdirectory(src)
 add_subdirectory(tools)
 

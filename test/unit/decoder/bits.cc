@@ -3,6 +3,11 @@
 
 using namespace sim;
 
+TEST(sizeofBits, uint32)
+{
+  ASSERT_EQ(Decoder::sizeofBits<std::uint32_t>(), 32);
+}
+
 TEST(getBits, easy)
 {
   // Assign
@@ -33,6 +38,20 @@ TEST(signExtend, easy)
   EXPECT_EQ(zext_gr, 0xBEEF);
   EXPECT_EQ(zext_le, 0x3EEF);
   EXPECT_EQ(zext_leh, 0x3EEF);
+}
+
+TEST(signExtend, full)
+{
+  // Assign
+  Word val = 0xBEEF;
+  // Act
+  auto sext = Decoder::signExtend<16>(val);
+  auto zext_gr = Decoder::signExtend<17>(val);
+  auto zext_le = Decoder::signExtend<15>(val);
+  // Assert
+  EXPECT_EQ(sext, 0xFFFFBEEF);
+  EXPECT_EQ(zext_gr, 0xBEEF);
+  EXPECT_EQ(zext_le, 0x3EEF);
 }
 
 TEST(setBit, easy)

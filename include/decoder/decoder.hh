@@ -53,6 +53,10 @@ public:
 
     return getBits<newSize - 1, 0>(zeroed);
   }
+
+  template <std::size_t oldSize> static Word signExtend(Word word) {
+    return signExtend<sizeofBits<Word>(), oldSize>(word);
+  }
 };
 
 } // namespace sim

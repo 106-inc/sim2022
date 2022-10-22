@@ -42,16 +42,11 @@ public:
     static_assert(oldSize > 0);
     static_assert(newSize <= sizeofBits<Word>());
 
-    using SignedWord = std::make_signed_t<Word>;
+    Word zeroed = getBits<oldSize - 1, 0>(word);
+    constexpr Word mask = Word(1) << (oldSize - 1);
+    Word res = (zeroed ^ mask) - mask;
 
-    SignedWord zeroed = getBits<oldSize - 1, 0>(word);
-    struct {
-      SignedWord clamped : oldSize = 0;
-    } clamper{};
-    clamper.clamped = zeroed;
-    zeroed = clamper.clamped;
-
-    return getBits<newSize - 1, 0>(zeroed);
+    return getBits<newSize - 1, 0>(res);
   }
 
   template <std::size_t oldSize> static Word signExtend(Word word) {

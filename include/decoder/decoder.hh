@@ -11,7 +11,7 @@ class Decoder final {
 public:
   static Instruction decode(Word binInst);
 
-  template <typename T> static constexpr auto sizeofBits() {
+  template <typename T> static consteval std::size_t sizeofBits() {
     return sizeof(T) * kBitsInByte;
   }
 
@@ -24,6 +24,16 @@ public:
       mask = ~(mask << (high + 1));
 
     return (word & mask) >> low;
+  }
+
+  template <std::size_t pos, bool toSet> static Word setBit(Word word) {
+    static_assert(pos < sizeofBits<Word>(), "Bit index out of range");
+
+    constexpr auto mask = Word(1) << pos;
+    if constexpr (toSet)
+      return word | mask;
+
+    return word & ~mask;
   }
 
   template <std::size_t newSize, std::size_t oldSize>

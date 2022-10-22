@@ -35,5 +35,21 @@ TEST(signExtend, easy)
   EXPECT_EQ(zext_leh, 0x3EEF);
 }
 
+TEST(setBit, easy)
+{
+  // Assign
+  Word val = 0xBEEF;
+  // Act
+  auto zero0 = Decoder::setBit<0, false>(val);
+  auto one4 = Decoder::setBit<4, true>(val);
+  auto one2 = Decoder::setBit<2, true>(val);
+  auto zero4 = Decoder::setBit<4, false>(val);
+  // Assert
+  EXPECT_EQ(zero0, 0xBEEE);
+  EXPECT_EQ(one4, 0xBEFF);
+  EXPECT_EQ(one2, 0xBEEF);
+  EXPECT_EQ(zero4, 0xBEEF);
+}
+
 
 #include "test_footer.hh"

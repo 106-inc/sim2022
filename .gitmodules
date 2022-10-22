@@ -1,3 +1,6 @@
 [submodule "thirdparty/CLI11"]
 	path = thirdparty/CLI11
 	url = https://github.com/CLIUtils/CLI11.git
+[submodule "thirdparty/riscv-opcodes"]
+	path = thirdparty/riscv-opcodes
+	url = git@github.com:riscv/riscv-opcodes.git

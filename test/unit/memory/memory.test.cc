@@ -5,51 +5,43 @@
 
 constexpr std::size_t kNumReqs = 10;
 
-TEST(Memory, Memory_store) {
+using sim::AddrType;
+
+TEST(Memory, Memory_store_load) {
 
     sim::Memory mem;
     sim::Memory::MemoryStats stats;
-    for (std::size_t i = 0; i < kNumReqs; ++i)
+
+    //Load value which was stored  previously
+    for (AddrType i = 0; i < kNumReqs; ++i)
        mem.storeWord(i, i * i);
-
-    stats = mem.getMemStats();
-    EXPECT_EQ(mem.getCurrMemSize(), kNumReqs);
-    EXPECT_EQ(stats.numStores, kNumReqs);
-    EXPECT_EQ(stats.numLoads, 0);
-    EXPECT_EQ(stats.numPageFaults, 0);
-}
-
-TEST(Memory, Memory_load) {
-
-    sim::Memory mem;
-    sim::Memory::MemoryStats stats;
-    for (std::size_t i = 0; i < kNumReqs; ++i)
-      mem.storeWord(i, i * i);
-
-    for (std::size_t i = 0; i < kNumReqs; ++i)
+    for (AddrType i = 0; i < kNumReqs; ++i)
       EXPECT_EQ(mem.loadWord(i), i * i);
+    //Load value which was stored  previously (page fault)
+    for (AddrType i = kNumReqs; i < 2 * kNumReqs; ++i)
+      EXPECT_EQ(mem.loadWord(i), sim::kDummyWord);
+
+}
+
+TEST(Memory, Mem_stats) {
+
+    sim::Memory mem;
+    sim::Memory::MemoryStats stats;
+
+    //kNumReqs stores
+    //2 * kNumReqs loads (kNumReqs pageFaults + kNumReqs real loads)
+    for (AddrType i = 0; i < kNumReqs; ++i)
+      mem.storeWord(i, i * i);
+    for (AddrType i = 0; i < kNumReqs; ++i)
+      mem.loadWord(i);
+    for (AddrType i = kNumReqs; i < 2 * kNumReqs; ++i)
+      mem.loadWord(i);
 
     stats = mem.getMemStats();
     EXPECT_EQ(mem.getCurrMemSize(), kNumReqs);
     EXPECT_EQ(stats.numStores, kNumReqs);
-    EXPECT_EQ(stats.numLoads, kNumReqs);
-    EXPECT_EQ(stats.numPageFaults, 0);
-}
-
-TEST(Memory, Memory_page_fault) {
-
-    sim::Memory mem;
-    sim::Memory::MemoryStats stats;
-    for (std::size_t i = 0; i < kNumReqs; ++i)
-      mem.storeWord(i, i * i);
-
-    EXPECT_EQ(mem.loadWord(kNumReqs + 1), sim::kDummyWord);
-
-    stats = mem.getMemStats();
-    EXPECT_EQ(mem.getCurrMemSize(), 10);
-    EXPECT_EQ(stats.numStores, 10);
-    EXPECT_EQ(stats.numLoads, 1);
-    EXPECT_EQ(stats.numPageFaults, 1);
+    EXPECT_EQ(stats.numLoads, 2 * kNumReqs);
+    EXPECT_EQ(stats.numPageFaults, kNumReqs);
 }
 
 #include "test_footer.hh"

@@ -2,6 +2,8 @@
 #define __INCLUDE_MEMORY_MEMORY_HH__
 
 #include "common/common.hh"
+#include <iostream>
+#include <unordered_map>
 
 namespace sim {
 
@@ -23,7 +25,6 @@ private:
   Word pageFaultHandle(AddrType addr);
 
 public:
-
   Memory();
   Memory(const Memory &) = delete;
   Memory(Memory &&) = delete;
@@ -34,7 +35,7 @@ public:
   void storeWord(AddrType addr, Word word);
 
   std::size_t getCurrMemSize() const;
-  void printMemStats() const;
+  void printMemStats(std::ostream &ost) const;
   const MemoryStats &getMemStats() const;
 };
 

@@ -1,8 +1,11 @@
+"""This module generates enum w/ opcodes & decoder function."""
+
 import argparse
-import yaml
 import sys
-from pathlib import Path
 import textwrap
+from pathlib import Path
+
+import yaml
 
 COMMENT = textwrap.dedent(
     """\
@@ -46,6 +49,8 @@ FUNC_FOOTER = END_NAMESPACE
 
 
 def get_bit_map_dict(msb, lsb=None, lshift=0):
+    """Helper function to build decoding dictionary"""
+
     if lsb is None:
         lsb = msb
     assert msb >= lsb
@@ -54,6 +59,8 @@ def get_bit_map_dict(msb, lsb=None, lshift=0):
 
 
 def gen_getbits(bit_dict, arg="binInst"):
+    """Helper function to generate call of c++ getBits() function from bit dictionary"""
+
     to_ret = f"getBits<{bit_dict['msb']}, {bit_dict['lsb']}>({arg})"
     shift = bit_dict["lshift"]
     if shift != 0:
@@ -95,6 +102,8 @@ IMM_DICT = {
 
 
 def gen_ifs(yaml_dict):
+    """Generate ifs decoding from yaml dictionary function"""
+
     to_ret = ""
     for inst_name, dec_data in yaml_dict.items():
         mask = int(dec_data["mask"], 0)
@@ -129,6 +138,8 @@ def gen_ifs(yaml_dict):
 
 
 def gen_cc(filename, yaml_dict):
+    """Function tp generate decoder function c++ file"""
+
     to_write = COMMENT
     to_write += INCLUDES
     to_write += START_NAMESPACE
@@ -138,11 +149,13 @@ def gen_cc(filename, yaml_dict):
     to_write += FUNC_FOOTER
     to_write += END_NAMESPACE
 
-    with open(filename, "w") as fout:
+    with open(filename, "w", encoding="utf-8") as fout:
         fout.write(to_write)
 
 
 def gen_hh(filename, yaml_dict):
+    """Function to generate c++ header with enum with instructions"""
+
     to_write = COMMENT
     to_write += "enum class OpType {\n    UNKNOWN,\n"
 
@@ -151,11 +164,13 @@ def gen_hh(filename, yaml_dict):
 
     to_write += "};\n"
 
-    with open(filename, "w") as fout:
+    with open(filename, "w", encoding="utf-8") as fout:
         fout.write(to_write)
 
 
 def main():
+    """Main function"""
+
     parser = argparse.ArgumentParser(
         description="Tool to generate decoder function according to riscv encoding"
     )
@@ -180,7 +195,7 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.yaml) as yml:
+    with open(args.yaml, encoding="utf-8") as yml:
         yaml_data = yaml.safe_load(yml)
     args.decoder_file.parent.mkdir(parents=True, exist_ok=True)
     args.enum_file.parent.mkdir(parents=True, exist_ok=True)
@@ -191,6 +206,6 @@ def main():
 if "__main__" == __name__:
     try:
         main()
-    except Exception as ex:
+    except ValueError as ex:
         print(f"Caught an exception. Error: {str(ex)}")
         sys.exit(1)

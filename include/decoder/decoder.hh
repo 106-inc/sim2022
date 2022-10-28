@@ -10,6 +10,12 @@ namespace sim {
 
 class Decoder final {
 public:
+  /**
+   * @brief Decode an instruction function
+   *
+   * @param binInst instruction bytes to decode
+   * @return Instruction decoded instruction
+   */
   static Instruction decode(Word binInst);
 };
 

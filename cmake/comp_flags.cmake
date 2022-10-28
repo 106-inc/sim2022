@@ -17,6 +17,7 @@ set(SANITIZERS
 -fsanitize=shift
 -fsanitize=signed-integer-overflow
 -fsanitize=undefined
+-fno-sanitize-recover
 -fsanitize=unreachable
 -fsanitize=vla-bound
 -fsanitize=vptr

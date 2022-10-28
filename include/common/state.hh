@@ -2,6 +2,7 @@
 #define __INCLUDE_STATE_STATE_HH__
 
 #include <array>
+#include <stdexcept>
 
 #include "common/common.hh"
 #include "memory/memory.hh"
@@ -10,19 +11,21 @@ namespace sim {
 
 class RegFile final {
 private:
-  std::array<Reg, 32> regs{};
+  std::array<RegVal, kRegNum> regs{};
 
 public:
-  Word get(std::size_t regnum) const { return regs.at(regnum); }
+  Word get(RegId regnum) const { return regs.at(regnum); }
 
-  void set(std::size_t regnum, Word val) {
-    regs.at(regnum) = regnum == 0 ? 0 : val;
+  void set(RegId regnum, Word val) {
+    if (regnum == 0)
+      throw std::runtime_error{"Trying to set value to register x0"};
+    regs.at(regnum) = val;
   }
 };
 
 struct State final {
-  Reg pc{};
-  Reg npc{};
+  Addr pc{};
+  Addr npc{};
   RegFile regs{};
   Memory mem{};
 };

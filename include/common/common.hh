@@ -14,16 +14,7 @@ constexpr RegId kRegNum = 32;
 constexpr std::uint8_t kBitsInByte = 8;
 
 
-enum class OpType
-{
-  UNKNOWN,
-  ADD,
-  SUB,
-  LW,
-  SW,
-  MUL,
-  DIV
-};
+#include "enum.gen.hh"
 
 } // namespace sim
 

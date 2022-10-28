@@ -8,7 +8,11 @@ namespace sim {
 struct Instruction final {
   RegId rs1{};
   RegId rs2{};
+  RegId rs3{};
+
   RegId rd{};
+  RegId rm{};
+  RegId csr{}; // a placeholder
 
   OpType type{OpType::UNKNOWN};
   RegVal imm{};

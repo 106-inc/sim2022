@@ -90,6 +90,7 @@ IMM_DICT = {
     "bimm12lo": [get_bit_map_dict(11, 8, 1), get_bit_map_dict(7, lshift=11)],
     "imm12hi": [get_bit_map_dict(31, 25, 5)],
     "imm12lo": [get_bit_map_dict(11, 7)],
+    "shamtw": [get_bit_map_dict(24, 20)],
 }
 
 
@@ -105,9 +106,7 @@ def gen_ifs(yaml_dict):
         has_imm = False
         for field_name in dec_data["variable_fields"]:
             if field_name in REG_DICT:
-                to_ret += (
-                    f"    decodedInst.{field_name} = {gen_getbits(REG_DICT[field_name])};\n"
-                )
+                to_ret += f"    decodedInst.{field_name} = {gen_getbits(REG_DICT[field_name])};\n"
             elif field_name in IMM_DICT:
                 has_imm = True
                 for bits_dict in IMM_DICT[field_name]:
@@ -120,7 +119,9 @@ def gen_ifs(yaml_dict):
         # sign extend an immediate
         if has_imm:
             assert max_from <= 32
-            to_ret += f"    decodedInst.imm = signExtend<{max_from}>(decodedInst.imm);\n"
+            to_ret += (
+                f"    decodedInst.imm = signExtend<{max_from + 1}>(decodedInst.imm);\n"
+            )
 
         to_ret += "    return decodedInst;\n}\n"
 

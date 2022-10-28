@@ -22,7 +22,7 @@ set(RISCV_YAML_DICT_PATH ${CMAKE_CURRENT_BINARY_DIR}/instr_dict.yaml)
 add_custom_command(
   OUTPUT ${RISCV_YAML_DICT_PATH}
   COMMAND ${Python3_EXECUTABLE} ${SIM_RISCV_DIR}/parse.py rv_i rv_m rv_a
-          rv_zicsr rv_f rv_d
+          rv_zicsr rv_f rv_d rv32_i
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   DEPENDS ${SIM_RISCV_DIR}/parse.py
   COMMENT "Generating RISC-V opcodes dictionary"

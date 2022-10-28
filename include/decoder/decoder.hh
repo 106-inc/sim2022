@@ -1,9 +1,10 @@
 #ifndef __INCLUDE_DECODER_DECODER_HH__
 #define __INCLUDE_DECODER_DECODER_HH__
 
+#include <type_traits>
+
 #include "common/common.hh"
 #include "common/inst.hh"
-#include <type_traits>
 
 namespace sim {
 
@@ -38,9 +39,12 @@ public:
 
   template <std::size_t newSize, std::size_t oldSize>
   static Word signExtend(Word word) {
-    static_assert(newSize > oldSize);
+    static_assert(newSize >= oldSize);
     static_assert(oldSize > 0);
     static_assert(newSize <= sizeofBits<Word>());
+
+    if constexpr (newSize == oldSize)
+      return word;
 
     Word zeroed = getBits<oldSize - 1, 0>(word);
     constexpr Word mask = Word(1) << (oldSize - 1);

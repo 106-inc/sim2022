@@ -1,21 +1,19 @@
 #include "test_header.hh"
 #include "decoder/decoder.hh"
 
-using namespace sim;
-
 TEST(sizeofBits, uint32)
 {
-  ASSERT_EQ(Decoder::sizeofBits<std::uint32_t>(), 32);
+  ASSERT_EQ(sim::sizeofBits<std::uint32_t>(), 32);
 }
 
 TEST(getBits, easy)
 {
   // Assign
-  Word val = 0xDEADBEEF;
+  sim::Word val = 0xDEADBEEF;
   // Act
-  auto beef = Decoder::getBits<15, 0>(val);
-  auto dead = Decoder::getBits<31, 16>(val);
-  auto one = Decoder::getBits<15, 15>(val);
+  auto beef = sim::getBits<15, 0>(val);
+  auto dead = sim::getBits<31, 16>(val);
+  auto one = sim::getBits<15, 15>(val);
   // Assert
   EXPECT_EQ(beef, 0xBEEF);
   EXPECT_EQ(dead, 0xDEAD);
@@ -25,13 +23,13 @@ TEST(getBits, easy)
 TEST(signExtend, easy)
 {
   // Assign
-  Word val = 0xBEEF;
+  sim::Word val = 0xBEEF;
   // Act
-  auto sext = Decoder::signExtend<32, 16>(val);
-  auto sext_le = Decoder::signExtend<21, 16>(val);
-  auto zext_gr = Decoder::signExtend<32, 17>(val);
-  auto zext_le = Decoder::signExtend<32, 15>(val);
-  auto zext_leh = Decoder::signExtend<16, 15>(val);
+  auto sext = sim::signExtend<32, 16>(val);
+  auto sext_le = sim::signExtend<21, 16>(val);
+  auto zext_gr = sim::signExtend<32, 17>(val);
+  auto zext_le = sim::signExtend<32, 15>(val);
+  auto zext_leh = sim::signExtend<16, 15>(val);
   // Assert
   EXPECT_EQ(sext, 0xFFFFBEEF);
   EXPECT_EQ(sext_le, 0x1FBEEF);
@@ -43,11 +41,11 @@ TEST(signExtend, easy)
 TEST(signExtend, full)
 {
   // Assign
-  Word val = 0xBEEF;
+  sim::Word val = 0xBEEF;
   // Act
-  auto sext = Decoder::signExtend<16>(val);
-  auto zext_gr = Decoder::signExtend<17>(val);
-  auto zext_le = Decoder::signExtend<15>(val);
+  auto sext = sim::signExtend<16>(val);
+  auto zext_gr = sim::signExtend<17>(val);
+  auto zext_le = sim::signExtend<15>(val);
   // Assert
   EXPECT_EQ(sext, 0xFFFFBEEF);
   EXPECT_EQ(zext_gr, 0xBEEF);
@@ -57,12 +55,12 @@ TEST(signExtend, full)
 TEST(setBit, easy)
 {
   // Assign
-  Word val = 0xBEEF;
+  sim::Word val = 0xBEEF;
   // Act
-  auto zero0 = Decoder::setBit<0, false>(val);
-  auto one4 = Decoder::setBit<4, true>(val);
-  auto one2 = Decoder::setBit<2, true>(val);
-  auto zero4 = Decoder::setBit<4, false>(val);
+  auto zero0 = sim::setBit<0, false>(val);
+  auto one4 = sim::setBit<4, true>(val);
+  auto one2 = sim::setBit<2, true>(val);
+  auto zero4 = sim::setBit<4, false>(val);
   // Assert
   EXPECT_EQ(zero0, 0xBEEE);
   EXPECT_EQ(one4, 0xBEFF);

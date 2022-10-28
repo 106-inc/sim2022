@@ -11,7 +11,7 @@ struct Instruction final {
   RegId rs3{};
 
   RegId rd{};
-  RegId rm{};
+  RegId rm{};  // rounding mode (for future use w/ floating-point operations)
   RegId csr{}; // a placeholder
 
   OpType type{OpType::UNKNOWN};

@@ -3,7 +3,7 @@ find_package(
   COMPONENTS Interpreter
   REQUIRED)
 
-set(SIM_RISCV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/riscv-opcodes)
+set(SIM_RISCV_DIR ${CMAKE_SOURCE_DIR}/thirdparty/riscv-opcodes)
 
 execute_process(
   COMMAND ${Python3_EXECUTABLE} -m pip show pyyaml
@@ -29,7 +29,7 @@ add_custom_command(
   VERBATIM)
 
 set(DEC_GEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/decoder.gen.cc)
-set(ENUM_GEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/../../include/codegen/enum.gen.hh)
+set(ENUM_GEN_FILE ${CMAKE_BINARY_DIR}/include/codegen/enum.gen.hh)
 
 add_custom_command(
   OUTPUT ${DEC_GEN_FILE} ${ENUM_GEN_FILE}

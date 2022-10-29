@@ -1,6 +1,7 @@
 """This module generates enum w/ opcodes & decoder function."""
 
 import argparse
+from collections import defaultdict
 import sys
 import textwrap
 from pathlib import Path
@@ -48,14 +49,20 @@ FUNC_HEADER = textwrap.dedent(
 FUNC_FOOTER = END_NAMESPACE
 
 
-def get_bit_map_dict(msb, lsb=None, lshift=0):
+def get_bit_map_dict(msb, lsb=None, lshift=0, signext=True):
     """Helper function to build decoding dictionary"""
 
     if lsb is None:
         lsb = msb
     assert msb >= lsb
     assert lshift < 32
-    return {"msb": msb, "lsb": lsb, "lshift": lshift, "from": lshift + msb - lsb}
+    return {
+        "msb": msb,
+        "lsb": lsb,
+        "lshift": lshift,
+        "from": lshift + msb - lsb,
+        "sign": signext,
+    }
 
 
 def gen_getbits(bit_dict, arg="binInst"):
@@ -90,7 +97,7 @@ IMM_DICT = {
     "pred": [get_bit_map_dict(27, 24, 4)],
     "fm": [get_bit_map_dict(31, 28, 8)],
     "imm12": [get_bit_map_dict(31, 20)],
-    "zimm": [get_bit_map_dict(19, 15)],
+    "zimm": [get_bit_map_dict(19, 15, signext=False)],
     "aq": [get_bit_map_dict(26, lshift=1)],
     "rl": [get_bit_map_dict(25)],
     "bimm12hi": [get_bit_map_dict(31, lshift=12), get_bit_map_dict(30, 25, 5)],
@@ -101,6 +108,45 @@ IMM_DICT = {
 }
 
 
+def gen_fill_inst(dec_data, inst_name):
+    """Generate instruction's fields filling function"""
+    to_ret = ""
+
+    to_ret += f"    decodedInst.type = OpType::{inst_name.upper()};\n"
+
+    max_from = 0
+    has_imm = False
+    sign_ext = True
+
+    for field_name in dec_data["variable_fields"]:
+
+        if field_name in REG_DICT:
+            to_ret += (
+                f"    decodedInst.{field_name} = {gen_getbits(REG_DICT[field_name])};\n"
+            )
+
+        elif field_name in IMM_DICT:
+            has_imm = True
+            for bits_dict in IMM_DICT[field_name]:
+                if not bits_dict["sign"]:
+                    sign_ext = False
+
+                max_from = max(max_from, bits_dict["from"])
+                to_ret += f"    decodedInst.imm |= {gen_getbits(bits_dict)};\n"
+
+        else:
+            raise ValueError(f"Unrecognized field name {field_name}")
+
+    # sign extend an immediate
+    if has_imm and sign_ext:
+        assert max_from <= 32
+        to_ret += (
+            f"    decodedInst.imm = signExtend<{max_from + 1}>(decodedInst.imm);\n"
+        )
+
+    return to_ret
+
+
 def gen_ifs(yaml_dict):
     """Generate ifs decoding from yaml dictionary function"""
 
@@ -109,30 +155,36 @@ def gen_ifs(yaml_dict):
         mask = int(dec_data["mask"], 0)
         match = int(dec_data["match"], 0)
         to_ret += f"if ((binInst & 0b{mask:032b}) == 0b{match:032b}) {{\n"
-        to_ret += f"    decodedInst.type = OpType::{inst_name.upper()};\n"
-
-        max_from = 0
-        has_imm = False
-        for field_name in dec_data["variable_fields"]:
-            if field_name in REG_DICT:
-                to_ret += f"    decodedInst.{field_name} = {gen_getbits(REG_DICT[field_name])};\n"
-            elif field_name in IMM_DICT:
-                has_imm = True
-                for bits_dict in IMM_DICT[field_name]:
-                    max_from = max(max_from, bits_dict["from"])
-                    to_ret += f"    decodedInst.imm |= {gen_getbits(bits_dict)};\n"
-
-            else:
-                raise ValueError(f"Unrecognized field name {field_name}")
-
-        # sign extend an immediate
-        if has_imm:
-            assert max_from <= 32
-            to_ret += (
-                f"    decodedInst.imm = signExtend<{max_from + 1}>(decodedInst.imm);\n"
-            )
-
+        to_ret += gen_fill_inst(dec_data, inst_name)
         to_ret += "    return decodedInst;\n}\n"
+
+    return to_ret
+
+
+def gen_by_mask_dict(yaml_dict):
+    """Generate by-mask dictionary function"""
+    to_ret = defaultdict(dict)
+    for inst_name, dec_data in yaml_dict.items():
+        to_ret[int(dec_data["mask"], 0)][inst_name] = dec_data
+
+    return to_ret
+
+
+def gen_switches(yaml_dict):
+    """Generate decoding by switches function"""
+    to_ret = ""
+
+    mask_dict = gen_by_mask_dict(yaml_dict)
+
+    for mask, insts_dict in mask_dict.items():
+        to_ret += f"  switch (binInst & 0b{mask:032b}) {{\n"
+
+        for inst_name, dec_dict in insts_dict.items():
+            to_ret += f"  case 0b{int(dec_dict['match'], 0):032b}:\n"
+            to_ret += gen_fill_inst(dec_dict, inst_name)
+            to_ret += "    return decodedInst;\n"
+
+        to_ret += "  default:\n    break;\n  }\n"
 
     return to_ret
 
@@ -144,7 +196,7 @@ def gen_cc(filename, yaml_dict):
     to_write += INCLUDES
     to_write += START_NAMESPACE
     to_write += FUNC_HEADER
-    to_write += gen_ifs(yaml_dict)
+    to_write += gen_switches(yaml_dict)
     to_write += "return decodedInst;\n"
     to_write += FUNC_FOOTER
     to_write += END_NAMESPACE
@@ -157,7 +209,7 @@ def gen_hh(filename, yaml_dict):
     """Function to generate c++ header with enum with instructions"""
 
     to_write = COMMENT
-    to_write += "enum class OpType {\n    UNKNOWN,\n"
+    to_write += "enum class OpType {\n    UNKNOWN = 0,\n"
 
     for inst_name in yaml_dict:
         to_write += f"    {inst_name.upper()},\n"

@@ -117,7 +117,7 @@ TEST(decoder, csrrsi)
   EXPECT_EQ(inst.type, sim::OpType::CSRRSI);
   EXPECT_EQ(inst.rd, 0x15);
   EXPECT_EQ(inst.csr, 0b110110011001);
-  EXPECT_EQ(inst.imm, 0xFFFFFFFE);
+  EXPECT_EQ(inst.imm, 0x1E);
 }
 
 TEST(decoder, lr_w)

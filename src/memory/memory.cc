@@ -2,8 +2,6 @@
 
 namespace sim {
 
-Memory::Memory() : mem{}, stats{} {}
-
 Word Memory::loadWord(Addr addr) {
 
   stats.numLoads++;

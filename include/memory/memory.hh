@@ -11,21 +11,19 @@ class Memory final {
 public:
   struct MemoryStats {
 
-    std::size_t numLoads;
-    std::size_t numStores;
-    std::size_t numPageFaults;
-
-    MemoryStats() : numLoads(0), numStores(0), numPageFaults(0) {}
+    std::size_t numLoads{};
+    std::size_t numStores{};
+    std::size_t numPageFaults{};
   };
 
 private:
-  std::unordered_map<Addr, Word> mem;
-  MemoryStats stats;
+  std::unordered_map<Addr, Word> mem{};
+  MemoryStats stats{};
 
   Word pageFaultHandle(Addr addr);
 
 public:
-  Memory();
+  Memory() = default;
   Memory(const Memory &) = delete;
   Memory(Memory &&) = delete;
   Memory &operator=(const Memory &) = delete;

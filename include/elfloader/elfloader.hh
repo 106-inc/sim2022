@@ -2,6 +2,7 @@
 #define __INCLUDE_ELFLOADER_ELFLOADER_HH__
 
 #include <filesystem>
+#include <span>
 
 #include <elfio/elfio.hpp>
 
@@ -19,6 +20,8 @@ public:
   ELFLoader(fs::path elfPath);
 
   Addr getEntryPoint() const;
+
+  std::span<const Word> getSection(const std::string &name) const;
 };
 
 } // namespace sim

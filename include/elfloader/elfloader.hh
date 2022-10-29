@@ -17,7 +17,8 @@ private:
   ELFIO::elfio elfFile_{};
 
 public:
-  ELFLoader(fs::path elfPath);
+  ELFLoader(const fs::path &file);
+  ELFLoader(std::istream &stream);
 
   Addr getEntryPoint() const;
 

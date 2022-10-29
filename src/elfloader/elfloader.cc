@@ -4,10 +4,15 @@
 
 namespace sim {
 
-ELFLoader::ELFLoader(fs::path elfPath) {
-  if (!elfFile_.load(elfPath))
+ELFLoader::ELFLoader(const fs::path &file) {
+  if (!elfFile_.load(file))
     throw std::runtime_error{"Failed while loading input file: " +
-                             elfPath.string()};
+                             file.string()};
+}
+
+ELFLoader::ELFLoader(std::istream &stream) {
+  if (!elfFile_.load(stream))
+    throw std::runtime_error{"Failed while loading input stream"};
 }
 
 Addr ELFLoader::getEntryPoint() const {

@@ -4,7 +4,7 @@ namespace sim {
 
 Memory::Memory() : mem{}, stats{} {}
 
-Word Memory::loadWord(AddrType addr) {
+Word Memory::loadWord(Addr addr) {
 
   stats.numLoads++;
   Word word = kDummyWord;
@@ -18,13 +18,13 @@ Word Memory::loadWord(AddrType addr) {
   return word;
 }
 
-void Memory::storeWord(AddrType addr, Word word) {
+void Memory::storeWord(Addr addr, Word word) {
 
   stats.numStores++;
   mem[addr] = word;
 }
 
-Word Memory::pageFaultHandle(AddrType addr) {
+Word Memory::pageFaultHandle(Addr addr) {
 
   (void)addr;
   stats.numPageFaults++;

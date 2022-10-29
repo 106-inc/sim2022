@@ -19,10 +19,10 @@ public:
   };
 
 private:
-  std::unordered_map<AddrType, Word> mem;
+  std::unordered_map<Addr, Word> mem;
   MemoryStats stats;
 
-  Word pageFaultHandle(AddrType addr);
+  Word pageFaultHandle(Addr addr);
 
 public:
   Memory();
@@ -31,8 +31,8 @@ public:
   Memory &operator=(const Memory &) = delete;
   Memory &operator=(Memory &&) = delete;
 
-  Word loadWord(AddrType addr);
-  void storeWord(AddrType addr, Word word);
+  Word loadWord(Addr addr);
+  void storeWord(Addr addr, Word word);
 
   std::size_t getCurrMemSize() const;
   void printMemStats(std::ostream &ost) const;

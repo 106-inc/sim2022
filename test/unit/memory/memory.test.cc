@@ -5,7 +5,7 @@
 
 constexpr std::size_t kNumReqs = 10;
 
-using sim::AddrType;
+using sim::Addr;
 
 TEST(Memory, Memory_store_load) {
 
@@ -13,12 +13,12 @@ TEST(Memory, Memory_store_load) {
     sim::Memory::MemoryStats stats;
 
     //Load value which was stored  previously
-    for (AddrType i = 0; i < kNumReqs; ++i)
+    for (Addr i = 0; i < kNumReqs; ++i)
        mem.storeWord(i, i * i);
-    for (AddrType i = 0; i < kNumReqs; ++i)
+    for (Addr i = 0; i < kNumReqs; ++i)
       EXPECT_EQ(mem.loadWord(i), i * i);
     //Load value which was stored  previously (page fault)
-    for (AddrType i = kNumReqs; i < 2 * kNumReqs; ++i)
+    for (Addr i = kNumReqs; i < 2 * kNumReqs; ++i)
       EXPECT_EQ(mem.loadWord(i), sim::kDummyWord);
 
 }
@@ -30,11 +30,11 @@ TEST(Memory, Mem_stats) {
 
     //kNumReqs stores
     //2 * kNumReqs loads (kNumReqs pageFaults + kNumReqs real loads)
-    for (AddrType i = 0; i < kNumReqs; ++i)
+    for (Addr i = 0; i < kNumReqs; ++i)
       mem.storeWord(i, i * i);
-    for (AddrType i = 0; i < kNumReqs; ++i)
+    for (Addr i = 0; i < kNumReqs; ++i)
       mem.loadWord(i);
-    for (AddrType i = kNumReqs; i < 2 * kNumReqs; ++i)
+    for (Addr i = kNumReqs; i < 2 * kNumReqs; ++i)
       mem.loadWord(i);
 
     stats = mem.getMemStats();

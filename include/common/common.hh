@@ -6,9 +6,8 @@
 namespace sim {
 
 using Word = std::uint32_t;
-
 using RegVal = Word;
-using AddrType = std::uint32_t;
+using Addr = std::uint32_t;
 using RegId = std::size_t;
 
 constexpr RegId kRegNum = 32;
@@ -117,8 +116,6 @@ template <std::size_t oldSize> Word signExtend(Word word) {
 }
 
 #include "enum.gen.hh"
-
-
 
 } // namespace sim
 

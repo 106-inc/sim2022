@@ -3,6 +3,10 @@
 
 #include <cstdint>
 
+static_assert(
+    -1 == ~0,
+    "Two's complement representation is required. It is fixed since c++20");
+
 namespace sim {
 
 using Word = std::uint32_t;
@@ -68,8 +72,8 @@ template <std::size_t pos, bool toSet> Word setBit(Word word) {
  * all new bits.
  * Consider number \f$ 110_2 \f$ (oldSize = \f$ 3 \f$).
  * Assume that we want to sign extend it to \f$ 7 \f$ bits. To simplify all
- * listings, also assume that sizeof(Word) == \f$ 1 \f$. The implemented algorithm works
- * as follows:
+ * listings, also assume that sizeof(Word) == \f$ 1 \f$. The implemented
+ * algorithm works as follows:
  *  -# All bits left to oldSize - 1 are zeroed:
  *    - \f$ 01110110_2 \f$ \f$ \rightarrow \f$  \f$ 00000110_2 \f$
  *  -# Mask for current signbit is generated:
@@ -77,13 +81,14 @@ template <std::size_t pos, bool toSet> Word setBit(Word word) {
  *  -# Zeroed value is XORed with mask:
  *    - \f$ XOR \:\:\: \frac{00000110_2}{00000100_2} = 00000010_2 \f$
  *  -# Mask is subtracted from previous result:
- *    - \f$ 00000010_2 - 00000100_2 = 2_{10} - 4_{10} = 00000000_2 - 2_{10} = 11111110_2 \f$
+ *    - \f$ 00000010_2 - 00000100_2 = 2_{10} - 4_{10} = 00000000_2 - 2_{10} =
+ * 11111110_2 \f$
  *  -# All bits left to newSize - 1 are zeroed:
  *    - \f$ 11111110_2 \f$ \f$ \rightarrow \f$  \f$ 01111110_2 \f$
  *  -# Result is \f$ 01111110_2 = 126_{10}\f$
  *
- * If sign bit is zero, then operations with mask do nothing together \f$ \Rightarrow \f$
- * only zeroing has effect
+ * If sign bit is zero, then operations with mask do nothing together \f$
+ * \Rightarrow \f$ only zeroing has effect
  * @tparam newSize size to sign extend to
  * @tparam oldSize initial size
  * @param[in] word number to sign extend

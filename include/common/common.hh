@@ -10,11 +10,6 @@ using Word = std::uint32_t;
 using RegVal = Word;
 using Addr = std::uint32_t;
 using RegId = std::size_t;
-/*
-  Except for the 5-bit immediates used in CSR instructions
-  immediates are always sign-extended
-*/
-using immVal = std::int32_t;
 
 constexpr RegId kRegNum = 32;
 constexpr std::uint8_t kBitsInByte = 8;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(SIM2022)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "11.2.0")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.3.0")
     message(FATAL_ERROR "Insufficient gcc version")
   endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

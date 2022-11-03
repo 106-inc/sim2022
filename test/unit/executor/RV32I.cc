@@ -39,14 +39,34 @@ TEST(execute, sub)
     ASSERT_EQ(simulationState.regs.get(3), 10);
 }
 
-TEST(execute, lw)
+TEST(execute, lwAndSw)
 {
-    // TODO
-}
-
-TEST(execute, sw)
-{
-    // TODO
+    simulationState.regs.set(1, 0xA0);
+    simulationState.regs.set(2, 0xFF);
+    sim::Instruction instr = {
+        1, // rs1
+        2, // rs2
+        0,
+        0, // rd
+        0,
+        0,
+        sim::OpType::SW,
+        0xA // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.mem.loadWord(0xAA), 0xFF);
+    instr = {
+        1, // rs1
+        2, // rs2
+        0,
+        3, // rd
+        0,
+        0,
+        sim::OpType::LW,
+        0xA // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(3), 0xFF);
 }
 
 TEST(execute, jal)

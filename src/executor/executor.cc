@@ -33,12 +33,13 @@ static void executeDiv(const Instruction &inst, State &state) {
 
 static void executeLw(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
-  state.regs.set(inst.rd, state.mem.loadWord(applyOffset(rs1, inst.imm)));
+  RegVal word = state.mem.loadWord(applyOffset(rs1, inst.imm));
+  state.regs.set(inst.rd, word);
 }
 
 static void executeSw(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal rs2 = state.regs.get(inst.rs1);
+  RegVal rs2 = state.regs.get(inst.rs2);
   state.mem.storeWord(applyOffset(rs1, inst.imm), rs2);
 }
 

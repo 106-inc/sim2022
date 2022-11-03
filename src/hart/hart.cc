@@ -9,6 +9,7 @@ void Hart::run() {
     exec_.execute(inst, state_);
     if (state_.branchIsTaken) {
       state_.pc = state_.npc;
+      state_.branchIsTaken = false;
     } else {
       state_.pc += kXLENInBytes;
     }

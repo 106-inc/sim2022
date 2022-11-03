@@ -3,7 +3,11 @@
 namespace sim {
 
 static auto applyOffset(RegVal val, RegVal imm) {
-  auto res = static_cast<SDWord>(val) + signCast(imm);
+  auto convertedVal = static_cast<SDWord>(val);
+  auto res = convertedVal + signCast(imm);
+  if (res < 0) {
+    throw std::runtime_error("invalid address");
+  }
   return static_cast<RegVal>(res);
 }
 

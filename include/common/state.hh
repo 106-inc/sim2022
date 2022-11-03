@@ -18,7 +18,7 @@ public:
 
   void set(RegId regnum, Word val) {
     if (!regnum) {
-       // NOP instruction looks like ADD x0, x0, 0 - assignment to x0, 
+       // NOP instruction looks like ADD x0, x0, 0 - assignment to x0,
        // furthermore JALR supports x0 as a destination register (to store return address if it is not needed).
        return;
     }
@@ -32,6 +32,7 @@ struct State final {
   RegFile regs{};
   Memory mem{};
   bool branchIsTaken{false};
+  bool complete{false};
 };
 
 } // namespace sim

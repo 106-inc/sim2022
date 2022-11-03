@@ -62,11 +62,16 @@ static void executeJALR(const Instruction &inst, State &state) {
                                                 // bit of the result to zero.
 }
 
+static void executeECALL(const Instruction &, State &state) {
+  state.complete = true;
+}
+
 Executor::Executor()
-    : executors{{OpType::ADD, executeADD}, {OpType::SUB, executeSUB},
-                {OpType::MUL, executeMUL}, {OpType::DIV, executeDIV},
-                {OpType::LW, executeLW},   {OpType::SW, executeSW},
-                {OpType::JAL, executeJAL}, {OpType::JALR, executeJALR}} {}
+    : executors{{OpType::ADD, executeADD},    {OpType::SUB, executeSUB},
+                {OpType::MUL, executeMUL},    {OpType::DIV, executeDIV},
+                {OpType::LW, executeLW},      {OpType::SW, executeSW},
+                {OpType::JAL, executeJAL},    {OpType::JALR, executeJALR},
+                {OpType::ECALL, executeECALL}} {}
 
 void Executor::execute(const Instruction &inst, State &state) const {
   executors.at(inst.type)(inst, state);

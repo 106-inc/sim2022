@@ -7,37 +7,37 @@ static auto applyOffset(RegVal val, RegVal imm) {
   return static_cast<RegVal>(res);
 }
 
-static void executeAdd(const Instruction &inst, State &state) {
+static void executeADD(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal rs2 = state.regs.get(inst.rs2);
   state.regs.set(inst.rd, rs1 + rs2);
 }
 
-static void executeSub(const Instruction &inst, State &state) {
+static void executeSUB(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal rs2 = state.regs.get(inst.rs2);
   state.regs.set(inst.rd, rs1 - rs2);
 }
 
-static void executeMul(const Instruction &inst, State &state) {
+static void executeMUL(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal rs2 = state.regs.get(inst.rs2);
   state.regs.set(inst.rd, rs1 * rs2);
 }
 
-static void executeDiv(const Instruction &inst, State &state) {
+static void executeDIV(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal rs2 = state.regs.get(inst.rs2);
   state.regs.set(inst.rd, rs1 / rs2);
 }
 
-static void executeLw(const Instruction &inst, State &state) {
+static void executeLW(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal word = state.mem.loadWord(applyOffset(rs1, inst.imm));
   state.regs.set(inst.rd, word);
 }
 
-static void executeSw(const Instruction &inst, State &state) {
+static void executeSW(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal rs2 = state.regs.get(inst.rs2);
   state.mem.storeWord(applyOffset(rs1, inst.imm), rs2);
@@ -59,9 +59,9 @@ static void executeJALR(const Instruction &inst, State &state) {
 }
 
 Executor::Executor()
-    : executors{{OpType::ADD, executeAdd}, {OpType::SUB, executeSub},
-                {OpType::MUL, executeMul}, {OpType::DIV, executeDiv},
-                {OpType::LW, executeLw},   {OpType::SW, executeSw},
+    : executors{{OpType::ADD, executeADD}, {OpType::SUB, executeSUB},
+                {OpType::MUL, executeMUL}, {OpType::DIV, executeDIV},
+                {OpType::LW, executeLW},   {OpType::SW, executeSW},
                 {OpType::JAL, executeJAL}, {OpType::JALR, executeJALR}} {}
 
 void Executor::execute(const Instruction &inst, State &state) const {

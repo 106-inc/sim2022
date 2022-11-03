@@ -3,7 +3,7 @@
 namespace sim {
 
 static auto applyOffset(RegVal val, RegVal imm) {
-  int64_t res = static_cast<int64_t>(val) + signCast(imm);
+  auto res = static_cast<SDWord>(val) + signCast(imm);
   return static_cast<RegVal>(res);
 }
 

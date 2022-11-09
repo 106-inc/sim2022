@@ -2,16 +2,26 @@
 #define __INCLUDE_COMMON_COMMON_HH__
 
 #include <cstdint>
+#include <concepts>
 
 namespace sim {
 
 using Word = std::uint32_t;
+using SDWord = std::int64_t; // S for signed and D for double
 using RegVal = Word;
 using Addr = std::uint32_t;
 using RegId = std::size_t;
 
 constexpr RegId kRegNum = 32;
 constexpr std::uint8_t kBitsInByte = 8;
+constexpr Word kDummyWord = 0;
+constexpr std::uint8_t kXLENInBytes = sizeof(Word);
+
+template <std::unsigned_integral T>
+constexpr auto signCast(T val)
+{
+  return static_cast<std::make_signed_t<T>>(val);
+}
 
 /**
  * @brief Calculate size of a type in bits function

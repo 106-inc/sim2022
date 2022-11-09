@@ -21,7 +21,7 @@ private:
   Addr &pc() { return state_.pc; };
 
 public:
-  [[noreturn]] void run();
+  void run();
 };
 
 } // namespace sim

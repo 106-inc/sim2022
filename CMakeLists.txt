@@ -42,6 +42,9 @@ add_subdirectory(tools)
 add_subdirectory(test)
 add_subdirectory(thirdparty)
 
+message("Collected libs: ${LIBLIST}")
+message("Collected tools: ${TOOLLIST}")
+
 set(TARGETS)
 list(APPEND TARGETS ${LIBLIST} ${TOOLLIST})
 
@@ -56,3 +59,8 @@ foreach(TARGET ${TARGETS})
     target_compile_options(${TARGET} PRIVATE -Werror)
   endif()
 endforeach()
+
+foreach(TOOL ${TOOLLIST})
+  target_link_libraries(${TOOL} PRIVATE ${LIBLIST})
+endforeach()
+

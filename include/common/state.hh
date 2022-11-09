@@ -17,8 +17,11 @@ public:
   Word get(RegId regnum) const { return regs.at(regnum); }
 
   void set(RegId regnum, Word val) {
-    if (regnum == 0)
-      throw std::runtime_error{"Trying to set value to register x0"};
+    if (!regnum) {
+       // NOP instruction looks like ADD x0, x0, 0 - assignment to x0,
+       // furthermore JALR supports x0 as a destination register (to store return address if it is not needed).
+       return;
+    }
     regs.at(regnum) = val;
   }
 };
@@ -28,6 +31,8 @@ struct State final {
   Addr npc{};
   RegFile regs{};
   Memory mem{};
+  bool branchIsTaken{false};
+  bool complete{false};
 };
 
 } // namespace sim

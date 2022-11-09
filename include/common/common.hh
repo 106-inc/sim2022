@@ -2,7 +2,11 @@
 #define __INCLUDE_COMMON_COMMON_HH__
 
 #include <cstdint>
+#include <bit>
 
+static_assert(
+    std::endian::little == std::endian::native,
+    "It seems that u r trying to run our sim on ur router");
 static_assert(
     -1 == ~0,
     "Two's complement representation is required. It is fixed since c++20");

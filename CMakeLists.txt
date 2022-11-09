@@ -4,7 +4,10 @@ project(SIM2022)
 macro(check_compiler_version COMPILER VER)
   if(CMAKE_CXX_COMPILER_ID STREQUAL ${COMPILER})
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${VER})
-      message(FATAL_ERROR "Insufficient ${COMPILER} version")
+      message(
+        FATAL_ERROR
+          "Insufficient ${COMPILER} version. Needed: ${VER}. Your: ${CMAKE_CXX_COMPILER_VERSION}"
+      )
     endif()
   endif()
 endmacro()
@@ -26,7 +29,7 @@ option(BUILD_TESTS "Build tests" ON)
 option(ENABLE_WERROR "Enable -Werror option (CI)" OFF)
 
 # Test running stuff
-if (BUILD_TESTS)
+if(BUILD_TESTS)
   enable_testing()
 endif()
 
@@ -48,12 +51,13 @@ list(APPEND TARGETS ${LIBLIST} ${TOOLLIST})
 
 foreach(TARGET ${TARGETS})
   target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/include)
-  target_include_directories(${TARGET} PUBLIC ${CMAKE_BINARY_DIR}/include/codegen)
+  target_include_directories(${TARGET}
+                             PUBLIC ${CMAKE_BINARY_DIR}/include/codegen)
   add_dependencies(${TARGET} DecoderGenerator)
   target_compile_features(${TARGET} PRIVATE cxx_std_20)
   target_link_libraries(${TARGET} PRIVATE spdlog::spdlog)
   apply_compiler_flags(${TARGET} PUBLIC)
-  if (ENABLE_WERROR)
+  if(ENABLE_WERROR)
     target_compile_options(${TARGET} PRIVATE -Werror)
   endif()
 endforeach()
@@ -61,4 +65,3 @@ endforeach()
 foreach(TOOL ${TOOLLIST})
   target_link_libraries(${TOOL} PRIVATE ${LIBLIST})
 endforeach()
-

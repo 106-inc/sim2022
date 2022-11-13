@@ -15,7 +15,6 @@ static_assert(
 namespace sim {
 
 using Word = std::uint32_t;
-using SDWord = std::int64_t; // S for signed and D for double
 using RegVal = Word;
 using Addr = std::uint32_t;
 using RegId = std::size_t;

@@ -28,4 +28,9 @@ std::span<const Word> ELFLoader::getSection(const std::string &name) const {
   return std::span<const Word>{data, section->get_size() / factor};
 }
 
+Addr ELFLoader::getSectionAddr(const std::string &name) const {
+  auto *section = elfFile_.sections[name];
+  return section->get_address();
+}
+
 } // namespace sim

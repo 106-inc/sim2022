@@ -23,6 +23,7 @@ public:
   Addr getEntryPoint() const;
 
   std::span<const Word> getSection(const std::string &name) const;
+  Addr getSectionAddr(const std::string &name) const;
 };
 
 } // namespace sim

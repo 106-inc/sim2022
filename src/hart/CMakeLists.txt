@@ -1,1 +1,5 @@
 add_library(hart hart.cc)
+target_link_libraries(hart PRIVATE elfloader)
+target_link_libraries(hart PRIVATE executor)
+target_link_libraries(hart PRIVATE memory)
+target_link_libraries(hart PRIVATE decoder)

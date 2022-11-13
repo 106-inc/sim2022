@@ -2,6 +2,7 @@
 #define __INCLUDE_HART_HART_HH__
 
 #include <array>
+#include <filesystem>
 
 #include "common/common.hh"
 #include "common/state.hh"
@@ -10,6 +11,8 @@
 #include "memory/memory.hh"
 
 namespace sim {
+
+namespace fs = std::filesystem;
 
 class Hart final {
 private:
@@ -21,6 +24,7 @@ private:
   Addr &pc() { return state_.pc; };
 
 public:
+  Hart(const fs::path &executable);
   void run();
 };
 

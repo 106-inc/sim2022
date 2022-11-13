@@ -32,6 +32,14 @@ public:
   Word loadWord(Addr addr);
   void storeWord(Addr addr, Word word);
 
+  template <std::forward_iterator It>
+  void storeRange(Addr start, It begin, It end) {
+    std::for_each(begin, end, [&start, this](auto curWord) {
+      storeWord(start, curWord);
+      start += kXLENInBytes;
+    });
+  }
+
   std::size_t getCurrMemSize() const;
   void printMemStats(std::ostream &ost) const;
   const MemoryStats &getMemStats() const;

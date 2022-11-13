@@ -20,7 +20,7 @@ Addr ELFLoader::getEntryPoint() const {
 }
 
 std::span<const Word> ELFLoader::getSection(const std::string &name) const {
-  auto *section = elfFile_.sections[name];
+  auto *section = getSectionPtr(name);
 
   auto *data = reinterpret_cast<const Word *>(section->get_data());
   constexpr auto factor = sizeof(Word) / sizeof(char);
@@ -29,8 +29,17 @@ std::span<const Word> ELFLoader::getSection(const std::string &name) const {
 }
 
 Addr ELFLoader::getSectionAddr(const std::string &name) const {
-  auto *section = elfFile_.sections[name];
+  auto *section = getSectionPtr(name);
   return static_cast<Addr>(section->get_address());
+}
+
+ELFIO::section *ELFLoader::getSectionPtr(const std::string &name) const {
+  auto *section = elfFile_.sections[name];
+
+  if (section == nullptr)
+    throw std::runtime_error{"Unknown section name: " + name};
+
+  return section;
 }
 
 } // namespace sim

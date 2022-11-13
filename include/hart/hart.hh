@@ -16,9 +16,9 @@ namespace fs = std::filesystem;
 
 class Hart final {
 private:
-  State state_;
-  Executor exec_;
-  Decoder decoder_;
+  State state_{};
+  Executor exec_{};
+  Decoder decoder_{};
 
   Memory &mem() { return state_.mem; };
   Addr &pc() { return state_.pc; };

@@ -30,7 +30,7 @@ std::span<const Word> ELFLoader::getSection(const std::string &name) const {
 
 Addr ELFLoader::getSectionAddr(const std::string &name) const {
   auto *section = elfFile_.sections[name];
-  return section->get_address();
+  return static_cast<Addr>(section->get_address());
 }
 
 } // namespace sim

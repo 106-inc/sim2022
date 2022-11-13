@@ -29,6 +29,10 @@ template <std::unsigned_integral T> constexpr auto signCast(T val) {
   return static_cast<std::make_signed_t<T>>(val);
 }
 
+template <std::unsigned_integral T> constexpr auto signAdd(T lhs, T rhs) {
+  return static_cast<T>(signCast(lhs) + signCast(rhs));
+}
+
 /**
  * @brief Calculate size of a type in bits function
  * @note All calculations are guaranteed to be compile-time
@@ -47,7 +51,7 @@ template <typename T> consteval std::size_t sizeofBits() {
  * @param[in] word number to get bits from
  * @return Word bits from range [high, low] (shifted to the beginning)
  */
-template <std::size_t high, std::size_t low> Word getBits(Word word) {
+template <std::size_t high, std::size_t low> constexpr Word getBits(Word word) {
   static_assert(high >= low, "Incorrect bits range");
   static_assert(high < sizeofBits<Word>(), "Bit index out of range");
 
@@ -66,7 +70,7 @@ template <std::size_t high, std::size_t low> Word getBits(Word word) {
  * @param[in] word number to set bit in
  * @return Word number with bit set
  */
-template <std::size_t pos, bool toSet> Word setBit(Word word) {
+template <std::size_t pos, bool toSet> constexpr Word setBit(Word word) {
   static_assert(pos < sizeofBits<Word>(), "Bit index out of range");
 
   constexpr auto mask = Word(1) << pos;
@@ -105,7 +109,8 @@ template <std::size_t pos, bool toSet> Word setBit(Word word) {
  * @param[in] word number to sign extend
  * @return Word sign extended number
  */
-template <std::size_t newSize, std::size_t oldSize> Word signExtend(Word word) {
+template <std::size_t newSize, std::size_t oldSize>
+constexpr Word signExtend(Word word) {
   static_assert(newSize >= oldSize, "Trying to sign extend to smaller size");
   static_assert(oldSize > 0, "Initial size must be non-zero");
   static_assert(newSize <= sizeofBits<Word>(), "newSize is out of bits range");
@@ -127,7 +132,7 @@ template <std::size_t newSize, std::size_t oldSize> Word signExtend(Word word) {
  * @param[in] word number to sign extend
  * @return Word sign extended number
  */
-template <std::size_t oldSize> Word signExtend(Word word) {
+template <std::size_t oldSize> constexpr Word signExtend(Word word) {
   return signExtend<sizeofBits<Word>(), oldSize>(word);
 }
 

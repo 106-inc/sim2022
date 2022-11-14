@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <map>
 #include <stdexcept>
 
 #include <CLI/App.hpp>
@@ -10,16 +11,32 @@
 #include "hart/hart.hh"
 
 namespace fs = std::filesystem;
+namespace lvl = spdlog::level;
 
 int main(int argc, char **argv) try {
   CLI::App app{"Simulator"};
 
-  bool isInfo;
-  app.add_flag("-i,--info", isInfo, "Turn on info logging level");
+  lvl::level_enum loggingLevel{lvl::warn};
+  std::map<std::string, lvl::level_enum> map{
+      {"trace", lvl::trace}, {"debug", lvl::debug}, {"info", lvl::info},
+      {"warn", lvl::warn},   {"err", lvl::err},     {"critical", lvl::critical},
+      {"off", lvl::off}};
 
-  // input
-  fs::path input{};                                    // input
-  app.add_option("input", input, "input")->required(); // input
+  app.add_option("-l,--log", loggingLevel, "Level settings")
+      ->required()
+      ->transform(CLI::CheckedTransformer(map, CLI::ignore_case));
+
+  fs::path input{};
+  app.add_option("input", input, "Executable file")->required();
+
+  spdlog::set_level(loggingLevel);
+
+  spdlog::trace("trace");
+  spdlog::debug("debug");
+  spdlog::info("info");
+  spdlog::warn("warn");
+  spdlog::error("err");
+  spdlog::critical("critical");
 
   try {
     app.parse(argc, argv);

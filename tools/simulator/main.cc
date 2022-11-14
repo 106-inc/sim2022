@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <stdexcept>
 
 #include <CLI/App.hpp>
 #include <CLI/Config.hpp>
@@ -10,7 +11,7 @@
 
 namespace fs = std::filesystem;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) try {
   CLI::App app{"Simulator"};
 
   bool isInfo;
@@ -30,4 +31,7 @@ int main(int argc, char **argv) {
   hart.run();
 
   return 0;
+} catch (const std::exception &e) {
+  spdlog::error(e.what());
+  return 1;
 }

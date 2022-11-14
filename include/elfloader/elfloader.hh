@@ -24,9 +24,10 @@ public:
 
   std::span<const Word> getSection(const std::string &name) const;
   Addr getSectionAddr(const std::string &name) const;
+  bool hasSection(const std::string &name) const;
 
 private:
-  ELFIO::section *getSectionPtr(const std::string &name) const;
+  const ELFIO::section *getSectionPtr(const std::string &name) const;
 };
 
 } // namespace sim

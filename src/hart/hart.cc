@@ -7,15 +7,11 @@ Hart::Hart(const fs::path &executable) {
   ELFLoader loader{executable};
   pc() = loader.getEntryPoint();
 
-  auto text = loader.getSection(".text");
-  mem().storeRange(loader.getSectionAddr(".text"), text.begin(), text.end());
-
-  // auto data = loader.getSection(".data");
-  // mem().storeRange(loader.getSectionAddr(".data"), data.begin(), data.end());
-
-  // auto rodata = loader.getSection(".rodata");
-  // mem().storeRange(loader.getSectionAddr(".rodata"), rodata.begin(),
-  //                  rodata.end());
+  for (auto name : {".text", ".data", ".rodata"})
+    if (loader.hasSection(name)) {
+      auto text = loader.getSection(name);
+      mem().storeRange(loader.getSectionAddr(name), text.begin(), text.end());
+    }
 }
 
 void Hart::run() {

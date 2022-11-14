@@ -33,7 +33,11 @@ Addr ELFLoader::getSectionAddr(const std::string &name) const {
   return static_cast<Addr>(section->get_address());
 }
 
-ELFIO::section *ELFLoader::getSectionPtr(const std::string &name) const {
+bool ELFLoader::hasSection(const std::string &name) const {
+  return elfFile_.sections[name] != nullptr;
+}
+
+const ELFIO::section *ELFLoader::getSectionPtr(const std::string &name) const {
   auto *section = elfFile_.sections[name];
 
   if (section == nullptr)

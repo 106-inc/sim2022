@@ -149,4 +149,50 @@ TEST(execute, jalr) {
   ASSERT_EQ(simulationState.npc, 0x9E);
 }
 
+TEST(execute, addi) {
+    simulationState.regs.set(20, 0xA0);
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::ADDI,
+        0x06 // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0xA6);
+}
+
+TEST(execute, slti) {
+    simulationState.regs.set(20, 0xA0);
+    simulationState.regs.set(11, 0xA0);
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::SLTI,
+        0x06 // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x0);
+
+    instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::SLTI,
+        0xAA6 // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x1);
+}
+
 #include "test_footer.hh"

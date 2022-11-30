@@ -28,7 +28,6 @@ set(COMMON_WARNINGS
 -Wall
 -Wextra
 -Wpedantic
--Wno-gnu-zero-variadic-macro-arguments
 )
 
 set(GCC_WARNINGS
@@ -62,9 +61,9 @@ set(GCC_WARNINGS
 -Wshadow
 -Wsign-conversion
 -Wsign-promo
--Wstack-usage=8192
+# -Wstack-usage=8192
 -Wstrict-null-sentinel
--Wstrict-overflow=2
+# -Wstrict-overflow=2
 -Wsuggest-attribute=noreturn
 -Wsuggest-final-methods
 -Wsuggest-final-types

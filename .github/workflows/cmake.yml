@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        compiler: [g++-10, clang++-12]
+        generator: ["Unix Makefiles", "Ninja"]
         include:
           - build_type: Debug
             enable_werror: ON
@@ -39,7 +41,12 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DENABLE_WERROR=${{matrix.enable_werror}} -DSKIP_CLANG_FORMAT=ON
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}} \
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
+          -DENABLE_WERROR=${{matrix.enable_werror}} \
+          -DSKIP_CLANG_FORMAT=ON
 
     - name: Build
       # Build your program with the given configuration

@@ -34,7 +34,7 @@ jobs:
         submodules: recursive
 
     - name: Install Ninja
-      if: ${{ matrix.generator == "Ninja" }}
+      if: ${{ matrix.generator == 'Ninja' }}
       run: sudo apt install ninja-build
 
     - name: Install spdlog

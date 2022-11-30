@@ -135,8 +135,8 @@ template <std::size_t oldSize> constexpr Word signExtend(Word word) {
   return signExtend<sizeofBits<Word>(), oldSize>(word);
 }
 
-#include "enum.gen.hh"
-
 } // namespace sim
+
+#include "enum.gen.hh"
 
 #endif // __INCLUDE_COMMON_COMMON_HH__

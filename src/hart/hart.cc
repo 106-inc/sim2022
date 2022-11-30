@@ -1,5 +1,7 @@
-#include "hart/hart.hh"
+#include <spdlog/spdlog.h>
+
 #include "elfloader/elfloader.hh"
+#include "hart/hart.hh"
 
 namespace sim {
 
@@ -18,7 +20,11 @@ void Hart::run() {
   while (!state_.complete) {
     auto binInst = mem().loadWord(pc());
     auto inst = decoder_.decode(binInst);
+    spdlog::trace("Decoded instuction:\n  {}", inst.str());
+
     exec_.execute(inst, state_);
+    spdlog::trace("Current regfile state:\n{}", state_.regs.str());
+
     if (state_.branchIsTaken) {
       state_.pc = state_.npc;
       state_.branchIsTaken = false;

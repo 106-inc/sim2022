@@ -2,7 +2,10 @@
 #define __INCLUDE_STATE_STATE_HH__
 
 #include <array>
+#include <iomanip>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
 #include "common/common.hh"
 #include "memory/memory.hh"
@@ -17,12 +20,30 @@ public:
   Word get(RegId regnum) const { return regs.at(regnum); }
 
   void set(RegId regnum, Word val) {
-    if (!regnum) {
-       // NOP instruction looks like ADD x0, x0, 0 - assignment to x0,
-       // furthermore JALR supports x0 as a destination register (to store return address if it is not needed).
-       return;
-    }
+    // NOP instruction looks like ADD x0, x0, 0 - assignment to x0,
+    // furthermore JALR supports x0 as a destination register
+    // (to store return address if it is not needed).
+    if (!regnum)
+      return;
+
     regs.at(regnum) = val;
+  }
+
+  std::string str() const {
+    size_t i = 0;
+    std::stringstream ss{};
+    ss << std::setfill('0');
+    for (auto reg : regs) {
+      ss << "  [" << std::dec << std::setw(2) << i++ << "] 0x" << std::hex
+         << std::setw(sizeof(reg) * 2) << reg;
+
+      if (i % 4 == 0)
+        ss << std::endl;
+      else
+        ss << "  ";
+    }
+
+    return ss.str();
   }
 };
 

@@ -16,7 +16,7 @@ namespace lvl = spdlog::level;
 int main(int argc, char **argv) try {
   CLI::App app{"Simulator"};
 
-  lvl::level_enum loggingLevel{lvl::warn};
+  lvl::level_enum loggingLevel{};
   std::map<std::string, lvl::level_enum> map{
       {"trace", lvl::trace}, {"debug", lvl::debug}, {"info", lvl::info},
       {"warn", lvl::warn},   {"err", lvl::err},     {"critical", lvl::critical},
@@ -29,20 +29,20 @@ int main(int argc, char **argv) try {
   fs::path input{};
   app.add_option("input", input, "Executable file")->required();
 
-  spdlog::set_level(loggingLevel);
-
-  spdlog::trace("trace");
-  spdlog::debug("debug");
-  spdlog::info("info");
-  spdlog::warn("warn");
-  spdlog::error("err");
-  spdlog::critical("critical");
-
   try {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
     return app.exit(e);
   }
+
+  spdlog::set_level(loggingLevel);
+
+  // spdlog::trace("trace");
+  // spdlog::debug("debug");
+  // spdlog::info("info");
+  // spdlog::warn("warn");
+  // spdlog::error("err");
+  // spdlog::critical("critical");
 
   sim::Hart hart{input};
   hart.run();

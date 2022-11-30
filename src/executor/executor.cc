@@ -67,14 +67,14 @@ static void executeECALL(const Instruction &, State &state) {
 }
 
 Executor::Executor()
-    : executors{{OpType::ADD, executeADD},    {OpType::SUB, executeSUB},
+    : executors_{{OpType::ADD, executeADD},    {OpType::SUB, executeSUB},
                 {OpType::MUL, executeMUL},    {OpType::DIV, executeDIV},
                 {OpType::LW, executeLW},      {OpType::SW, executeSW},
                 {OpType::JAL, executeJAL},    {OpType::JALR, executeJALR},
                 {OpType::ECALL, executeECALL}} {}
 
 void Executor::execute(const Instruction &inst, State &state) const {
-  executors.at(inst.type)(inst, state);
+  executors_.at(inst.type)(inst, state);
 }
 
 } // namespace sim

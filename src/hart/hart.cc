@@ -20,7 +20,7 @@ void Hart::run() {
   while (!state_.complete) {
     auto binInst = mem().loadWord(pc());
     auto inst = decoder_.decode(binInst);
-    spdlog::trace("Decoded instuction:\n  {}", inst.str());
+    spdlog::trace("Decoded instuction:\n  [0x{:08x}]{}", state_.pc, inst.str());
 
     exec_.execute(inst, state_);
     spdlog::trace("Current regfile state:\n{}", state_.regs.str());

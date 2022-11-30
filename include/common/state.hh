@@ -36,8 +36,9 @@ public:
 
     for (std::size_t i = 0; i < kRegNum / colNum; ++i) {
       for (std::size_t j = 0; j < colNum; ++j) {
-        auto &reg = regs[i];
-        ss << "  [" << std::dec << std::setw(2) << (j * colNum + i) << "] ";
+        auto regIdx = j * colNum + i;
+        auto &reg = regs[regIdx];
+        ss << "  [" << std::dec << std::setw(2) << regIdx << "] ";
         ss << "0x" << std::hex << std::setw(sizeof(reg) * 2) << reg;
       }
       ss << std::endl;

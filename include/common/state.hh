@@ -30,17 +30,17 @@ public:
   }
 
   std::string str() const {
-    size_t i = 0;
     std::stringstream ss{};
     ss << std::setfill('0');
-    for (auto reg : regs) {
-      ss << "  [" << std::dec << std::setw(2) << i++ << "] 0x" << std::hex
-         << std::setw(sizeof(reg) * 2) << reg;
+    constexpr std::size_t colNum = 4;
 
-      if (i % 4 == 0)
-        ss << std::endl;
-      else
-        ss << "  ";
+    for (std::size_t i = 0; i < kRegNum / colNum; ++i) {
+      for (std::size_t j = 0; j < colNum; ++j) {
+        auto &reg = regs[i];
+        ss << "  [" << std::dec << std::setw(2) << (j * colNum + i) << "] ";
+        ss << "0x" << std::hex << std::setw(sizeof(reg) * 2) << reg;
+      }
+      ss << std::endl;
     }
 
     return ss.str();

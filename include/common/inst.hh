@@ -24,7 +24,7 @@ struct Instruction final {
   std::string str() const {
     std::stringstream ss{};
 
-    ss << std::setw(9) << opTypeToString[type] << " {";
+    ss << std::setw(9) << opTypeToString.at(type) << " {";
     ss << "rs1 = " << std::setw(2) << rs1 << ", ";
     ss << "rs2 = " << std::setw(2) << rs2 << ", ";
     ss << "rs3 = " << std::setw(2) << rs3 << ", ";

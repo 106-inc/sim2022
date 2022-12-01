@@ -219,7 +219,7 @@ def gen_hh(filename, yaml_dict):
         to_write += f"    {inst_name.upper()},\n"
     to_write += "};\n\n"
 
-    to_write += "inline std::unordered_map<OpType, std::string> opTypeToString {\n"
+    to_write += "inline std::unordered_map<OpType, std::string_view> opTypeToString {\n"
     for inst_name in yaml_dict:
         iname = inst_name.upper()
         to_write += f'    {{OpType::{iname}, "{iname}"}},\n'

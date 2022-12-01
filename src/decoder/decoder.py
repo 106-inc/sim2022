@@ -209,7 +209,7 @@ def gen_hh(filename, yaml_dict):
     """Function to generate c++ header with enum with instructions"""
 
     to_write = COMMENT
-    to_write += "#include <string>\n"
+    to_write += "#include <string_view>\n"
     to_write += "#include <unordered_map>\n\n"
 
     to_write += "namespace sim {\n"

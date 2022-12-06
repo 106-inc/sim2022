@@ -2,15 +2,6 @@
 
 namespace sim {
 
-static auto applyOffset(RegVal val, RegVal imm) {
-  auto res = signAdd(val, imm);
-
-  if (signCast(res) < 0)
-    throw std::runtime_error("invalid address");
-
-  return res;
-}
-
 static void executeADD(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal rs2 = state.regs.get(inst.rs2);
@@ -70,15 +61,21 @@ static void executeADDI(const Instruction &inst, State &state) {
   state.regs.set(inst.rd, rs1 + inst.imm);
 }
 
+template <std::integral T> static T executeSLT(T lhs, T rhs) {
+  return lhs < rhs;
+}
+
 static void executeSLTI(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
-  state.regs.set(inst.rd, rs1 < inst.imm);
+  auto &&lhs = signCast(rs1);
+  auto &&rhs = signCast(inst.imm);
+  RegVal res = unsignedCast(executeSLT(lhs, rhs));
+  state.regs.set(inst.rd, res);
 }
 
 inline static void executeSLTIU(const Instruction &inst, State &state) {
-  // instruction have the same semantic as SLTI.
-  // Main difference is result interpretation.
-  executeSLTI(inst, state);
+  RegVal rs1 = state.regs.get(inst.rs1);
+  state.regs.set(inst.rd, executeSLT(rs1, inst.imm));
 }
 
 static void executeANDI(const Instruction &inst, State &state) {
@@ -110,16 +107,22 @@ static void executeSLLI(const Instruction &inst, State &state) {
   state.regs.set(inst.rd, rs1 << shamt);
 }
 
+template <std::integral T> static T executeSRLT(T val, RegVal imm) {
+  RegVal shamt = getBits<5, 0>(imm);
+  return val >> shamt;
+}
+
 static void executeSRLI(const Instruction &inst, State &state) {
-  RegVal shamt = getBits<5, 0>(inst.imm);
   RegVal rs1 = state.regs.get(inst.rs1);
-  state.regs.set(inst.rd, rs1 >> shamt);
+  auto &&signedRs1 = signCast(rs1);
+  RegVal res = unsignedCast(executeSRLT(signedRs1, inst.imm));
+  state.regs.set(inst.rd, res);
 }
 
 static void executeSRAI(const Instruction &inst, State &state) {
-  // instruction have the same semantic as SRLI.
-  // Main difference is result interpretation.
-  executeSRLI(inst, state);
+  RegVal rs1 = state.regs.get(inst.rs1);
+  RegVal res = executeSRLT(rs1, inst.imm);
+  state.regs.set(inst.rd, res);
 }
 
 static void executeSLL(const Instruction &inst, State &state) {
@@ -128,31 +131,36 @@ static void executeSLL(const Instruction &inst, State &state) {
   state.regs.set(inst.rd, rs1 << rs2);
 }
 
+template <std::integral T> static T executeSR(T lhs, T rhs) {
+  return lhs >> rhs;
+}
+
 static void executeSRL(const Instruction &inst, State &state) {
-  RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal rs2 = state.regs.get(inst.rs2);
-  state.regs.set(inst.rd, rs1 >> rs2);
+  auto &&rs1 = signCast(state.regs.get(inst.rs1));
+  auto &&rs2 = signCast(state.regs.get(inst.rs2));
+  RegVal res = unsignedCast(executeSR(rs1, rs2));
+  state.regs.set(inst.rd, res);
 }
 
 static void executeSRA(const Instruction &inst, State &state) {
-  // instruction have the same semantic as SRL.
-  // Main difference is result interpretation.
-  executeSRL(inst, state);
+  RegVal rs1 = state.regs.get(inst.rs1);
+  RegVal rs2 = state.regs.get(inst.rs2);
+  state.regs.set(inst.rd, executeSR(rs1, rs2));
 }
 
 Executor::Executor()
-    : executors_{{OpType::ADD, executeADD},    {OpType::SUB, executeSUB},
-                {OpType::MUL, executeMUL},     {OpType::DIV, executeDIV},
-                {OpType::LW, executeLW},       {OpType::SW, executeSW},
-                {OpType::JAL, executeJAL},     {OpType::JALR, executeJALR},
-                {OpType::ECALL, executeECALL}, {OpType::ADDI, executeADDI},
-                {OpType::SLTI, executeSLTI},   {OpType::SLTIU, executeSLTIU},
-                {OpType::ANDI, executeANDI},   {OpType::ORI, executeORI},
-                {OpType::XORI, executeXORI},   {OpType::LUI, executeLUI},
-                {OpType::AUIPC, executeAUIPC}, {OpType::SLLI, executeSLLI},
-                {OpType::SRLI, executeSRLI},   {OpType::SRAI, executeSRAI},
-                {OpType::SLL, executeSLL},     {OpType::SLL, executeSLL},
-                {OpType::SRL, executeSRL},     {OpType::SRA, executeSRA}} {}
+    : executors_{{OpType::ADD, executeADD},     {OpType::SUB, executeSUB},
+                 {OpType::MUL, executeMUL},     {OpType::DIV, executeDIV},
+                 {OpType::LW, executeLW},       {OpType::SW, executeSW},
+                 {OpType::JAL, executeJAL},     {OpType::JALR, executeJALR},
+                 {OpType::ECALL, executeECALL}, {OpType::ADDI, executeADDI},
+                 {OpType::SLTI, executeSLTI},   {OpType::SLTIU, executeSLTIU},
+                 {OpType::ANDI, executeANDI},   {OpType::ORI, executeORI},
+                 {OpType::XORI, executeXORI},   {OpType::LUI, executeLUI},
+                 {OpType::AUIPC, executeAUIPC}, {OpType::SLLI, executeSLLI},
+                 {OpType::SRLI, executeSRLI},   {OpType::SRAI, executeSRAI},
+                 {OpType::SLL, executeSLL},     {OpType::SLL, executeSLL},
+                 {OpType::SRL, executeSRL},     {OpType::SRA, executeSRA}} {}
 
 void Executor::execute(const Instruction &inst, State &state) const {
   executors_.at(inst.type)(inst, state);

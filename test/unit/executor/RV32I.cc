@@ -166,6 +166,7 @@ TEST(execute, addi) {
 }
 
 TEST(execute, slti) {
+    // basic compare with result 0
     simulationState.regs.set(20, 0xA0);
     simulationState.regs.set(11, 0xA0);
     sim::Instruction instr = {
@@ -181,6 +182,7 @@ TEST(execute, slti) {
     executor.execute(instr, simulationState);
     ASSERT_EQ(simulationState.regs.get(11), 0x0);
 
+    // basic compare with result 1
     instr = {
         20, // rs1
         15, // rs2
@@ -193,6 +195,56 @@ TEST(execute, slti) {
     };
     executor.execute(instr, simulationState);
     ASSERT_EQ(simulationState.regs.get(11), 0x1);
+
+    // compare signed negative nums with result 0
+    simulationState.regs.set(20, 0xFFFFFFFF);
+    simulationState.regs.set(11, 0xFFFFFFFE);
+    instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::SLTI,
+        0xFFFFFFFE // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x0);
+}
+
+TEST(execute, sltiu) {
+    // compare unsigned nums with result 0
+    simulationState.regs.set(20, 0xFFFFFFFF);
+    simulationState.regs.set(11, 0xFFFFFFFE);
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::SLTI,
+        0xFFFFFFFE // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x0);
+}
+
+TEST(execute, ori) {
+    simulationState.regs.set(20, 0x0F0F0F0F);
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::ORI,
+        0xF0F0F0F0 // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0xFFFFFFFF);
 }
 
 #include "test_footer.hh"

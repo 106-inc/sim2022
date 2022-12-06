@@ -28,6 +28,10 @@ template <std::unsigned_integral T> constexpr auto signCast(T val) {
   return static_cast<std::make_signed_t<T>>(val);
 }
 
+template <std::signed_integral T> constexpr auto unsignedCast(T val) {
+  return static_cast<std::make_unsigned_t<T>>(val);
+}
+
 template <std::unsigned_integral T> constexpr auto signAdd(T lhs, T rhs) {
   return static_cast<T>(signCast(lhs) + signCast(rhs));
 }

@@ -41,4 +41,17 @@ void Memory::printMemStats(std::ostream &ost) const {
 
 const Memory::MemoryStats &Memory::getMemStats() const { return stats; }
 
+PhysMemory::AddrSections PhysMemory::getVirtAddrSections(Addr addr) {
+  constexpr uint16_t offsetShift = 12;
+  constexpr uint16_t offsetMask = (1u << 12) - 1;
+  constexpr uint16_t index_P1Mask = (1u << 10) - 1;
+  constexpr uint16_t index_P2Mask = (1u << 10) - 1;
+  constexpr uint16_t index_P1Shift = 22;
+
+  uint16_t index_p1 = (addr >> index_P1Shift) & index_P1Mask;
+  uint16_t index_p2 = (addr >> offsetShift) & index_P2Mask;
+  uint16_t offset = addr & offsetMask;
+  return PhysMemory::AddrSections(index_p1, index_p2, offset);
+}
+
 } // namespace sim

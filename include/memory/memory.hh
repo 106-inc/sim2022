@@ -3,6 +3,7 @@
 
 #include "common/common.hh"
 #include <iostream>
+#include <list>
 #include <unordered_map>
 
 namespace sim {
@@ -43,6 +44,36 @@ public:
   std::size_t getCurrMemSize() const;
   void printMemStats(std::ostream &ost) const;
   const MemoryStats &getMemStats() const;
+};
+
+class PhysMemory {
+public:
+  struct Page {
+    Page() = default;
+
+  private:
+    std::vector<Word> wordStorage{};
+  };
+
+  struct AddrSections {
+    uint16_t index_pt1{};
+    uint16_t index_pt2{};
+    uint16_t offset{};
+
+    AddrSections(uint16_t pt_1, uint16_t pt_2, uint16_t off)
+        : index_pt1(pt_1), index_pt2(pt_2), offset(off) {}
+    auto operator<=>(const AddrSections &) const = default;
+  };
+
+  PhysMemory() = default;
+  AddrSections getVirtAddrSections(Addr addr);
+
+private:
+  using listIt = std::list<Page>::iterator;
+  using PageTable =
+      std::unordered_map<uint16_t, std::unordered_map<uint16_t, listIt>>;
+  std::list<Page> pageStorage{};
+  PageTable pageTable{};
 };
 
 } // namespace sim

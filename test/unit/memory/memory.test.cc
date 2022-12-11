@@ -6,6 +6,8 @@
 constexpr std::size_t kNumReqs = 10;
 
 using sim::Addr;
+using AddrSections = sim::PhysMemory::AddrSections;
+using Page = sim::PhysMemory::Page;
 
 TEST(Memory, Memory_store_load) {
 
@@ -41,6 +43,15 @@ TEST(Memory, Mem_stats) {
   EXPECT_EQ(stats.numStores, kNumReqs);
   EXPECT_EQ(stats.numLoads, 2 * kNumReqs);
   EXPECT_EQ(stats.numPageFaults, kNumReqs);
+}
+
+TEST(PhysMemory, getVirtAddrSections) {
+
+  sim::PhysMemory phMem;
+
+  EXPECT_EQ(phMem.getVirtAddrSections(0xDEADBEEF), AddrSections(890, 731, 3823));
+  EXPECT_EQ(phMem.getVirtAddrSections(0x0), AddrSections(0, 0, 0));
+  EXPECT_EQ(phMem.getVirtAddrSections(0xFFFFFFFF), AddrSections(1023, 1023, 4095));
 }
 
 #include "test_footer.hh"

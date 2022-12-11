@@ -52,7 +52,7 @@ public:
     Page() = default;
 
   private:
-    std::vector<Word> wordStorage{};
+    std::array<Word, kPageSize / sizeof(Word)> wordStorage{};
   };
 
   struct AddrSections {
@@ -65,15 +65,19 @@ public:
     auto operator<=>(const AddrSections &) const = default;
   };
 
+  enum struct MemoryOp { STORE = 0, LOAD = 1 };
+
+  using listIt = std::list<Page>::iterator;
+  using PTLowLvl = std::unordered_map<uint16_t, listIt>;
+  using PTHighLvl = std::unordered_map<uint16_t, PTLowLvl>;
+
   PhysMemory() = default;
   AddrSections getVirtAddrSections(Addr addr);
+  listIt pageTableLookup(const AddrSections &sect, MemoryOp op);
 
 private:
-  using listIt = std::list<Page>::iterator;
-  using PageTable =
-      std::unordered_map<uint16_t, std::unordered_map<uint16_t, listIt>>;
   std::list<Page> pageStorage{};
-  PageTable pageTable{};
+  PTHighLvl pageTable{};
 };
 
 } // namespace sim

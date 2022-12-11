@@ -8,6 +8,7 @@ constexpr std::size_t kNumReqs = 10;
 using sim::Addr;
 using AddrSections = sim::PhysMemory::AddrSections;
 using Page = sim::PhysMemory::Page;
+using MemOp = sim::PhysMemory::MemoryOp;
 
 TEST(Memory, Memory_store_load) {
 
@@ -52,6 +53,33 @@ TEST(PhysMemory, getVirtAddrSections) {
   EXPECT_EQ(phMem.getVirtAddrSections(0xDEADBEEF), AddrSections(890, 731, 3823));
   EXPECT_EQ(phMem.getVirtAddrSections(0x0), AddrSections(0, 0, 0));
   EXPECT_EQ(phMem.getVirtAddrSections(0xFFFFFFFF), AddrSections(1023, 1023, 4095));
+}
+
+
+TEST(PhysMemory, pageTableLookup) {
+
+  sim::PhysMemory phMem;
+  //Load on unmapped region (P1) and than store to it
+  AddrSections page1(0, 0, 0);
+  EXPECT_ANY_THROW(phMem.pageTableLookup(page1, MemOp::LOAD));
+  auto iter_1 = phMem.pageTableLookup(page1, MemOp::STORE);
+
+  //Load on unmapped region (P2) and than store to it
+  AddrSections page2(0, 1, 0);
+  EXPECT_ANY_THROW(phMem.pageTableLookup(page2, MemOp::LOAD));
+  auto iter_2 = phMem.pageTableLookup(page2, MemOp::STORE);
+
+  //Check previously stored values
+  EXPECT_EQ(phMem.pageTableLookup(page1, MemOp::LOAD), iter_1);
+  EXPECT_EQ(phMem.pageTableLookup(page2, MemOp::LOAD), iter_2);
+
+  //Check that stores point on the same pages
+  AddrSections page3(3, 2, 1);
+  auto iter_3 = phMem.pageTableLookup(page3, MemOp::STORE);
+  auto iter_4 = phMem.pageTableLookup(page3, MemOp::STORE);
+  EXPECT_EQ(iter_3, iter_4);
+  EXPECT_EQ(phMem.pageTableLookup(page3, MemOp::LOAD), iter_3);
+
 }
 
 #include "test_footer.hh"

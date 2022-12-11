@@ -54,4 +54,30 @@ PhysMemory::AddrSections PhysMemory::getVirtAddrSections(Addr addr) {
   return PhysMemory::AddrSections(index_p1, index_p2, offset);
 }
 
+PhysMemory::listIt PhysMemory::pageTableLookup(const AddrSections &sect,
+                                               MemoryOp op) {
+  using MemOp = PhysMemory::MemoryOp;
+  auto it_P1 = pageTable.find(sect.index_pt1);
+  if (it_P1 == pageTable.end()) {
+    if (op == MemOp::LOAD)
+      throw std::runtime_error("Load on unmapped region in physical mem (P1)");
+    else {
+      pageStorage.push_back(Page{});
+      pageTable[sect.index_pt1][sect.index_pt2] = std::prev(pageStorage.end());
+    }
+  }
+  auto &pageTableLowLvl = pageTable.at(sect.index_pt1);
+
+  auto it_P2 = pageTableLowLvl.find(sect.index_pt2);
+  if (it_P2 == pageTableLowLvl.end()) {
+    if (op == MemOp::LOAD)
+      throw std::runtime_error("Load on unmapped region in physical mem (P2)");
+    else {
+      pageStorage.push_back(Page{});
+      pageTableLowLvl[sect.index_pt2] = std::prev(pageStorage.end());
+    }
+  }
+  return pageTableLowLvl.at(sect.index_pt2);
+}
+
 } // namespace sim

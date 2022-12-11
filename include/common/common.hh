@@ -23,6 +23,7 @@ constexpr RegId kRegNum = 32;
 constexpr std::uint8_t kBitsInByte = 8;
 constexpr Word kDummyWord = 0;
 constexpr std::uint8_t kXLENInBytes = sizeof(Word);
+constexpr std::uint16_t kPageSize = 4096;
 
 template <std::unsigned_integral T> constexpr auto signCast(T val) {
   return static_cast<std::make_signed_t<T>>(val);

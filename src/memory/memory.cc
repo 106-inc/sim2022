@@ -6,36 +6,20 @@ namespace sim {
 
 Word Memory::loadWord(Addr addr) {
   stats.numLoads++;
-  Word word = kDummyWord;
+  Word loadedWord = physMem->getWord(addr, PhysMemory::MemoryOp::LOAD);
 
-  auto it = mem.find(addr);
-  if (it != mem.end())
-    word = it->second;
-  else
-    word = pageFaultHandle(addr);
-
-  return word;
+  return loadedWord;
 }
 
 void Memory::storeWord(Addr addr, Word word) {
   stats.numStores++;
-  mem[addr] = word;
+  physMem->getWord(addr, PhysMemory::MemoryOp::STORE) = word;
 }
-
-Word Memory::pageFaultHandle(Addr addr) {
-  (void)addr;
-  stats.numPageFaults++;
-  std::cout << "Placeholder for page fault" << std::endl;
-  return kDummyWord;
-}
-
-std::size_t Memory::getCurrMemSize() const { return mem.size(); }
 
 void Memory::printMemStats(std::ostream &ost) const {
   ost << "Memory stats:" << std::endl;
   ost << "Loads: " << stats.numLoads << std::endl;
   ost << "Stores: " << stats.numStores << std::endl;
-  ost << "PageFaults: " << stats.numPageFaults << std::endl;
   ost << "End of memory stats." << std::endl;
 }
 
@@ -78,6 +62,15 @@ PhysMemory::listIt PhysMemory::pageTableLookup(const AddrSections &sect,
     }
   }
   return pageTableLowLvl.at(sect.index_pt2);
+}
+
+Word &PhysMemory::getWord(Addr addr, MemoryOp op) {
+  if (addr % sizeof(Word))
+    throw std::runtime_error("Misaligned memory access is not supported!");
+  auto sections = PhysMemory::getVirtAddrSections(addr);
+  auto offset = sections.offset;
+  auto it = PhysMemory::pageTableLookup(sections, op);
+  return it->wordStorage.at(offset / sizeof(Word));
 }
 
 } // namespace sim

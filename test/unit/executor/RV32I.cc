@@ -51,10 +51,10 @@ TEST(execute, lwAndSw)
         0,
         0,
         sim::OpType::SW,
-        0xA // imm
+        0x0 // imm
     };
     executor.execute(instr, simulationState);
-    ASSERT_EQ(simulationState.mem.loadWord(0xAA), 0xFF);
+    ASSERT_EQ(simulationState.mem.loadWord(0xA0), 0xFF);
     instr = {
         1, // rs1
         2, // rs2
@@ -63,7 +63,7 @@ TEST(execute, lwAndSw)
         0,
         0,
         sim::OpType::LW,
-        0xA // imm
+        0x0 // imm
     };
     executor.execute(instr, simulationState);
     ASSERT_EQ(simulationState.regs.get(3), 0xFF);

@@ -17,12 +17,9 @@ TEST(Memory, Memory_store_load) {
 
   // Load value which was stored  previously
   for (Addr i = 0; i < kNumReqs; ++i)
-    mem.storeWord(i, i * i);
+    mem.storeWord(i * 4, i * i);
   for (Addr i = 0; i < kNumReqs; ++i)
-    EXPECT_EQ(mem.loadWord(i), i * i);
-  // Load value which was stored  previously (page fault)
-  for (Addr i = kNumReqs; i < 2 * kNumReqs; ++i)
-    EXPECT_EQ(mem.loadWord(i), sim::kDummyWord);
+    EXPECT_EQ(mem.loadWord(i * 4), i * i);
 }
 
 TEST(Memory, Mem_stats) {
@@ -33,17 +30,15 @@ TEST(Memory, Mem_stats) {
   // kNumReqs stores
   // 2 * kNumReqs loads (kNumReqs pageFaults + kNumReqs real loads)
   for (Addr i = 0; i < kNumReqs; ++i)
-    mem.storeWord(i, i * i);
+    mem.storeWord(i * 4, i * i);
   for (Addr i = 0; i < kNumReqs; ++i)
-    mem.loadWord(i);
+    mem.loadWord(i * 4);
   for (Addr i = kNumReqs; i < 2 * kNumReqs; ++i)
-    mem.loadWord(i);
+    mem.loadWord(i * 4);
 
   stats = mem.getMemStats();
-  EXPECT_EQ(mem.getCurrMemSize(), kNumReqs);
   EXPECT_EQ(stats.numStores, kNumReqs);
   EXPECT_EQ(stats.numLoads, 2 * kNumReqs);
-  EXPECT_EQ(stats.numPageFaults, kNumReqs);
 }
 
 TEST(PhysMemory, getVirtAddrSections) {
@@ -79,6 +74,29 @@ TEST(PhysMemory, pageTableLookup) {
   auto iter_4 = phMem.pageTableLookup(page3, MemOp::STORE);
   EXPECT_EQ(iter_3, iter_4);
   EXPECT_EQ(phMem.pageTableLookup(page3, MemOp::LOAD), iter_3);
+
+}
+
+TEST(PhysMemory, getWord) {
+  sim::PhysMemory phMem;
+  //Misaligned Address
+  EXPECT_ANY_THROW(phMem.getWord(0xDEADBEEF, MemOp::LOAD));
+
+  //Load on unmapped region
+  EXPECT_ANY_THROW(phMem.getWord(0x10000000, MemOp::LOAD));
+
+  phMem.getWord(0x10000000, MemOp::STORE) = 42;
+  EXPECT_EQ(phMem.getWord(0x10000000, MemOp::LOAD), 42);
+
+  //Rewriting word on 0x10000000
+  phMem.getWord(0x10000000, MemOp::STORE) = 0;
+  phMem.getWord(0x10000010, MemOp::STORE) = 1;
+  phMem.getWord(0x10000020, MemOp::STORE) = 2;
+  phMem.getWord(0x10000030, MemOp::STORE) = 3;
+  EXPECT_EQ(phMem.getWord(0x10000000, MemOp::LOAD), 0);
+  EXPECT_EQ(phMem.getWord(0x10000010, MemOp::LOAD), 1);
+  EXPECT_EQ(phMem.getWord(0x10000020, MemOp::LOAD), 2);
+  EXPECT_EQ(phMem.getWord(0x10000030, MemOp::LOAD), 3);
 
 }
 

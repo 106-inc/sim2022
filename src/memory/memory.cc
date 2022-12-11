@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "memory/memory.hh"
 
 namespace sim {

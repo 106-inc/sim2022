@@ -7,9 +7,9 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <vector>
-#include <optional>
 
 namespace sim {
 
@@ -49,6 +49,10 @@ private:
   std::unordered_map<TLBIndex, TLBEntry> tlb{};
   TLBStats stats{};
 };
+
+template <typename T>
+concept isSimType =
+    std::same_as<T, Word> || std::same_as<T, Byte> || std::same_as<T, Half>;
 
 class PhysMemory final {
 public:
@@ -94,7 +98,7 @@ public:
 
   template <MemoryOp op> listIt pageTableLookup(const AddrSections &sect);
 
-  template <typename T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
+  template <isSimType T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
   uint16_t getOffset(Addr addr);
 
 private:
@@ -136,7 +140,7 @@ public:
   void storeRange(Addr start, It begin, It end);
 };
 
-template <typename T, PhysMemory::MemoryOp op>
+template <isSimType T, PhysMemory::MemoryOp op>
 inline T *PhysMemory::getEntity(Addr addr) {
   if (addr % sizeof(T) || ((getOffset(addr) + sizeof(T)) > (1 << kOffsetBits)))
     throw PhysMemory::MisAlignedAddrException(

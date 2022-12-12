@@ -7,7 +7,7 @@ constexpr std::size_t kNumReqs = 10;
 
 using sim::Addr;
 using AddrSections = sim::PhysMemory::AddrSections;
-using Page = sim::PhysMemory::Page;
+using Page = sim::Page;
 using MemOp = sim::PhysMemory::MemoryOp;
 
 TEST(Memory, Memory_store_load) {
@@ -115,6 +115,47 @@ TEST(PhysMemory, getEntity) {
   //Rewriting word
   mem.storeWord(0x10000000, 21);
   EXPECT_EQ(mem.loadWord(0x10000000), 21);
+}
+
+TEST(TLB, getTLBIndex)
+{
+  sim::TLB tlb;
+  EXPECT_EQ(tlb.getTLBIndex(0xDEADBEEF),  731);
+  EXPECT_EQ(tlb.getTLBIndex(0x0),  0);
+  EXPECT_EQ(tlb.getTLBIndex(0xFFFFFFFF),  1023);
+}
+
+TEST(TLB, tlbLookup)
+{
+  sim::TLB tlb;
+  std::list<sim::Page> storage;
+  storage.emplace_back();
+  auto iter_1 = std::prev(storage.end());
+  tlb.tlbUpdate(0xDEADBEEF, iter_1);
+
+  //Deadbeef is in TLB, BeafDead - not;
+  EXPECT_EQ(tlb.tlbLookup(0xBEEFDEAD), std::nullopt);
+  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), iter_1);
+
+  //Change value in the TLB
+  storage.emplace_back();
+  auto iter_2 = std::prev(storage.end());
+  tlb.tlbUpdate(0xDEADBEEF, iter_2);
+  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), iter_2);
+  EXPECT_NE(tlb.tlbLookup(0xDEADBEEF), iter_1);
+
+  //FAADBDEA has the same TLBIndex with DEADBEEF
+  storage.emplace_back();
+  auto iter_3 = std::prev(storage.end());
+  tlb.tlbUpdate(0xFAADBDEA, iter_3);
+  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), std::nullopt);
+  EXPECT_EQ(tlb.tlbLookup(0xFAADBDEA), iter_3);
+
+  auto stats = tlb.getTLBStats();
+  EXPECT_EQ(stats.TLBHits, 4);
+  EXPECT_EQ(stats.TLBMisses, 2);
+  EXPECT_EQ(stats.TLBRequests, 6);
+
 }
 
 #include "test_footer.hh"

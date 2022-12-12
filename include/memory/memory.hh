@@ -12,14 +12,45 @@
 
 namespace sim {
 
-class PhysMemory final {
-public:
-  struct Page {
-    Page() { wordStorage.resize(kPageSize / sizeof(Word)); }
+struct Page {
+  Page() { wordStorage.resize(kPageSize / sizeof(Word)); }
 
-    std::vector<Word> wordStorage{};
+  std::vector<Word> wordStorage{};
+};
+
+using listIt = std::list<Page>::iterator;
+
+class TLB final {
+public:
+  using TLBIndex = uint16_t;
+  struct TLBEntry {
+    Addr virtualAddress{};
+    listIt physPage{};
+    TLBEntry() = default;
+    TLBEntry(Addr addr, listIt page) : virtualAddress(addr), physPage(page) {}
   };
 
+  struct TLBStats {
+    std::size_t TLBHits{};
+    std::size_t TLBMisses{};
+    std::size_t TLBRequests{};
+
+    TLBStats() = default;
+  };
+
+  TLB() = default;
+  std::optional<listIt> tlbLookup(Addr addr);
+  void tlbUpdate(Addr addr, listIt page);
+  TLBIndex getTLBIndex(Addr addr);
+  const TLBStats &getTLBStats();
+
+private:
+  std::unordered_map<TLBIndex, TLBEntry> tlb{};
+  TLBStats stats{};
+};
+
+class PhysMemory final {
+public:
   struct AddrSections {
     uint16_t indexPt1{};
     uint16_t indexPt2{};
@@ -53,7 +84,6 @@ public:
 
   enum struct MemoryOp { STORE = 0, LOAD = 1 };
 
-  using listIt = std::list<Page>::iterator;
   using PTLowLvl = std::unordered_map<uint16_t, listIt>;
   using PTHighLvl = std::unordered_map<uint16_t, PTLowLvl>;
 
@@ -69,6 +99,7 @@ public:
 private:
   std::list<Page> pageStorage{};
   PTHighLvl pageTable{};
+  TLB tlb{};
 };
 
 class Memory final {
@@ -104,20 +135,6 @@ public:
   void storeRange(Addr start, It begin, It end);
 };
 
-/*
-class TLB
-{
-  struct TLBEntry
-  {
-    Addr VirtualAddress{};
-    listIt physPage{};
-  }
-
-  private:
-  std::unordered_map<
-};
-*/
-
 template <typename T, PhysMemory::MemoryOp op>
 inline T *PhysMemory::getEntity(Addr addr) {
   if (addr % sizeof(T) || ((getOffset(addr) + sizeof(T)) > (1 << kOffsetBits)))
@@ -125,14 +142,21 @@ inline T *PhysMemory::getEntity(Addr addr) {
         "Misaligned memory access is not supported!");
   AddrSections sections(addr);
   auto offset = sections.offset;
-  auto it = PhysMemory::pageTableLookup<op>(sections);
+  auto isInTLB = tlb.tlbLookup(addr);
+  listIt it{};
+  if (isInTLB.has_value()) {
+    it = isInTLB.value();
+  } else {
+    it = PhysMemory::pageTableLookup<op>(sections);
+    tlb.tlbUpdate(addr, it);
+  }
   Word *word = &it->wordStorage.at(offset / sizeof(Word));
   Byte *byte = reinterpret_cast<Byte *>(word) + (offset % sizeof(Word));
   return reinterpret_cast<T *>(byte);
 }
 
 template <PhysMemory::MemoryOp op>
-PhysMemory::listIt PhysMemory::pageTableLookup(const AddrSections &sect) {
+listIt PhysMemory::pageTableLookup(const AddrSections &sect) {
   using MemOp = PhysMemory::MemoryOp;
   auto it_P1 = pageTable.find(sect.indexPt1);
   if (it_P1 == pageTable.end()) {
@@ -157,7 +181,7 @@ PhysMemory::listIt PhysMemory::pageTableLookup(const AddrSections &sect) {
   return pageTableLowLvl.at(sect.indexPt2);
 }
 
-inline PhysMemory::listIt PhysMemory::getNewPage(uint16_t pt1, uint16_t pt2) {
+inline listIt PhysMemory::getNewPage(uint16_t pt1, uint16_t pt2) {
   pageStorage.emplace_back();
   auto new_page = std::prev(pageStorage.end());
   pageTable[pt1][pt2] = new_page;
@@ -221,6 +245,36 @@ inline void Memory::storeByte(Addr addr, Byte byte) {
   *physMem.getEntity<Byte, PhysMemory::MemoryOp::STORE>(addr) = byte;
 }
 
+inline TLB::TLBIndex TLB::getTLBIndex(Addr addr) {
+  return static_cast<TLB::TLBIndex>(
+      getBits<(kTLBBits + kOffsetBits - 1), kOffsetBits>(addr));
+}
+
+inline std::optional<listIt> TLB::tlbLookup(Addr addr) {
+  stats.TLBRequests++;
+  auto idx = getTLBIndex(addr);
+  auto it = tlb.find(idx);
+  if (it == tlb.end()) {
+    stats.TLBMisses++;
+    return std::nullopt;
+  } else {
+    if (it->second.virtualAddress != addr) {
+      stats.TLBMisses++;
+      return std::nullopt;
+    } else {
+      stats.TLBHits++;
+      return it->second.physPage;
+    }
+  }
+}
+
+inline void TLB::tlbUpdate(Addr addr, listIt page) {
+
+  auto idx = getTLBIndex(addr);
+  tlb[idx] = TLBEntry(addr, page);
+}
+
+inline const TLB::TLBStats &TLB::getTLBStats() { return stats; }
 } // namespace sim
 
 #endif // __INCLUDE_MEMORY_MEMORY_HH__

@@ -41,13 +41,13 @@ TEST(Memory, Mem_stats) {
   EXPECT_EQ(stats.numLoads, 2 * kNumReqs);
 }
 
-TEST(PhysMemory, getVirtAddrSections) {
+TEST(PhysMemory, AddrSectionsCtor) {
 
   sim::PhysMemory phMem;
 
-  EXPECT_EQ(phMem.getVirtAddrSections(0xDEADBEEF), AddrSections(890, 731, 3823));
-  EXPECT_EQ(phMem.getVirtAddrSections(0x0), AddrSections(0, 0, 0));
-  EXPECT_EQ(phMem.getVirtAddrSections(0xFFFFFFFF), AddrSections(1023, 1023, 4095));
+  EXPECT_EQ(AddrSections(0xDEADBEEF), AddrSections(890, 731, 3823));
+  EXPECT_EQ(AddrSections(0x0), AddrSections(0, 0, 0));
+  EXPECT_EQ(AddrSections(0xFFFFFFFF), AddrSections(1023, 1023, 4095));
 }
 
 
@@ -77,27 +77,44 @@ TEST(PhysMemory, pageTableLookup) {
 
 }
 
-TEST(PhysMemory, getWord) {
+TEST(PhysMemory, MixingWordHalf)
+{
+  sim::Memory mem;
+  mem.storeWord(0x10000000, 0xAABBCCDD);
+  EXPECT_EQ(mem.loadWord(0x10000000), 0xAABBCCDD);
+  EXPECT_EQ(mem.loadHalf(0x10000000), 0xCCDD);
+  EXPECT_EQ(mem.loadHalf(0x10000002), 0xAABB);
+  EXPECT_EQ(mem.loadByte(0x10000000), 0xDD);
+  EXPECT_EQ(mem.loadByte(0x10000001), 0xCC);
+  EXPECT_EQ(mem.loadByte(0x10000002), 0xBB);
+  EXPECT_EQ(mem.loadByte(0x10000003), 0xAA);
+
+}
+
+TEST(PhysMemory, getOffset)
+{
   sim::PhysMemory phMem;
-  //Misaligned Address
-  EXPECT_ANY_THROW(phMem.getWord(0xDEADBEEF, MemOp::LOAD));
+  EXPECT_EQ(phMem.getOffset(0xDEADBEEF),  3823);
+  EXPECT_EQ(phMem.getOffset(0x0),  0);
+  EXPECT_EQ(phMem.getOffset(0xFFFFFFFF),  4095);
 
+}
+
+TEST(PhysMemory, getEntity) {
+  sim::Memory mem;
+  //Misaligned Address (Not alogned to word_size)
+  EXPECT_ANY_THROW(mem.storeWord(0xDEADBE01, 0x0));
+  //Misaligned Address (Change the page)
+  EXPECT_ANY_THROW(mem.storeWord(0xDEADFFFE, 0x0));
   //Load on unmapped region
-  EXPECT_ANY_THROW(phMem.getWord(0x10000000, MemOp::LOAD));
+  EXPECT_ANY_THROW(mem.loadWord(0x0));
 
-  phMem.getWord(0x10000000, MemOp::STORE) = 42;
-  EXPECT_EQ(phMem.getWord(0x10000000, MemOp::LOAD), 42);
+  mem.storeWord(0x10000000, 42);
+  EXPECT_EQ(mem.loadWord(0x10000000), 42);
 
-  //Rewriting word on 0x10000000
-  phMem.getWord(0x10000000, MemOp::STORE) = 0;
-  phMem.getWord(0x10000010, MemOp::STORE) = 1;
-  phMem.getWord(0x10000020, MemOp::STORE) = 2;
-  phMem.getWord(0x10000030, MemOp::STORE) = 3;
-  EXPECT_EQ(phMem.getWord(0x10000000, MemOp::LOAD), 0);
-  EXPECT_EQ(phMem.getWord(0x10000010, MemOp::LOAD), 1);
-  EXPECT_EQ(phMem.getWord(0x10000020, MemOp::LOAD), 2);
-  EXPECT_EQ(phMem.getWord(0x10000030, MemOp::LOAD), 3);
-
+  //Rewriting word
+  mem.storeWord(0x10000000, 21);
+  EXPECT_EQ(mem.loadWord(0x10000000), 21);
 }
 
 #include "test_footer.hh"

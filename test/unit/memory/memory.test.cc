@@ -56,24 +56,24 @@ TEST(PhysMemory, pageTableLookup) {
   sim::PhysMemory phMem;
   //Load on unmapped region (P1) and than store to it
   AddrSections page1(0, 0, 0);
-  EXPECT_ANY_THROW(phMem.pageTableLookup(page1, MemOp::LOAD));
-  auto iter_1 = phMem.pageTableLookup(page1, MemOp::STORE);
+  EXPECT_ANY_THROW(phMem.pageTableLookup<MemOp::LOAD>(page1));
+  auto iter_1 = phMem.pageTableLookup<MemOp::STORE>(page1);
 
   //Load on unmapped region (P2) and than store to it
   AddrSections page2(0, 1, 0);
-  EXPECT_ANY_THROW(phMem.pageTableLookup(page2, MemOp::LOAD));
-  auto iter_2 = phMem.pageTableLookup(page2, MemOp::STORE);
+  EXPECT_ANY_THROW(phMem.pageTableLookup<MemOp::LOAD>(page2));
+  auto iter_2 = phMem.pageTableLookup<MemOp::STORE>(page2);
 
   //Check previously stored values
-  EXPECT_EQ(phMem.pageTableLookup(page1, MemOp::LOAD), iter_1);
-  EXPECT_EQ(phMem.pageTableLookup(page2, MemOp::LOAD), iter_2);
+  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page1), iter_1);
+  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page2), iter_2);
 
   //Check that stores point on the same pages
   AddrSections page3(3, 2, 1);
-  auto iter_3 = phMem.pageTableLookup(page3, MemOp::STORE);
-  auto iter_4 = phMem.pageTableLookup(page3, MemOp::STORE);
+  auto iter_3 = phMem.pageTableLookup<MemOp::STORE>(page3);
+  auto iter_4 = phMem.pageTableLookup<MemOp::STORE>(page3);
   EXPECT_EQ(iter_3, iter_4);
-  EXPECT_EQ(phMem.pageTableLookup(page3, MemOp::LOAD), iter_3);
+  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page3), iter_3);
 
 }
 

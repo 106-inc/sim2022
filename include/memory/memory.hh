@@ -20,6 +20,8 @@ struct Page {
 };
 
 using listIt = std::list<Page>::iterator;
+using PTLowLvl = std::unordered_map<uint16_t, listIt>;
+using PTHighLvl = std::unordered_map<uint16_t, PTLowLvl>;
 
 class TLB final {
 public:
@@ -53,6 +55,9 @@ private:
 template <typename T>
 concept isSimType =
     std::same_as<T, Word> || std::same_as<T, Byte> || std::same_as<T, Half>;
+
+template <typename T>
+concept isPTType = std::same_as<T, PTLowLvl> || std::same_as<T, PTHighLvl>;
 
 class PhysMemory final {
 public:
@@ -89,10 +94,11 @@ public:
 
   enum struct MemoryOp { STORE = 0, LOAD = 1 };
 
-  using PTLowLvl = std::unordered_map<uint16_t, listIt>;
-  using PTHighLvl = std::unordered_map<uint16_t, PTLowLvl>;
-
   PhysMemory() = default;
+
+  template <isPTType T, PhysMemory::MemoryOp op>
+  std::optional<listIt> pageTableOperation(T &pageTable, uint16_t pt1,
+                                           uint16_t pt2);
 
   listIt getNewPage(uint16_t pt1, uint16_t pt2);
 
@@ -162,28 +168,38 @@ inline T *PhysMemory::getEntity(Addr addr) {
 
 template <PhysMemory::MemoryOp op>
 listIt PhysMemory::pageTableLookup(const AddrSections &sect) {
-  using MemOp = PhysMemory::MemoryOp;
-  auto it_P1 = pageTable.find(sect.indexPt1);
-  if (it_P1 == pageTable.end()) {
-    if constexpr (op == MemOp::LOAD)
-      throw PhysMemory::PageFaultException(
-          "Load on unmapped region in physical mem (P1)");
-    else {
-      return getNewPage(sect.indexPt1, sect.indexPt2);
-    }
-  }
+  auto pt1Search = pageTableOperation<PTHighLvl, op>(pageTable, sect.indexPt1,
+                                                     sect.indexPt2);
+  if (pt1Search.has_value())
+    return pt1Search.value();
   auto &pageTableLowLvl = pageTable.at(sect.indexPt1);
+  auto pt2Search = pageTableOperation<PTLowLvl, op>(
+      pageTableLowLvl, sect.indexPt1, sect.indexPt2);
+  if (pt2Search.has_value())
+    return pt2Search.value();
+  return pageTableLowLvl.at(sect.indexPt2);
+}
 
-  auto it_P2 = pageTableLowLvl.find(sect.indexPt2);
-  if (it_P2 == pageTableLowLvl.end()) {
+template <isPTType T, PhysMemory::MemoryOp op>
+inline std::optional<listIt>
+PhysMemory::pageTableOperation(T &pTable, uint16_t pt1, uint16_t pt2) {
+  using MemOp = PhysMemory::MemoryOp;
+  using ptIt = T::iterator;
+  ptIt it_PT{};
+  if constexpr (std::is_same_v<T, PTHighLvl>) {
+    it_PT = pTable.find(pt1);
+  } else {
+    it_PT = pTable.find(pt2);
+  }
+  if (it_PT == pTable.end()) {
     if constexpr (op == MemOp::LOAD)
       throw PhysMemory::PageFaultException(
-          "Load on unmapped region in physical mem (P2)");
+          "Load on unmapped region in physical mem");
     else {
-      return getNewPage(sect.indexPt1, sect.indexPt2);
+      return getNewPage(pt1, pt2);
     }
   }
-  return pageTableLowLvl.at(sect.indexPt2);
+  return std::nullopt;
 }
 
 inline listIt PhysMemory::getNewPage(uint16_t pt1, uint16_t pt2) {
@@ -266,10 +282,9 @@ inline std::optional<listIt> TLB::tlbLookup(Addr addr) {
     if (it->second.virtualAddress != addr) {
       stats.TLBMisses++;
       return std::nullopt;
-    } else {
-      stats.TLBHits++;
-      return it->second.physPage;
     }
+    stats.TLBHits++;
+    return it->second.physPage;
   }
 }
 

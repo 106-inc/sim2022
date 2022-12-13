@@ -56,12 +56,12 @@ TEST(PhysMemory, pageTableLookup) {
   sim::PhysMemory phMem;
   //Load on unmapped region (P1) and than store to it
   AddrSections page1(0, 0, 0);
-  EXPECT_ANY_THROW(phMem.pageTableLookup<MemOp::LOAD>(page1));
+  EXPECT_THROW(phMem.pageTableLookup<MemOp::LOAD>(page1), sim::PhysMemory::PageFaultException);
   auto iter_1 = phMem.pageTableLookup<MemOp::STORE>(page1);
 
   //Load on unmapped region (P2) and than store to it
   AddrSections page2(0, 1, 0);
-  EXPECT_ANY_THROW(phMem.pageTableLookup<MemOp::LOAD>(page2));
+  EXPECT_THROW(phMem.pageTableLookup<MemOp::LOAD>(page2), sim::PhysMemory::PageFaultException);
   auto iter_2 = phMem.pageTableLookup<MemOp::STORE>(page2);
 
   //Check previously stored values
@@ -103,11 +103,11 @@ TEST(PhysMemory, getOffset)
 TEST(PhysMemory, getEntity) {
   sim::Memory mem;
   //Misaligned Address (Not alogned to word_size)
-  EXPECT_ANY_THROW(mem.storeWord(0xDEADBE01, 0x0));
-  //Misaligned Address (Change the page)
-  EXPECT_ANY_THROW(mem.storeWord(0xDEADFFFE, 0x0));
+  EXPECT_THROW(mem.storeWord(0xDEADBE01, 0x0), sim::PhysMemory::MisAlignedAddrException);
+  //Misaligned Address (Between the pages)
+  EXPECT_THROW(mem.storeWord(0xDEADFFFE, 0x0), sim::PhysMemory::MisAlignedAddrException);
   //Load on unmapped region
-  EXPECT_ANY_THROW(mem.loadWord(0x0));
+  EXPECT_THROW(mem.loadWord(0x0), sim::PhysMemory::PageFaultException);
 
   mem.storeWord(0x10000000, 42);
   EXPECT_EQ(mem.loadWord(0x10000000), 42);

@@ -97,8 +97,8 @@ public:
   PhysMemory() = default;
 
   template <isPTType T, PhysMemory::MemoryOp op>
-  std::optional<listIt> pageTableOperation(T &pageTable, uint16_t pt1,
-                                           uint16_t pt2);
+  std::optional<listIt> pageTableFindPage(T &pageTable, uint16_t pt1,
+                                          uint16_t pt2);
 
   listIt getNewPage(uint16_t pt1, uint16_t pt2);
 
@@ -168,12 +168,12 @@ inline T *PhysMemory::getEntity(Addr addr) {
 
 template <PhysMemory::MemoryOp op>
 listIt PhysMemory::pageTableLookup(const AddrSections &sect) {
-  auto pt1Search = pageTableOperation<PTHighLvl, op>(pageTable, sect.indexPt1,
-                                                     sect.indexPt2);
+  auto pt1Search =
+      pageTableFindPage<PTHighLvl, op>(pageTable, sect.indexPt1, sect.indexPt2);
   if (pt1Search.has_value())
     return pt1Search.value();
   auto &pageTableLowLvl = pageTable.at(sect.indexPt1);
-  auto pt2Search = pageTableOperation<PTLowLvl, op>(
+  auto pt2Search = pageTableFindPage<PTLowLvl, op>(
       pageTableLowLvl, sect.indexPt1, sect.indexPt2);
   if (pt2Search.has_value())
     return pt2Search.value();
@@ -182,9 +182,9 @@ listIt PhysMemory::pageTableLookup(const AddrSections &sect) {
 
 template <isPTType T, PhysMemory::MemoryOp op>
 inline std::optional<listIt>
-PhysMemory::pageTableOperation(T &pTable, uint16_t pt1, uint16_t pt2) {
+PhysMemory::pageTableFindPage(T &pTable, uint16_t pt1, uint16_t pt2) {
   using MemOp = PhysMemory::MemoryOp;
-  using ptIt = T::iterator;
+  using ptIt = typename T::iterator;
   ptIt it_PT{};
   if constexpr (std::is_same_v<T, PTHighLvl>) {
     it_PT = pTable.find(pt1);

@@ -9,11 +9,11 @@ Hart::Hart(const fs::path &executable) {
   ELFLoader loader{executable};
   pc() = loader.getEntryPoint();
 
-  for (auto name : {".text", ".data", ".rodata"})
-    if (loader.hasSection(name)) {
-      auto text = loader.getSection(name);
-      mem().storeRange(loader.getSectionAddr(name), text.begin(), text.end());
-    }
+  for (auto segmentIdx : loader.getLoadableSegments()) {
+    auto text = loader.getSegment(segmentIdx);
+    mem().storeRange(loader.getSegmentAddr(segmentIdx), text.begin(),
+                     text.end());
+  }
 }
 
 void Hart::run() {

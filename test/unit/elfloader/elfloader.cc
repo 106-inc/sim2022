@@ -1,6 +1,5 @@
 #include <ios>
 #include <sstream>
-#include <string>
 
 #include "elfloader/elfloader.hh"
 #include "test_header.hh"
@@ -52,7 +51,8 @@ TEST(elfloader, segments) {
 
     .size  _start, .-_start
   */
-  auto str = std::string(
+
+  std::istringstream ss(
       {'\x7f', '\x45', '\x4c', '\x46', '\x01', '\x01', '\x01', '\x00', '\x00',
        '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x02', '\x00',
        '\xf3', '\x00', '\x01', '\x00', '\x00', '\x00', '\x94', '\x00', '\x01',
@@ -167,8 +167,6 @@ TEST(elfloader, segments) {
        '\x00', '\x41', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
        '\x00', '\x00', '\x00', '\x00', '\x01', '\x00', '\x00', '\x00', '\x00',
        '\x00', '\x00', '\x00'});
-
-  std::istringstream ss(str);
   ELFLoader loader{ss};
 
   // Act

@@ -82,6 +82,9 @@ void ELFLoader::check() const {
   if (elfFile_.get_type() != ELFIO::ET_EXEC)
     throw std::runtime_error{
         "Wrong file type: only executable files are supported"};
+
+  if (elfFile_.get_machine() != ELFIO::EM_RISCV)
+    throw std::runtime_error{"Wrong machine type: only RISC-V supported"};
 }
 
 const ELFIO::section *ELFLoader::getSectionPtr(const std::string &name) const {

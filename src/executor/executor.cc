@@ -23,6 +23,9 @@ static void executeMUL(const Instruction &inst, State &state) {
 static void executeDIV(const Instruction &inst, State &state) {
   RegVal rs1 = state.regs.get(inst.rs1);
   RegVal rs2 = state.regs.get(inst.rs2);
+  if (rs2 == 0) {
+    throw std::logic_error("division by zero");
+  }
   state.regs.set(inst.rd, rs1 / rs2);
 }
 
@@ -102,13 +105,13 @@ static void executeAUIPC(const Instruction &inst, State &state) {
 }
 
 static void executeSLLI(const Instruction &inst, State &state) {
-  RegVal shamt = getBits<5, 0>(inst.imm);
+  RegVal shamt = getBits<4, 0>(inst.imm);
   RegVal rs1 = state.regs.get(inst.rs1);
   state.regs.set(inst.rd, rs1 << shamt);
 }
 
 template <std::integral T> static T executeSRLT(T val, RegVal imm) {
-  RegVal shamt = getBits<5, 0>(imm);
+  RegVal shamt = getBits<4, 0>(imm);
   return val >> shamt;
 }
 

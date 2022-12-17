@@ -263,4 +263,51 @@ TEST(execute, xori) {
     ASSERT_EQ(simulationState.regs.get(11), 0x0FFFFFFF);
 }
 
+TEST(execute, lui) {
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::LUI,
+        0x1 // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x1000);
+}
+
+TEST(execute, auipc) {
+    simulationState.pc = 0x1;
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::AUIPC,
+        0x1 // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x1001);
+}
+
+TEST(execute, slli) {
+    simulationState.regs.set(20, 0x1);
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::SLLI,
+        0xDEADBEEF // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x8000);
+}
+
 #include "test_footer.hh"

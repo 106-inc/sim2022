@@ -10,18 +10,16 @@ ELFLoader::ELFLoader(const fs::path &file) {
     throw std::runtime_error{"Failed while loading input file: " +
                              file.string()};
 
-  if (auto diagnosis = elfFile_.validate(); !diagnosis.empty()) {
+  if (auto diagnosis = elfFile_.validate(); !diagnosis.empty())
     throw std::runtime_error{diagnosis};
-  }
 }
 
 ELFLoader::ELFLoader(std::istream &stream) {
   if (!elfFile_.load(stream))
     throw std::runtime_error{"Failed while loading input stream"};
 
-  if (auto diagnosis = elfFile_.validate(); !diagnosis.empty()) {
+  if (auto diagnosis = elfFile_.validate(); !diagnosis.empty())
     throw std::runtime_error{diagnosis};
-  }
 }
 
 Addr ELFLoader::getEntryPoint() const {

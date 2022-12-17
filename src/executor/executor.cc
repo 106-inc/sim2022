@@ -148,6 +148,60 @@ static void executeSRA(const Instruction &inst, State &state) {
   state.regs.set(inst.rd, executeSR(rs1, rs2));
 }
 
+static void executeBEQ(const Instruction &inst, State &state) {
+  RegVal rs1 = state.regs.get(inst.rs1);
+  RegVal rs2 = state.regs.get(inst.rs2);
+  if (rs1 == rs2) {
+    state.branchIsTaken = true;
+    state.npc = inst.imm;
+  }
+}
+
+static void executeBNE(const Instruction &inst, State &state) {
+  RegVal rs1 = state.regs.get(inst.rs1);
+  RegVal rs2 = state.regs.get(inst.rs2);
+  if (rs1 != rs2) {
+    state.branchIsTaken = true;
+    state.npc = inst.imm;
+  }
+}
+
+static void executeBLT(const Instruction &inst, State &state) {
+  auto rs1 = signCast(state.regs.get(inst.rs1));
+  auto rs2 = signCast(state.regs.get(inst.rs2));
+  if (rs1 < rs2) {
+    state.branchIsTaken = true;
+    state.npc = inst.imm;
+  }
+}
+
+static void executeBGE(const Instruction &inst, State &state) {
+  auto rs1 = signCast(state.regs.get(inst.rs1));
+  auto rs2 = signCast(state.regs.get(inst.rs2));
+  if (rs1 >= rs2) {
+    state.branchIsTaken = true;
+    state.npc = inst.imm;
+  }
+}
+
+static void executeBLTU(const Instruction &inst, State &state) {
+  RegVal rs1 = state.regs.get(inst.rs1);
+  RegVal rs2 = state.regs.get(inst.rs2);
+  if (rs1 > rs2) {
+    state.branchIsTaken = true;
+    state.npc = inst.imm;
+  }
+}
+
+static void executeBGEU(const Instruction &inst, State &state) {
+  RegVal rs1 = state.regs.get(inst.rs1);
+  RegVal rs2 = state.regs.get(inst.rs2);
+  if (rs1 >= rs2) {
+    state.branchIsTaken = true;
+    state.npc = inst.imm;
+  }
+}
+
 Executor::Executor()
     : executors_{{OpType::ADD, executeADD},     {OpType::SUB, executeSUB},
                  {OpType::MUL, executeMUL},     {OpType::DIV, executeDIV},
@@ -160,7 +214,10 @@ Executor::Executor()
                  {OpType::AUIPC, executeAUIPC}, {OpType::SLLI, executeSLLI},
                  {OpType::SRLI, executeSRLI},   {OpType::SRAI, executeSRAI},
                  {OpType::SLL, executeSLL},     {OpType::SLL, executeSLL},
-                 {OpType::SRL, executeSRL},     {OpType::SRA, executeSRA}} {}
+                 {OpType::SRL, executeSRL},     {OpType::SRA, executeSRA},
+                 {OpType::BEQ, executeBEQ},     {OpType::BNE, executeBNE},
+                 {OpType::BLT, executeBLT},     {OpType::BGE, executeBGE},
+                 {OpType::BLTU, executeBLTU},   {OpType::BGEU, executeBGEU}} {}
 
 void Executor::execute(const Instruction &inst, State &state) const {
   executors_.at(inst.type)(inst, state);

@@ -247,4 +247,20 @@ TEST(execute, ori) {
     ASSERT_EQ(simulationState.regs.get(11), 0xFFFFFFFF);
 }
 
+TEST(execute, xori) {
+    simulationState.regs.set(20, 0x0F0F0F0F);
+    sim::Instruction instr = {
+        20, // rs1
+        15, // rs2
+        0,
+        11, // rd
+        0,
+        0,
+        sim::OpType::XORI,
+        0x00F0F0F0 // imm
+    };
+    executor.execute(instr, simulationState);
+    ASSERT_EQ(simulationState.regs.get(11), 0x0FFFFFFF);
+}
+
 #include "test_footer.hh"

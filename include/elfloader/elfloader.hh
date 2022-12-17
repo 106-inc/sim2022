@@ -34,6 +34,7 @@ public:
   bool hasSegment(IndexT index) const;
 
 private:
+  void check() const;
   const ELFIO::section *getSectionPtr(const std::string &name) const;
   const ELFIO::segment *getSegmentPtr(IndexT index) const;
 };

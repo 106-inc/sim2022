@@ -10,16 +10,14 @@ ELFLoader::ELFLoader(const fs::path &file) {
     throw std::runtime_error{"Failed while loading input file: " +
                              file.string()};
 
-  if (auto diagnosis = elfFile_.validate(); !diagnosis.empty())
-    throw std::runtime_error{diagnosis};
+  check();
 }
 
 ELFLoader::ELFLoader(std::istream &stream) {
   if (!elfFile_.load(stream))
     throw std::runtime_error{"Failed while loading input stream"};
 
-  if (auto diagnosis = elfFile_.validate(); !diagnosis.empty())
-    throw std::runtime_error{diagnosis};
+  check();
 }
 
 Addr ELFLoader::getEntryPoint() const {
@@ -70,13 +68,20 @@ bool ELFLoader::hasSegment(IndexT index) const {
   return elfFile_.segments[index] != nullptr;
 }
 
-const ELFIO::segment *ELFLoader::getSegmentPtr(IndexT index) const {
-  auto *segment = elfFile_.segments[index];
+void ELFLoader::check() const {
+  if (auto diagnosis = elfFile_.validate(); !diagnosis.empty())
+    throw std::runtime_error{diagnosis};
 
-  if (segment == nullptr)
-    throw std::runtime_error{"Unknown segment index: " + std::to_string(index)};
+  if (elfFile_.get_class() != ELFIO::ELFCLASS32)
+    throw std::runtime_error{"Wrong elf file class: only elf32 supported"};
 
-  return segment;
+  if (elfFile_.get_encoding() != ELFIO::ELFDATA2LSB)
+    throw std::runtime_error{
+        "Wrong encoding: only 2's complement little endian supported"};
+
+  if (elfFile_.get_type() != ELFIO::ET_EXEC)
+    throw std::runtime_error{
+        "Wrong file type: only executable files are supported"};
 }
 
 const ELFIO::section *ELFLoader::getSectionPtr(const std::string &name) const {
@@ -86,6 +91,15 @@ const ELFIO::section *ELFLoader::getSectionPtr(const std::string &name) const {
     throw std::runtime_error{"Unknown section name: " + name};
 
   return section;
+}
+
+const ELFIO::segment *ELFLoader::getSegmentPtr(IndexT index) const {
+  auto *segment = elfFile_.segments[index];
+
+  if (segment == nullptr)
+    throw std::runtime_error{"Unknown segment index: " + std::to_string(index)};
+
+  return segment;
 }
 
 } // namespace sim

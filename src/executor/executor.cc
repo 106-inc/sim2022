@@ -145,14 +145,14 @@ const std::unordered_map<OpType,
         {OpType::SRLI,
          [](const Instruction &inst, State &state) {
            auto rs1 = state.regs.get(inst.rs1);
-           auto signedRs1 = signCast(rs1);
-           auto res = unsignedCast(executeSRLT(signedRs1, inst.imm));
+           auto res = executeSRLT(rs1, inst.imm);
            state.regs.set(inst.rd, res);
          }},
         {OpType::SRAI,
          [](const Instruction &inst, State &state) {
            auto rs1 = state.regs.get(inst.rs1);
-           auto res = executeSRLT(rs1, inst.imm);
+           auto signedRs1 = signCast(rs1);
+           auto res = unsignedCast(executeSRLT(signedRs1, inst.imm));
            state.regs.set(inst.rd, res);
          }},
         {OpType::SLL,
@@ -163,14 +163,14 @@ const std::unordered_map<OpType,
          }},
         {OpType::SRL,
          [](const Instruction &inst, State &state) {
+           executeRegisterRegisterOp(inst, state, executeSR<RegVal>);
+         }},
+        {OpType::SRA,
+         [](const Instruction &inst, State &state) {
            auto rs1 = signCast(state.regs.get(inst.rs1));
            auto rs2 = signCast(state.regs.get(inst.rs2));
            auto res = unsignedCast(executeSR(rs1, rs2));
            state.regs.set(inst.rd, res);
-         }},
-        {OpType::SRA,
-         [](const Instruction &inst, State &state) {
-           executeRegisterRegisterOp(inst, state, executeSR<RegVal>);
          }},
         {OpType::BEQ,
          [](const Instruction &inst, State &state) {

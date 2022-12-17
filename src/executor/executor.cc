@@ -6,14 +6,14 @@ void Executor::execute(const Instruction &inst, State &state) const {
   execMap_.at(inst.type)(inst, state);
 }
 
-template <typename Func>
+template <std::regular_invocable<RegVal, RegVal> Func>
 void executeRegisterRegisterOp(const Instruction &inst, State &state, Func op) {
   auto rs1 = state.regs.get(inst.rs1);
   auto rs2 = state.regs.get(inst.rs2);
   state.regs.set(inst.rd, op(rs1, rs2));
 }
 
-template <typename Func>
+template <std::regular_invocable<RegVal, RegVal> Func>
 void executeRegisterImmidiateOp(const Instruction &inst, State &state,
                                 Func op) {
   auto rs1 = state.regs.get(inst.rs1);
@@ -33,7 +33,7 @@ template <std::integral T> static T executeSR(T lhs, T rhs) {
   return lhs >> rhs;
 }
 
-template <typename Func>
+template <std::predicate<RegVal, RegVal> Func>
 void executeCondBranch(const Instruction &inst, State &state, Func op) {
   auto rs1 = state.regs.get(inst.rs1);
   auto rs2 = state.regs.get(inst.rs2);

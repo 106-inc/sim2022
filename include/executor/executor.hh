@@ -1,13 +1,19 @@
-#ifndef __INCLUDE_EXEC_EXEC_HH__
-#define __INCLUDE_EXEC_EXEC_HH__
+#ifndef __INCLUDE_EXECUTOR_EXECUTOR_HH__
+#define __INCLUDE_EXECUTOR_EXECUTOR_HH__
 
+#include <concepts>
 #include <functional>
+#include <iterator>
 #include <unordered_map>
 
 #include "common/inst.hh"
 #include "common/state.hh"
 
 namespace sim {
+
+template <typename T>
+concept InstForwardIterator = std::forward_iterator<T> &&
+    std::is_same_v<Instruction, typename std::iterator_traits<T>::value_type>;
 
 class Executor final {
 public:
@@ -19,6 +25,9 @@ public:
 
   void execute(const Instruction &inst, State &state) const;
 
+  template <InstForwardIterator It>
+  void execute(It begin, It end, State &state) const;
+
 private:
   static const std::unordered_map<
       OpType, std::function<void(const Instruction, State &)>>
@@ -27,4 +36,4 @@ private:
 
 } // namespace sim
 
-#endif // __INCLUDE_EXEC_EXEC_HH__
+#endif // __INCLUDE_EXECUTOR_EXECUTOR_HH__

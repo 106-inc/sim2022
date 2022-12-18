@@ -1,9 +1,17 @@
+#include <algorithm>
+
 #include "executor/executor.hh"
 
 namespace sim {
 
 void Executor::execute(const Instruction &inst, State &state) const {
   execMap_.at(inst.type)(inst, state);
+}
+
+template <InstForwardIterator It>
+void Executor::execute(It begin, It end, State &state) const {
+  std::for_each(begin, end,
+                [this, &state](const auto &inst) { execute(inst, state); });
 }
 
 template <std::regular_invocable<RegVal, RegVal> Func>

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "common/common.hh"
 #include "memory/memory.hh"
@@ -17,9 +18,9 @@ private:
   std::array<RegVal, kRegNum> regs{};
 
 public:
-  Word get(RegId regnum) const { return regs.at(regnum); }
+  RegVal get(RegId regnum) const { return regs.at(regnum); }
 
-  void set(RegId regnum, Word val) {
+  void set(RegId regnum, RegVal val) {
     // NOP instruction looks like ADD x0, x0, 0 - assignment to x0,
     // furthermore JALR supports x0 as a destination register
     // (to store return address if it is not needed).
@@ -48,10 +49,23 @@ public:
   }
 };
 
+class CSRegFile final {
+private:
+  std::vector<RegVal> regs{};
+
+public:
+  CSRegFile() : regs(kCSRegNum) {}
+
+  RegVal get(CSRegId regnum) const { return regs.at(regnum); }
+
+  void set(CSRegId regnum, RegVal val) { regs.at(regnum) = val; }
+};
+
 struct State final {
   Addr pc{};
   Addr npc{};
   RegFile regs{};
+  CSRegFile csregs{};
   Memory mem{};
   bool branchIsTaken{false};
   bool complete{false};

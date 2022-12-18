@@ -18,9 +18,10 @@ using Word = std::uint32_t;
 using RegVal = Word;
 using Addr = std::uint32_t;
 using RegId = std::uint8_t;
-using CsrId = std::size_t;
+using CSRegId = std::uint16_t;
 
 constexpr RegId kRegNum = 32;
+constexpr CSRegId kCSRegNum = 4096;
 constexpr std::uint8_t kBitsInByte = 8;
 constexpr Word kDummyWord = 0;
 constexpr std::uint8_t kXLENInBytes = sizeof(Word);

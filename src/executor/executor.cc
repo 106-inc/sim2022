@@ -3,12 +3,12 @@
 namespace sim {
 
 static auto applyOffset(RegVal val, RegVal imm) {
-  auto convertedVal = static_cast<SDWord>(val);
-  auto res = convertedVal + signCast(imm);
-  if (res < 0) {
+  auto res = signAdd(val, imm);
+
+  if (signCast(res) < 0)
     throw std::runtime_error("invalid address");
-  }
-  return static_cast<RegVal>(res);
+
+  return res;
 }
 
 static void executeADD(const Instruction &inst, State &state) {
@@ -67,14 +67,14 @@ static void executeECALL(const Instruction &, State &state) {
 }
 
 Executor::Executor()
-    : executors{{OpType::ADD, executeADD},    {OpType::SUB, executeSUB},
-                {OpType::MUL, executeMUL},    {OpType::DIV, executeDIV},
-                {OpType::LW, executeLW},      {OpType::SW, executeSW},
-                {OpType::JAL, executeJAL},    {OpType::JALR, executeJALR},
-                {OpType::ECALL, executeECALL}} {}
+    : executors_{{OpType::ADD, executeADD},    {OpType::SUB, executeSUB},
+                 {OpType::MUL, executeMUL},    {OpType::DIV, executeDIV},
+                 {OpType::LW, executeLW},      {OpType::SW, executeSW},
+                 {OpType::JAL, executeJAL},    {OpType::JALR, executeJALR},
+                 {OpType::ECALL, executeECALL}} {}
 
 void Executor::execute(const Instruction &inst, State &state) const {
-  executors.at(inst.type)(inst, state);
+  executors_.at(inst.type)(inst, state);
 }
 
 } // namespace sim

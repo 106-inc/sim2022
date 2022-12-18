@@ -1,9 +1,11 @@
 #ifndef __INCLUDE_MEMORY_MEMORY_HH__
 #define __INCLUDE_MEMORY_MEMORY_HH__
 
-#include "common/common.hh"
+#include <algorithm>
 #include <iostream>
 #include <unordered_map>
+
+#include "common/common.hh"
 
 namespace sim {
 
@@ -31,6 +33,14 @@ public:
 
   Word loadWord(Addr addr);
   void storeWord(Addr addr, Word word);
+
+  template <std::forward_iterator It>
+  void storeRange(Addr start, It begin, It end) {
+    std::for_each(begin, end, [&start, this](auto curWord) {
+      storeWord(start, curWord);
+      start += kXLENInBytes;
+    });
+  }
 
   std::size_t getCurrMemSize() const;
   void printMemStats(std::ostream &ost) const;

@@ -11,7 +11,7 @@ namespace sim {
 
 class Executor final {
 public:
-  Executor();
+  Executor() = default;
   Executor(const Executor &) = delete;
   Executor(Executor &&) = delete;
   Executor &operator=(const Executor &) = delete;
@@ -20,8 +20,9 @@ public:
   void execute(const Instruction &inst, State &state) const;
 
 private:
-  std::unordered_map<OpType, std::function<void(const Instruction, State &)>>
-      executors_;
+  static const std::unordered_map<
+      OpType, std::function<void(const Instruction, State &)>>
+      execMap_;
 };
 
 } // namespace sim

@@ -41,7 +41,7 @@ void executeCondBranch(const Instruction &inst, State &state, Func op) {
   auto rs2 = state.regs.get(inst.rs2);
   if (op(rs1, rs2)) {
     state.branchIsTaken = true;
-    state.npc = inst.imm;
+    state.npc = state.pc + inst.imm;
   }
 }
 
@@ -200,7 +200,7 @@ const std::unordered_map<OpType,
            auto rs2 = signCast(state.regs.get(inst.rs2));
            if (rs1 >= rs2) {
              state.branchIsTaken = true;
-             state.npc = inst.imm;
+             state.npc = state.pc + inst.imm;
            }
          }},
     };

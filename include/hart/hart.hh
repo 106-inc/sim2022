@@ -3,6 +3,7 @@
 
 #include <array>
 #include <filesystem>
+#include <unordered_map>
 
 #include "common/common.hh"
 #include "common/state.hh"
@@ -14,11 +15,14 @@ namespace sim {
 
 namespace fs = std::filesystem;
 
+using BBCache = std::unordered_map<Addr, BasicBlock>;
+
 class Hart final {
 private:
   State state_{};
   Executor exec_{};
   Decoder decoder_{};
+  BBCache cache_{};
 
   Memory &getMem() { return state_.mem; };
   Addr &getPC() { return state_.pc; };

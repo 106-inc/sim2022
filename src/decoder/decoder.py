@@ -83,7 +83,7 @@ def gen_getbits(bit_dict: BitDict, arg: str = "binInst"):
     return to_ret
 
 
-BRANCH_MNEMONICS = ("beq", "bne", "bge", "bgeu", "blt", "bltu", "jal", "jalr")
+BRANCH_MNEMONICS = ("beq", "bne", "bge", "bgeu", "blt", "bltu", "jal", "jalr", "ecall")
 
 REG_DICT = {
     "rm": get_bit_map_dict(14, 12),

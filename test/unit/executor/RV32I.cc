@@ -408,10 +408,11 @@ TEST(execute, CondBranches) {
     };
     executor.execute(instr, simulationState);
     ASSERT_TRUE(simulationState.branchIsTaken);
-    ASSERT_EQ(simulationState.npc, 0x12);
+    ASSERT_EQ(simulationState.npc, 0x13);
 
     instr = {
         20, // rs1
+        
         15, // rs2
         0,
         11, // rd
@@ -421,7 +422,7 @@ TEST(execute, CondBranches) {
         0x14 // imm
     };
     executor.execute(instr, simulationState);
-    ASSERT_EQ(simulationState.npc, 0x12);
+    ASSERT_EQ(simulationState.npc, 0x13);
 }
 
 #include "test_footer.hh"

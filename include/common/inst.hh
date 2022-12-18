@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "common.hh"
 
@@ -41,6 +42,8 @@ struct Instruction final {
     return ss.str();
   }
 };
+
+using BasicBlock = std::vector<Instruction>;
 
 } // namespace sim
 

@@ -1,5 +1,8 @@
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 
+#include "common/common.hh"
+#include "common/inst.hh"
 #include "elfloader/elfloader.hh"
 #include "hart/hart.hh"
 
@@ -7,30 +10,41 @@ namespace sim {
 
 Hart::Hart(const fs::path &executable) {
   ELFLoader loader{executable};
-  pc() = loader.getEntryPoint();
+  getPC() = loader.getEntryPoint();
 
   for (auto segmentIdx : loader.getLoadableSegments()) {
     auto text = loader.getSegment(segmentIdx);
-    mem().storeRange(loader.getSegmentAddr(segmentIdx), text.begin(),
-                     text.end());
+    getMem().storeRange(loader.getSegmentAddr(segmentIdx), text.begin(),
+                        text.end());
   }
+}
+
+BasicBlock Hart::createBB(Addr addr) {
+  BasicBlock bb{};
+
+  spdlog::trace("Creating basic block:");
+  for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {
+    auto inst = decoder_.decode(getMem().loadWord(addr));
+    if (inst.type == OpType::UNKNOWN)
+      throw std::logic_error{
+          "Unknown instruction found while decoding basic block" + inst.str()};
+
+    spdlog::trace(inst.str());
+    isBranch = inst.isBranch;
+    bb.push_back(inst);
+  }
+
+  spdlog::trace("Basic blok created.");
+  return bb;
 }
 
 void Hart::run() {
   while (!state_.complete) {
-    auto binInst = mem().loadWord(pc());
-    auto inst = decoder_.decode(binInst);
-    spdlog::trace("Decoded instuction:\n  [0x{:08x}]{}", state_.pc, inst.str());
+    if (cache_.find(getPC()) == cache_.end())
+      cache_[getPC()] = createBB(getPC());
 
-    exec_.execute(inst, state_);
-    spdlog::trace("Current regfile state:\n{}", state_.regs.str());
-
-    if (state_.branchIsTaken) {
-      state_.pc = state_.npc;
-      state_.branchIsTaken = false;
-    } else {
-      state_.pc += kXLENInBytes;
-    }
+    const auto &bb = cache_[getPC()];
+    exec_.execute(bb.begin(), bb.end(), state_);
   }
 }
 

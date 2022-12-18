@@ -6,6 +6,8 @@
 #include <iterator>
 #include <unordered_map>
 
+#include <spdlog/spdlog.h>
+
 #include "common/inst.hh"
 #include "common/state.hh"
 
@@ -13,7 +15,7 @@ namespace sim {
 
 template <typename T>
 concept InstForwardIterator = std::input_iterator<T> &&
-    std::is_same_v<Instruction, typename std::iterator_traits<T>::value_type>;
+    std::is_same_v<typename std::iterator_traits<T>::value_type, Instruction>;
 
 class Executor final {
 public:
@@ -26,7 +28,19 @@ public:
   void execute(const Instruction &inst, State &state) const;
 
   template <InstForwardIterator It>
-  void execute(It begin, It end, State &state) const;
+  void execute(It begin, It end, State &state) const {
+    std::for_each(begin, end, [this, &state](const auto &inst) {
+      execute(inst, state);
+      spdlog::trace("Current regfile state:\n{}", state.regs.str());
+
+      if (state.branchIsTaken) {
+        state.pc = state.npc;
+        state.branchIsTaken = false;
+      } else {
+        state.pc += kXLENInBytes;
+      }
+    });
+  }
 
 private:
   static const std::unordered_map<

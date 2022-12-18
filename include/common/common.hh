@@ -17,7 +17,7 @@ namespace sim {
 using Word = std::uint32_t;
 using RegVal = Word;
 using Addr = std::uint32_t;
-using RegId = std::size_t;
+using RegId = std::uint8_t;
 
 constexpr RegId kRegNum = 32;
 constexpr std::uint8_t kBitsInByte = 8;

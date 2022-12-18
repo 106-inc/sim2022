@@ -396,6 +396,7 @@ TEST(execute, SRA) {
 TEST(execute, CondBranches) {
     simulationState.regs.set(20, 0xFFFFFFFF);
     simulationState.regs.set(15, 0xFFFFFFFF);
+    simulationState.pc = 0x1;
     sim::Instruction instr = {
         20, // rs1
         15, // rs2
@@ -407,12 +408,11 @@ TEST(execute, CondBranches) {
         0x12 // imm
     };
     executor.execute(instr, simulationState);
-    ASSERT_TRUE(simulationState.branchIsTaken);
     ASSERT_EQ(simulationState.npc, 0x13);
 
     instr = {
         20, // rs1
-        
+
         15, // rs2
         0,
         11, // rd

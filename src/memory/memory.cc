@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <spdlog/spdlog.h>
 
 #include "memory/memory.hh"
 
@@ -20,6 +21,7 @@ Word Memory::loadWord(Addr addr) {
 void Memory::storeWord(Addr addr, Word word) {
   stats.numStores++;
   mem[addr] = word;
+  spdlog::info("M[0x{:08x}]=0x{:08x}", addr, word);
 }
 
 Word Memory::pageFaultHandle(Addr addr) {

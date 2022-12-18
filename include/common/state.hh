@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <spdlog/spdlog.h>
 
 #include "common/common.hh"
 #include "memory/memory.hh"
@@ -26,7 +27,7 @@ public:
     // (to store return address if it is not needed).
     if (!regnum)
       return;
-
+    spdlog::info("x{}=0x{:08x}", regnum, val);
     regs.at(regnum) = val;
   }
 

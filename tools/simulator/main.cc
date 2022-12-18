@@ -36,7 +36,7 @@ int main(int argc, char **argv) try {
   }
 
   spdlog::set_level(loggingLevel);
-
+  spdlog::set_pattern("%v");
   sim::Hart hart{input};
   hart.run();
 

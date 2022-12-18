@@ -20,8 +20,8 @@ private:
   Executor exec_{};
   Decoder decoder_{};
 
-  Memory &mem() { return state_.mem; };
-  Addr &pc() { return state_.pc; };
+  Memory &getMem() { return state_.mem; };
+  Addr &getPC() { return state_.pc; };
 
 public:
   Hart(const fs::path &executable);

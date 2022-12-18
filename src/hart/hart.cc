@@ -7,18 +7,18 @@ namespace sim {
 
 Hart::Hart(const fs::path &executable) {
   ELFLoader loader{executable};
-  pc() = loader.getEntryPoint();
+  getPC() = loader.getEntryPoint();
 
   for (auto segmentIdx : loader.getLoadableSegments()) {
     auto text = loader.getSegment(segmentIdx);
-    mem().storeRange(loader.getSegmentAddr(segmentIdx), text.begin(),
+    getMem().storeRange(loader.getSegmentAddr(segmentIdx), text.begin(),
                      text.end());
   }
 }
 
 void Hart::run() {
   while (!state_.complete) {
-    auto binInst = mem().loadWord(pc());
+    auto binInst = getMem().loadWord(getPC());
     auto inst = decoder_.decode(binInst);
     spdlog::trace("Decoded instuction:\n  [0x{:08x}]{}", state_.pc, inst.str());
 

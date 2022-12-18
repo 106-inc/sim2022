@@ -12,7 +12,7 @@
 namespace sim {
 
 template <typename T>
-concept InstForwardIterator = std::forward_iterator<T> &&
+concept InstForwardIterator = std::input_iterator<T> &&
     std::is_same_v<Instruction, typename std::iterator_traits<T>::value_type>;
 
 class Executor final {

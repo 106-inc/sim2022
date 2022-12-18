@@ -26,7 +26,7 @@ BasicBlock Hart::createBB(Addr addr) {
     auto binInst = getMem().loadWord(addr);
     auto inst = decoder_.decode(binInst);
     spdlog::trace(inst.str());
-    bb.push_back(std::move(inst));
+    bb.push_back(inst);
     isBranch = bb.back().isBranch;
   }
 

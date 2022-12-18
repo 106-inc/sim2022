@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_STATE_STATE_HH__
-#define __INCLUDE_STATE_STATE_HH__
+#ifndef __INCLUDE_COMMON_STATE_HH__
+#define __INCLUDE_COMMON_STATE_HH__
 
 #include <array>
 #include <iomanip>
@@ -32,11 +32,11 @@ public:
   std::string str() const {
     std::stringstream ss{};
     ss << std::setfill('0');
-    constexpr std::size_t colNum = 4;
+    constexpr std::size_t lineNum = 8;
 
-    for (std::size_t i = 0; i < kRegNum / colNum; ++i) {
-      for (std::size_t j = 0; j < colNum; ++j) {
-        auto regIdx = j * colNum + i;
+    for (std::size_t i = 0; i < lineNum; ++i) {
+      for (std::size_t j = 0; j < kRegNum / lineNum; ++j) {
+        auto regIdx = j * lineNum + i;
         auto &reg = regs[regIdx];
         ss << "  [" << std::dec << std::setw(2) << regIdx << "] ";
         ss << "0x" << std::hex << std::setw(sizeof(reg) * 2) << reg;
@@ -59,4 +59,4 @@ struct State final {
 
 } // namespace sim
 
-#endif // __INCLUDE_STATE_STATE_HH__
+#endif // __INCLUDE_COMMON_STATE_HH__

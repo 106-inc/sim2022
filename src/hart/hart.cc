@@ -1,4 +1,5 @@
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 
 #include "common/common.hh"
 #include "common/inst.hh"
@@ -23,11 +24,14 @@ BasicBlock Hart::createBB(Addr addr) {
 
   spdlog::trace("Creating basic block:");
   for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {
-    auto binInst = getMem().loadWord(addr);
-    auto inst = decoder_.decode(binInst);
+    auto inst = decoder_.decode(getMem().loadWord(addr));
+    if (inst.type == OpType::UNKNOWN)
+      throw std::logic_error{
+          "Unknown instruction found while decoding basic block" + inst.str()};
+
     spdlog::trace(inst.str());
+    isBranch = inst.isBranch;
     bb.push_back(inst);
-    isBranch = bb.back().isBranch;
   }
 
   spdlog::trace("Basic blok created.");

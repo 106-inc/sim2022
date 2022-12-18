@@ -30,7 +30,8 @@ public:
   template <InstForwardIterator It>
   void execute(It begin, It end, State &state) const {
     std::for_each(begin, end, [this, &state](const auto &inst) {
-      execute(inst, state);
+      this->execute(inst, state);
+      spdlog::trace("Instuction:\n  [0x{:08x}]{}", state.pc, inst.str());
       spdlog::trace("Current regfile state:\n{}", state.regs.str());
 
       if (state.branchIsTaken) {

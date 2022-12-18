@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "common/common.hh"
+#include "common/inst.hh"
 #include "common/state.hh"
 #include "decoder/decoder.hh"
 #include "executor/executor.hh"
@@ -26,6 +27,8 @@ private:
 
   Memory &getMem() { return state_.mem; };
   Addr &getPC() { return state_.pc; };
+
+  BasicBlock createBB(Addr entry);
 
 public:
   Hart(const fs::path &executable);

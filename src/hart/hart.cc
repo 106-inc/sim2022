@@ -1,5 +1,7 @@
 #include <spdlog/spdlog.h>
 
+#include "common/common.hh"
+#include "common/inst.hh"
 #include "elfloader/elfloader.hh"
 #include "hart/hart.hh"
 
@@ -12,25 +14,33 @@ Hart::Hart(const fs::path &executable) {
   for (auto segmentIdx : loader.getLoadableSegments()) {
     auto text = loader.getSegment(segmentIdx);
     getMem().storeRange(loader.getSegmentAddr(segmentIdx), text.begin(),
-                     text.end());
+                        text.end());
   }
+}
+
+BasicBlock Hart::createBB(Addr addr) {
+  BasicBlock bb{};
+
+  spdlog::trace("Creating basic block:");
+  for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {
+    auto binInst = getMem().loadWord(addr);
+    auto inst = decoder_.decode(binInst);
+    spdlog::trace(inst.str());
+    bb.push_back(std::move(inst));
+    isBranch = bb.back().isBranch;
+  }
+
+  spdlog::trace("Basic blok created.");
+  return bb;
 }
 
 void Hart::run() {
   while (!state_.complete) {
-    auto binInst = getMem().loadWord(getPC());
-    auto inst = decoder_.decode(binInst);
-    spdlog::trace("Decoded instuction:\n  [0x{:08x}]{}", state_.pc, inst.str());
+    if (cache_.find(getPC()) == cache_.end())
+      cache_[getPC()] = createBB(getPC());
 
-    exec_.execute(inst, state_);
-    spdlog::trace("Current regfile state:\n{}", state_.regs.str());
-
-    if (state_.branchIsTaken) {
-      state_.pc = state_.npc;
-      state_.branchIsTaken = false;
-    } else {
-      state_.pc += kXLENInBytes;
-    }
+    const auto &bb = cache_[getPC()];
+    exec_.execute(bb.begin(), bb.end(), state_);
   }
 }
 

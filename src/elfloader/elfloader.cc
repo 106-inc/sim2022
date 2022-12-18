@@ -44,7 +44,7 @@ bool ELFLoader::hasSection(const std::string &name) const {
 
 std::vector<ELFLoader::IndexT> ELFLoader::getLoadableSegments() const {
   std::vector<IndexT> res{};
-  for (auto *segment : elfFile_.segments)
+  for (auto &&segment : elfFile_.segments)
     if (ELFIO::PT_LOAD == segment->get_type())
       res.push_back(segment->get_index());
   return res;

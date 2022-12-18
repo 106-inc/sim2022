@@ -1,9 +1,9 @@
 """This module generates enum w/ opcodes & decoder function."""
 
 import argparse
-from collections import defaultdict
 import sys
 import textwrap
+from collections import defaultdict
 from pathlib import Path
 
 import yaml
@@ -48,8 +48,15 @@ FUNC_HEADER = textwrap.dedent(
 
 FUNC_FOOTER = END_NAMESPACE
 
+BitDict = dict[str, bool | int]
+InstDict = dict[str, list[str] | str]
+RiscVDict = dict[str, InstDict]
+ByMaskDict = defaultdict[int, dict[str, InstDict]]
 
-def get_bit_map_dict(msb, lsb=None, lshift=0, signext=True):
+
+def get_bit_map_dict(
+    msb: int, lsb: int | None = None, lshift: int = 0, signext: bool = True
+) -> BitDict:
     """Helper function to build decoding dictionary"""
 
     if lsb is None:
@@ -65,7 +72,7 @@ def get_bit_map_dict(msb, lsb=None, lshift=0, signext=True):
     }
 
 
-def gen_getbits(bit_dict, arg="binInst"):
+def gen_getbits(bit_dict: BitDict, arg: str = "binInst"):
     """Helper function to generate call of c++ getBits() function from bit dictionary"""
 
     to_ret = f"getBits<{bit_dict['msb']}, {bit_dict['lsb']}>({arg})"
@@ -75,6 +82,8 @@ def gen_getbits(bit_dict, arg="binInst"):
 
     return to_ret
 
+
+BRANCH_MNEMONICS = ("beq", "bne", "bge", "bgeu", "blt", "bltu", "jal", "jalr")
 
 REG_DICT = {
     "rm": get_bit_map_dict(14, 12),
@@ -108,11 +117,14 @@ IMM_DICT = {
 }
 
 
-def gen_fill_inst(dec_data, inst_name):
+def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
     """Generate instruction's fields filling function"""
     to_ret = ""
 
     to_ret += f"    decodedInst.type = OpType::{inst_name.upper()};\n"
+
+    if inst_name in BRANCH_MNEMONICS:
+        to_ret += "    decodedInst.isBranch = true;\n"
 
     max_from = 0
     has_imm = False
@@ -147,30 +159,37 @@ def gen_fill_inst(dec_data, inst_name):
     return to_ret
 
 
-def gen_ifs(yaml_dict):
+def gen_ifs(yaml_dict: RiscVDict) -> str:
     """Generate ifs decoding from yaml dictionary function"""
 
     to_ret = ""
     for inst_name, dec_data in yaml_dict.items():
-        mask = int(dec_data["mask"], 0)
-        match = int(dec_data["match"], 0)
-        to_ret += f"if ((binInst & 0b{mask:032b}) == 0b{match:032b}) {{\n"
+        mask_str = dec_data["mask"]
+        match_str = dec_data["match"]
+        assert isinstance(mask_str, str)
+        assert isinstance(match_str, str)
+
+        mask = int(mask_str, 0)
+        matched = int(match_str, 0)
+        to_ret += f"if ((binInst & 0b{mask:032b}) == 0b{matched:032b}) {{\n"
         to_ret += gen_fill_inst(dec_data, inst_name)
         to_ret += "    return decodedInst;\n}\n"
 
     return to_ret
 
 
-def gen_by_mask_dict(yaml_dict):
+def gen_by_mask_dict(yaml_dict: RiscVDict) -> ByMaskDict:
     """Generate by-mask dictionary function"""
-    to_ret = defaultdict(dict)
+    to_ret: ByMaskDict = defaultdict(dict)
     for inst_name, dec_data in yaml_dict.items():
-        to_ret[int(dec_data["mask"], 0)][inst_name] = dec_data
+        mask = dec_data["mask"]
+        assert isinstance(mask, str)
+        to_ret[int(mask, 0)][inst_name] = dec_data
 
     return to_ret
 
 
-def gen_switches(yaml_dict):
+def gen_switches(yaml_dict: RiscVDict) -> str:
     """Generate decoding by switches function"""
     to_ret = ""
 
@@ -180,7 +199,10 @@ def gen_switches(yaml_dict):
         to_ret += f"  switch (binInst & 0b{mask:032b}) {{\n"
 
         for inst_name, dec_dict in insts_dict.items():
-            to_ret += f"  case 0b{int(dec_dict['match'], 0):032b}:\n"
+            matched = dec_dict["match"]
+            assert isinstance(matched, str)
+
+            to_ret += f"  case 0b{int(matched, 0):032b}:\n"
             to_ret += gen_fill_inst(dec_dict, inst_name)
             to_ret += "    return decodedInst;\n"
 
@@ -189,7 +211,7 @@ def gen_switches(yaml_dict):
     return to_ret
 
 
-def gen_cc(filename, yaml_dict):
+def gen_cc(filename: Path, yaml_dict: RiscVDict) -> None:
     """Function tp generate decoder function c++ file"""
 
     to_write = COMMENT
@@ -205,7 +227,7 @@ def gen_cc(filename, yaml_dict):
         fout.write(to_write)
 
 
-def gen_hh(filename, yaml_dict):
+def gen_hh(filename: Path, yaml_dict: RiscVDict) -> None:
     """Function to generate c++ header with enum with instructions"""
 
     to_write = COMMENT
@@ -231,7 +253,7 @@ def gen_hh(filename, yaml_dict):
         fout.write(to_write)
 
 
-def main():
+def main() -> None:
     """Main function"""
 
     parser = argparse.ArgumentParser(
@@ -260,8 +282,12 @@ def main():
 
     with open(args.yaml, encoding="utf-8") as yml:
         yaml_data = yaml.safe_load(yml)
+
+    # make dirs for generated files
     args.decoder_file.parent.mkdir(parents=True, exist_ok=True)
     args.enum_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # generate enum & decoder files
     gen_cc(args.decoder_file, yaml_data)
     gen_hh(args.enum_file, yaml_data)
 

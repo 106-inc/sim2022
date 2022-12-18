@@ -2,79 +2,205 @@
 
 namespace sim {
 
-static auto applyOffset(RegVal val, RegVal imm) {
-  auto res = signAdd(val, imm);
-
-  if (signCast(res) < 0)
-    throw std::runtime_error("invalid address");
-
-  return res;
-}
-
-static void executeADD(const Instruction &inst, State &state) {
-  RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal rs2 = state.regs.get(inst.rs2);
-  state.regs.set(inst.rd, rs1 + rs2);
-}
-
-static void executeSUB(const Instruction &inst, State &state) {
-  RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal rs2 = state.regs.get(inst.rs2);
-  state.regs.set(inst.rd, rs1 - rs2);
-}
-
-static void executeMUL(const Instruction &inst, State &state) {
-  RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal rs2 = state.regs.get(inst.rs2);
-  state.regs.set(inst.rd, rs1 * rs2);
-}
-
-static void executeDIV(const Instruction &inst, State &state) {
-  RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal rs2 = state.regs.get(inst.rs2);
-  state.regs.set(inst.rd, rs1 / rs2);
-}
-
-static void executeLW(const Instruction &inst, State &state) {
-  RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal word = state.mem.loadWord(applyOffset(rs1, inst.imm));
-  state.regs.set(inst.rd, word);
-}
-
-static void executeSW(const Instruction &inst, State &state) {
-  RegVal rs1 = state.regs.get(inst.rs1);
-  RegVal rs2 = state.regs.get(inst.rs2);
-  state.mem.storeWord(applyOffset(rs1, inst.imm), rs2);
-}
-
-static void executeJAL(const Instruction &inst, State &state) {
-  state.branchIsTaken = true;
-  state.regs.set(inst.rd, state.pc + kXLENInBytes);
-  state.npc = applyOffset(state.pc, inst.imm);
-}
-
-static void executeJALR(const Instruction &inst, State &state) {
-  state.branchIsTaken = true;
-  state.regs.set(inst.rd, state.pc + kXLENInBytes);
-  RegVal rs1 = state.regs.get(inst.rs1);
-  state.npc =
-      setBit<0, 0>(applyOffset(rs1, inst.imm)); // setting the least-significant
-                                                // bit of the result to zero.
-}
-
-static void executeECALL(const Instruction &, State &state) {
-  state.complete = true;
-}
-
-Executor::Executor()
-    : executors_{{OpType::ADD, executeADD},    {OpType::SUB, executeSUB},
-                 {OpType::MUL, executeMUL},    {OpType::DIV, executeDIV},
-                 {OpType::LW, executeLW},      {OpType::SW, executeSW},
-                 {OpType::JAL, executeJAL},    {OpType::JALR, executeJALR},
-                 {OpType::ECALL, executeECALL}} {}
-
 void Executor::execute(const Instruction &inst, State &state) const {
-  executors_.at(inst.type)(inst, state);
+  execMap_.at(inst.type)(inst, state);
 }
+
+template <std::regular_invocable<RegVal, RegVal> Func>
+void executeRegisterRegisterOp(const Instruction &inst, State &state, Func op) {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto rs2 = state.regs.get(inst.rs2);
+  state.regs.set(inst.rd, op(rs1, rs2));
+}
+
+template <std::regular_invocable<RegVal, RegVal> Func>
+void executeRegisterImmidiateOp(const Instruction &inst, State &state,
+                                Func op) {
+  auto rs1 = state.regs.get(inst.rs1);
+  state.regs.set(inst.rd, op(rs1, inst.imm));
+}
+
+template <std::integral T> static T executeSLT(T lhs, T rhs) {
+  return lhs < rhs;
+}
+
+template <std::integral T> static T executeSRLT(T val, RegVal imm) {
+  RegVal shamt = getBits<4, 0>(imm);
+  return val >> shamt;
+}
+
+template <std::integral T> static T executeSR(T lhs, T rhs) {
+  return lhs >> rhs;
+}
+
+template <std::predicate<RegVal, RegVal> Func>
+void executeCondBranch(const Instruction &inst, State &state, Func op) {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto rs2 = state.regs.get(inst.rs2);
+  if (op(rs1, rs2)) {
+    state.branchIsTaken = true;
+    state.npc = inst.imm;
+  }
+}
+
+const std::unordered_map<OpType,
+                         std::function<void(const Instruction, State &)>>
+    Executor::execMap_{
+        {OpType::ADD,
+         [](const Instruction &inst, State &state) {
+           executeRegisterRegisterOp(inst, state, std::plus<RegVal>());
+         }},
+        {OpType::SUB,
+         [](const Instruction &inst, State &state) {
+           executeRegisterRegisterOp(inst, state, std::minus<RegVal>());
+         }},
+        {OpType::MUL,
+         [](const Instruction &inst, State &state) {
+           executeRegisterRegisterOp(inst, state, std::multiplies<RegVal>());
+         }},
+        {OpType::DIV,
+         [](const Instruction &inst, State &state) {
+           auto rs2 = state.regs.get(inst.rs2);
+           if (rs2 == 0) {
+             throw std::logic_error("division by zero");
+           }
+           executeRegisterRegisterOp(inst, state, std::divides<RegVal>());
+         }},
+        {OpType::LW,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto word = state.mem.loadWord(rs1 + inst.imm);
+           state.regs.set(inst.rd, word);
+         }},
+        {OpType::SW,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto rs2 = state.regs.get(inst.rs2);
+           state.mem.storeWord(rs1 + inst.imm, rs2);
+         }},
+        {OpType::JAL,
+         [](const Instruction &inst, State &state) {
+           state.branchIsTaken = true;
+           state.regs.set(inst.rd, state.pc + kXLENInBytes);
+           state.npc = state.pc + inst.imm;
+         }},
+        {OpType::JALR,
+         [](const Instruction &inst, State &state) {
+           state.branchIsTaken = true;
+           state.regs.set(inst.rd, state.pc + kXLENInBytes);
+           auto rs1 = state.regs.get(inst.rs1);
+           state.npc =
+               setBit<0, 0>(rs1 + inst.imm); // setting the least-significant
+                                             // bit of the result to zero.
+         }},
+        {OpType::ECALL,
+         [](const Instruction &, State &state) { state.complete = true; }},
+        {OpType::ADDI,
+         [](const Instruction &inst, State &state) {
+           executeRegisterImmidiateOp(inst, state, std::plus<RegVal>());
+         }},
+        {OpType::ANDI,
+         [](const Instruction &inst, State &state) {
+           executeRegisterImmidiateOp(inst, state, std::bit_and<RegVal>());
+         }},
+
+        {OpType::XORI,
+         [](const Instruction &inst, State &state) {
+           executeRegisterImmidiateOp(inst, state, std::bit_xor<RegVal>());
+         }},
+
+        {OpType::ORI,
+         [](const Instruction &inst, State &state) {
+           executeRegisterImmidiateOp(inst, state, std::bit_or<RegVal>());
+         }},
+        {OpType::SLTI,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto lhs = signCast(rs1);
+           auto rhs = signCast(inst.imm);
+           auto res = unsignedCast(executeSLT(lhs, rhs));
+           state.regs.set(inst.rd, res);
+         }},
+        {OpType::SLTIU,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           state.regs.set(inst.rd, executeSLT(rs1, inst.imm));
+         }},
+
+        {OpType::LUI,
+         [](const Instruction &inst, State &state) {
+           state.regs.set(inst.rd, inst.imm << 12);
+         }},
+        {OpType::AUIPC,
+         [](const Instruction &inst, State &state) {
+           state.regs.set(inst.rd, state.pc + (inst.imm << 12));
+         }},
+
+        {OpType::SLLI,
+         [](const Instruction &inst, State &state) {
+           auto shamt = getBits<4, 0>(inst.imm);
+           auto rs1 = state.regs.get(inst.rs1);
+           state.regs.set(inst.rd, rs1 << shamt);
+         }},
+        {OpType::SRLI,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto res = executeSRLT(rs1, inst.imm);
+           state.regs.set(inst.rd, res);
+         }},
+        {OpType::SRAI,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto signedRs1 = signCast(rs1);
+           auto res = unsignedCast(executeSRLT(signedRs1, inst.imm));
+           state.regs.set(inst.rd, res);
+         }},
+        {OpType::SLL,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto rs2 = state.regs.get(inst.rs2);
+           state.regs.set(inst.rd, rs1 << rs2);
+         }},
+        {OpType::SRL,
+         [](const Instruction &inst, State &state) {
+           executeRegisterRegisterOp(inst, state, executeSR<RegVal>);
+         }},
+        {OpType::SRA,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = signCast(state.regs.get(inst.rs1));
+           auto rs2 = signCast(state.regs.get(inst.rs2));
+           auto res = unsignedCast(executeSR(rs1, rs2));
+           state.regs.set(inst.rd, res);
+         }},
+        {OpType::BEQ,
+         [](const Instruction &inst, State &state) {
+           executeCondBranch(inst, state, std::equal_to<RegVal>());
+         }},
+        {OpType::BNE,
+         [](const Instruction &inst, State &state) {
+           executeCondBranch(inst, state, std::not_equal_to<RegVal>());
+         }},
+        {OpType::BLT,
+         [](const Instruction &inst, State &state) {
+           executeCondBranch(inst, state, std::less<RegVal>());
+         }},
+        {OpType::BLTU,
+         [](const Instruction &inst, State &state) {
+           executeCondBranch(inst, state, std::greater<RegVal>());
+         }},
+        {OpType::BGEU,
+         [](const Instruction &inst, State &state) {
+           executeCondBranch(inst, state, std::greater_equal<RegVal>());
+         }},
+        {OpType::BGE,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = signCast(state.regs.get(inst.rs1));
+           auto rs2 = signCast(state.regs.get(inst.rs2));
+           if (rs1 >= rs2) {
+             state.branchIsTaken = true;
+             state.npc = inst.imm;
+           }
+         }},
+    };
 
 } // namespace sim

@@ -22,6 +22,8 @@ struct Instruction final {
   OpType type{OpType::UNKNOWN};
   RegVal imm{};
 
+  bool isBranch{false};
+
   std::string str() const {
     std::stringstream ss{};
 

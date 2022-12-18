@@ -6,6 +6,12 @@ namespace sim {
 
 void Executor::execute(const Instruction &inst, State &state) const {
   execMap_.at(inst.type)(inst, state);
+  if (state.branchIsTaken) {
+    state.pc = state.npc;
+    state.branchIsTaken = false;
+  } else {
+    state.pc += kXLENInBytes;
+  }
 }
 
 template <std::regular_invocable<RegVal, RegVal> Func>

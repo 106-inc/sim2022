@@ -33,13 +33,6 @@ public:
       this->execute(inst, state);
       spdlog::trace("Instuction:\n  [0x{:08x}]{}", state.pc, inst.str());
       spdlog::trace("Current regfile state:\n{}", state.regs.str());
-
-      if (state.branchIsTaken) {
-        state.pc = state.npc;
-        state.branchIsTaken = false;
-      } else {
-        state.pc += kXLENInBytes;
-      }
     });
   }
 

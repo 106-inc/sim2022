@@ -133,8 +133,10 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
     for field_name in dec_data["variable_fields"]:
 
         if field_name in REG_DICT:
+            dst = f"decodedInst.{field_name}"
             to_ret += (
-                f"    decodedInst.{field_name} = {gen_getbits(REG_DICT[field_name])};\n"
+                f"    {dst} = static_cast<decltype({dst})>"
+                f"({gen_getbits(REG_DICT[field_name])});\n"
             )
 
         elif field_name in IMM_DICT:

@@ -1,9 +1,11 @@
 #ifndef __INCLUDE_MEMORY_MEMORY_HH__
 #define __INCLUDE_MEMORY_MEMORY_HH__
 
-#include "common/common.hh"
+#include <algorithm>
 #include <iostream>
 #include <unordered_map>
+
+#include "common/common.hh"
 
 namespace sim {
 

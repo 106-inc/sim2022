@@ -26,8 +26,17 @@ public:
   Addr getSectionAddr(const std::string &name) const;
   bool hasSection(const std::string &name) const;
 
+  using IndexT = unsigned;
+  std::vector<IndexT> getLoadableSegments() const;
+
+  std::span<const Word> getSegment(IndexT index) const;
+  Addr getSegmentAddr(IndexT index) const;
+  bool hasSegment(IndexT index) const;
+
 private:
+  void check() const;
   const ELFIO::section *getSectionPtr(const std::string &name) const;
+  const ELFIO::segment *getSegmentPtr(IndexT index) const;
 };
 
 } // namespace sim

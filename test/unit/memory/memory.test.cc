@@ -8,9 +8,7 @@ constexpr std::size_t kNumReqs = 10;
 using sim::Addr;
 
 TEST(Memory, Memory_store_load) {
-
   sim::Memory mem;
-  sim::Memory::MemoryStats stats;
 
   // Load value which was stored  previously
   for (Addr i = 0; i < kNumReqs; ++i)
@@ -23,7 +21,6 @@ TEST(Memory, Memory_store_load) {
 }
 
 TEST(Memory, Mem_stats) {
-
   sim::Memory mem;
   sim::Memory::MemoryStats stats;
 

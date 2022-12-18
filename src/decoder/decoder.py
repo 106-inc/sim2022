@@ -83,6 +83,8 @@ def gen_getbits(bit_dict: BitDict, arg: str = "binInst"):
     return to_ret
 
 
+BRANCH_MNEMONICS = ("beq", "bne", "bge", "bgeu", "blt", "bltu", "jal", "jalr")
+
 REG_DICT = {
     "rm": get_bit_map_dict(14, 12),
     "rd": get_bit_map_dict(11, 7),
@@ -120,6 +122,9 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
     to_ret = ""
 
     to_ret += f"    decodedInst.type = OpType::{inst_name.upper()};\n"
+
+    if inst_name in BRANCH_MNEMONICS:
+        to_ret += "    decodedInst.isBranch = true;\n"
 
     max_from = 0
     has_imm = False

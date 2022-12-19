@@ -28,11 +28,11 @@ constexpr std::uint8_t kBitsInByte = 8;
 constexpr Word kDummyWord = 0;
 constexpr std::uint8_t kXLENInBytes = sizeof(Word);
 
-constexpr char kCosimLoggerName[] = "cosim";
+constexpr std::string_view kCosimLoggerName = "cosim";
 
 template<typename... Args>
 void cosimLog(fmt::format_string<Args...> str, Args&&...args) {
-  auto coSimLogger = spdlog::get(kCosimLoggerName);
+  auto coSimLogger = spdlog::get(kCosimLoggerName.data());
   if(coSimLogger) {
     coSimLogger->info(str, std::forward<Args>(args)...);
   }

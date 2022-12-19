@@ -17,7 +17,7 @@ namespace lvl = spdlog::level;
 
 void initCosimLogger() {
   auto logger =
-      spdlog::basic_logger_mt(sim::kCosimLoggerName, "trace.txt", true);
+      spdlog::basic_logger_mt(sim::kCosimLoggerName.data(), "trace.txt", true);
   logger->set_pattern("%v");
   logger->set_level(spdlog::level::info);
 }

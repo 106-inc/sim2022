@@ -6,12 +6,21 @@
 #include <CLI/Config.hpp>
 #include <CLI/Formatter.hpp>
 
+#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 
+#include "common/common.hh"
 #include "hart/hart.hh"
 
 namespace fs = std::filesystem;
 namespace lvl = spdlog::level;
+
+void initCosimLogger() {
+  auto logger =
+      spdlog::basic_logger_mt(sim::kCosimLoggerName, "trace.txt", true);
+  logger->set_pattern("%v");
+  logger->set_level(spdlog::level::info);
+}
 
 int main(int argc, char **argv) try {
   CLI::App app{"Simulator"};
@@ -36,7 +45,7 @@ int main(int argc, char **argv) try {
   }
 
   spdlog::set_level(loggingLevel);
-  spdlog::set_pattern("%v");
+  initCosimLogger();
   sim::Hart hart{input};
   hart.run();
 

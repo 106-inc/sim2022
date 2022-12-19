@@ -4,6 +4,8 @@
 #include <bit>
 #include <concepts>
 #include <cstdint>
+#include <string_view>
+#include <spdlog/spdlog.h>
 
 static_assert(std::endian::little == std::endian::native,
               "It seems that u r trying to run our sim on ur router");
@@ -25,6 +27,16 @@ constexpr CSRegId kCSRegNum = 4096;
 constexpr std::uint8_t kBitsInByte = 8;
 constexpr Word kDummyWord = 0;
 constexpr std::uint8_t kXLENInBytes = sizeof(Word);
+
+constexpr char kCosimLoggerName[] = "cosim";
+
+template<typename... Args>
+void cosimLog(fmt::format_string<Args...> str, Args&&...args) {
+  auto coSimLogger = spdlog::get(kCosimLoggerName);
+  if(coSimLogger) {
+    coSimLogger->info(str, std::forward<Args>(args)...);
+  }
+}
 
 template <std::unsigned_integral T> constexpr auto signCast(T val) {
   return static_cast<std::make_signed_t<T>>(val);

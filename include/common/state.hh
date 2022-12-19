@@ -27,7 +27,8 @@ public:
     // (to store return address if it is not needed).
     if (!regnum)
       return;
-    spdlog::info("x{}=0x{:08x}", regnum, val);
+
+    cosimLog("x{}=0x{:08x}", regnum, val);
     regs.at(regnum) = val;
   }
 

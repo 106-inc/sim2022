@@ -31,10 +31,10 @@ public:
   void execute(It begin, It end, State &state) const {
     static std::size_t instrCount = 1;
     std::for_each(begin, end, [this, &state](const auto &inst) {
-      spdlog::info("-----------------------");
-      spdlog::info("NUM={}", instrCount);
+      cosimLog("-----------------------");
+      cosimLog("NUM={}", instrCount);
       this->execute(inst, state);
-      spdlog::info("PC=0x{:08x}", state.pc);
+      cosimLog("PC=0x{:08x}", state.pc);
       spdlog::trace("Instuction:\n  [0x{:08x}]{}", state.pc, inst.str());
       spdlog::trace("Current regfile state:\n{}", state.regs.str());
       instrCount += 1;

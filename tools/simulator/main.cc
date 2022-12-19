@@ -38,6 +38,9 @@ int main(int argc, char **argv) try {
   fs::path input{};
   app.add_option("input", input, "Executable file")->required();
 
+  bool isCosim{false};
+  app.add_flag("--trace", isCosim, "dump execution trace for cosim");
+
   try {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
@@ -45,7 +48,9 @@ int main(int argc, char **argv) try {
   }
 
   spdlog::set_level(loggingLevel);
-  initCosimLogger();
+  if (isCosim) {
+    initCosimLogger();
+  }
   sim::Hart hart{input};
   hart.run();
 

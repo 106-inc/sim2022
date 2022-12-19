@@ -21,6 +21,7 @@ public:
 private:
   std::unordered_map<Addr, Word> mem{};
   MemoryStats stats{};
+  bool isProgramStored{false};
 
   Word pageFaultHandle(Addr addr);
 
@@ -33,6 +34,7 @@ public:
 
   Word loadWord(Addr addr);
   void storeWord(Addr addr, Word word);
+  void setProgramStoredFlag() { isProgramStored = true; }
 
   template <std::forward_iterator It>
   void storeRange(Addr start, It begin, It end) {

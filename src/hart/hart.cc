@@ -17,6 +17,7 @@ Hart::Hart(const fs::path &executable) {
     getMem().storeRange(loader.getSegmentAddr(segmentIdx), text.begin(),
                         text.end());
   }
+  getMem().setProgramStoredFlag();
 }
 
 BasicBlock Hart::createBB(Addr addr) {

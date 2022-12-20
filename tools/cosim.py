@@ -10,10 +10,14 @@ kRegAccessRegx = r"x({})=0x({})".format(kHexRegx, kHexRegx)
 kMemAccessRegx = r"M\[0x({})\]=0x({})".format(kHexRegx, kHexRegx)
 
 class State:
-    def __init__(self, stream):
-        self.stream = stream
-        self.stream.readline() # skip first preambula in trace. TODO: regex check
+    def __init__(self, streamFilename):
+        self.stream = streamFilename.open()
 
+        line = self.stream.readline() # skip first preambula in trace
+        if not re.match(kPreambuleRegx, line):
+            raise RuntimeError("{}: Invalid file format.".format(streamFilename))
+
+        self.streamFilename = streamFilename
         self.currentInstrCount = 0
         self.PC = 0
         self.lastChangedRegNum = None
@@ -43,7 +47,7 @@ class State:
 
             match = re.match(kPCRegx, line)
             if match != None:
-                self.PC = int(match.group(1))
+                self.PC = int(match.group(1), base = 16)
                 break
 
             match = re.match(kRegAccessRegx, line)
@@ -58,27 +62,32 @@ class State:
                 self.lastChangedMemVal = int(match.group(2), base = 16)
                 break
 
+            raise RuntimeError("{}: Invalid file format.".format(self.streamFilename))
+
 class Cosim:
-    def __init__(self, masterFile, slaveFile):
-        self.master = masterFile
-        self.slave = slaveFile
+    def __init__(self, masterFilename, slaveFilename):
+        self.masterState = State(masterFilename)
+        self.slaveState = State(slaveFilename)
         self.errorMsg = ""
         self.isSame = True
 
     def run(self):
-        masterState = State(self.master)
-        slaveState = State(self.slave)
+        masterState = self.masterState
+        slaveState = self.slaveState
 
         while(self.isSame and not (masterState.EOF and slaveState.EOF)):
             masterState.update()
             slaveState.update()
 
-            self.isSame = self.compare(masterState, slaveState)
+            self.isSame = self.__compare()
 
-    def compare(self, masterState, slaveState):
+    def __compare(self):
+        masterState = self.masterState
+        slaveState = self.slaveState
+
         if masterState.currentInstrCount != slaveState.currentInstrCount:
             self.errorMsg += ("master " if masterState.EOF else "slave ")
-            self.errorMsg += "unexpected end of trace."
+            self.errorMsg += "trace unexpectedly finished"
             return False
 
         if (masterState.PC != slaveState.PC) or \
@@ -105,7 +114,7 @@ def main():
     parser.add_argument("--slave", type=Path, required=True, help="Path to slave trace")
     args = parser.parse_args()
 
-    cosim = Cosim(args.master.open(), args.slave.open())
+    cosim = Cosim(args.master, args.slave)
     cosim.run()
     cosim.dumpResults()
 

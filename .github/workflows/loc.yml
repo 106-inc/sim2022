@@ -16,7 +16,7 @@ jobs:
         id: badge
         with:
           directory: ./
-          badge: ./output/badge.svg
+          badge: ./.loc/badge.svg
           # The file patterns to search for, separated by pipes ("|").
           ignore: '*.txt|*.yml|CMakeLists.txt|*.pdf|.clang-format|.gitignore|.gitmodules|LICENSE'
           badge_style: 'flat'
@@ -30,7 +30,7 @@ jobs:
       - name: Deploy to image-data branch
         uses: peaceiris/actions-gh-pages@v3
         with:
-          publish_dir: ./
+          publish_dir: ./.loc/
           publish_branch: image-data
           github_token: ${{ secrets.GITHUB_TOKEN }}
           user_name: 'github-actions[bot]'

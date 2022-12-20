@@ -11,11 +11,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Make Code Badge
-        # You may pin to the exact commit or the version.
-        # uses: shadowmoose/GHA-LoC-Badge@8c8191e02ebe2e4b4764f4711228bddcaeb88f19
+        # You may pin to the exact commit or the version
         uses: shadowmoose/GHA-LoC-Badge@1.0.0
         id: badge
         with:
+          directory: ./
+          badge: ./output/badge.svg
           # The file patterns to search for, separated by pipes ("|").
           ignore: '*.txt|*.yml|CMakeLists.txt|*.pdf|.clang-format|.gitignore|.gitmodules|LICENSE'
           badge_style: 'flat'
@@ -29,7 +30,7 @@ jobs:
       - name: Deploy to image-data branch
         uses: peaceiris/actions-gh-pages@v3
         with:
-          publish_dir: ./output
+          publish_dir: ./
           publish_branch: image-data
           github_token: ${{ secrets.GITHUB_TOKEN }}
           user_name: 'github-actions[bot]'

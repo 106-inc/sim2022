@@ -263,7 +263,7 @@ inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
   tlb[idx] = TLBEntry(addr, page);
 }
 
-inline const TLB::TLBStats &TLB::getTLBStats() { return stats; }
+inline const TLB::TLBStats &TLB::getTLBStats() const { return stats; }
 
 inline void TLB::tlbFlush() { tlb.clear(); }
 

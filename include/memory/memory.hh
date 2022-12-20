@@ -297,5 +297,5 @@ inline void TLB::tlbUpdate(Addr addr, listIt page) {
 inline const TLB::TLBStats &TLB::getTLBStats() { return stats; }
 } // namespace sim
 
-//dummy comment
+// dummy comment
 #endif // __INCLUDE_MEMORY_MEMORY_HH__

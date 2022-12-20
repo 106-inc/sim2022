@@ -119,8 +119,10 @@ public:
 
 private:
   MemoryStats stats{};
+
   PhysMemory physMem{};
   bool isProgramStored{false};
+
 
 public:
   Memory() = default;
@@ -131,10 +133,12 @@ public:
 
   Word loadWord(Addr addr);
   void storeWord(Addr addr, Word word);
+
   Half loadHalf(Addr addr);
   void storeHalf(Addr addr, Half half);
   Byte loadByte(Addr addr);
   void storeByte(Addr addr, Byte Byte);
+
   void setProgramStoredFlag() { isProgramStored = true; }
 
   void printMemStats(std::ostream &ost) const;

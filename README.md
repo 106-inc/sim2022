@@ -1,3 +1,7 @@
+![GitHub repo size](https://img.shields.io/github/repo-size/106-inc/sim2022?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/106-inc/sim2022?color=red&style=for-the-badge)
+![GitHub lines](https://img.shields.io/tokei/lines/github/106-inc/sim2022?style=for-the-badge)
+
 # sim2022
 RISC-V simulator
 

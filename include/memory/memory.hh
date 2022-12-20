@@ -77,10 +77,8 @@ public:
     AddrSections(Addr addr) {
       constexpr std::pair<uint8_t, uint8_t> of_bits{11, 0};
       constexpr std::pair<uint8_t, uint8_t> pt_bits{31, 12};
-      indexPt =
-          static_cast<uint32_t>(getBits<pt_bits.first, pt_bits.second>(addr));
-      offset =
-          static_cast<uint16_t>(getBits<of_bits.first, of_bits.second>(addr));
+      indexPt = getBits<pt_bits.first, pt_bits.second>(addr);
+      offset = getBits<of_bits.first, of_bits.second>(addr);
     }
     bool operator==(const AddrSections &) const = default;
   };

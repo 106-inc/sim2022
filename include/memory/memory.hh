@@ -19,18 +19,26 @@ struct Page {
   std::vector<Word> wordStorage{};
 };
 
-using listIt = std::list<Page>::iterator;
-using PTLowLvl = std::unordered_map<uint16_t, listIt>;
-using PTHighLvl = std::unordered_map<uint16_t, PTLowLvl>;
+using PT = std::unordered_map<uint32_t, Page>;
+using PagePtr = Page *;
+
+/*
+  We use pointers on std::unordered_map::value because
+  (§23.2.5/13) The insert and emplace members shall not affect the validity
+  of references to container elements, but may invalidate all iterators
+  to the container.
+  The erase members shall invalidate only iterators and references
+  to the erased elements.
+*/
 
 class TLB final {
 public:
   using TLBIndex = uint16_t;
   struct TLBEntry {
     Addr virtualAddress{};
-    listIt physPage{};
+    PagePtr physPage{};
     TLBEntry() = default;
-    TLBEntry(Addr addr, listIt page) : virtualAddress(addr), physPage(page) {}
+    TLBEntry(Addr addr, PagePtr page) : virtualAddress(addr), physPage(page) {}
   };
 
   struct TLBStats {
@@ -42,8 +50,8 @@ public:
   };
 
   TLB() = default;
-  std::optional<listIt> tlbLookup(Addr addr);
-  void tlbUpdate(Addr addr, listIt page);
+  std::optional<PagePtr> tlbLookup(Addr addr);
+  void tlbUpdate(Addr addr, PagePtr page);
   TLBIndex getTLBIndex(Addr addr);
   const TLBStats &getTLBStats();
 
@@ -56,26 +64,18 @@ template <typename T>
 concept isSimType =
     std::same_as<T, Word> || std::same_as<T, Byte> || std::same_as<T, Half>;
 
-template <typename T>
-concept isPTType = std::same_as<T, PTLowLvl> || std::same_as<T, PTHighLvl>;
-
 class PhysMemory final {
 public:
   struct AddrSections {
-    uint16_t indexPt1{};
-    uint16_t indexPt2{};
+    uint32_t indexPt{};
     uint16_t offset{};
 
-    AddrSections(uint16_t pt_1, uint16_t pt_2, uint16_t off)
-        : indexPt1(pt_1), indexPt2(pt_2), offset(off) {}
+    AddrSections(uint32_t pt, uint16_t off) : indexPt(pt), offset(off) {}
     AddrSections(Addr addr) {
       constexpr std::pair<uint8_t, uint8_t> of_bits{11, 0};
-      constexpr std::pair<uint8_t, uint8_t> pt2_bits{21, 12};
-      constexpr std::pair<uint8_t, uint8_t> pt1_bits{31, 22};
-      indexPt1 =
-          static_cast<uint16_t>(getBits<pt1_bits.first, pt1_bits.second>(addr));
-      indexPt2 =
-          static_cast<uint16_t>(getBits<pt2_bits.first, pt2_bits.second>(addr));
+      constexpr std::pair<uint8_t, uint8_t> pt_bits{31, 12};
+      indexPt =
+          static_cast<uint32_t>(getBits<pt_bits.first, pt_bits.second>(addr));
       offset =
           static_cast<uint16_t>(getBits<of_bits.first, of_bits.second>(addr));
     }
@@ -96,20 +96,13 @@ public:
 
   PhysMemory() = default;
 
-  template <isPTType T, PhysMemory::MemoryOp op>
-  std::optional<listIt> pageTableFindPage(T &pageTable, uint16_t pt1,
-                                          uint16_t pt2);
-
-  listIt getNewPage(uint16_t pt1, uint16_t pt2);
-
-  template <MemoryOp op> listIt pageTableLookup(const AddrSections &sect);
+  template <MemoryOp op> PagePtr pageTableLookup(const AddrSections &sect);
 
   template <isSimType T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
   uint16_t getOffset(Addr addr);
 
 private:
-  std::list<Page> pageStorage{};
-  PTHighLvl pageTable{};
+  PT pageTable{};
   TLB tlb{};
 };
 
@@ -154,59 +147,33 @@ inline T *PhysMemory::getEntity(Addr addr) {
   AddrSections sections(addr);
   auto offset = sections.offset;
   auto isInTLB = tlb.tlbLookup(addr);
-  listIt it{};
+  PagePtr page;
   if (isInTLB.has_value()) {
-    it = isInTLB.value();
+    page = isInTLB.value();
   } else {
-    it = PhysMemory::pageTableLookup<op>(sections);
-    tlb.tlbUpdate(addr, it);
+    page = PhysMemory::pageTableLookup<op>(sections);
+    tlb.tlbUpdate(addr, page);
   }
-  Word *word = &it->wordStorage.at(offset / sizeof(Word));
+  Word *word = &page->wordStorage.at(offset / sizeof(Word));
   Byte *byte = reinterpret_cast<Byte *>(word) + (offset % sizeof(Word));
   return reinterpret_cast<T *>(byte);
 }
 
 template <PhysMemory::MemoryOp op>
-listIt PhysMemory::pageTableLookup(const AddrSections &sect) {
-  auto pt1Search =
-      pageTableFindPage<PTHighLvl, op>(pageTable, sect.indexPt1, sect.indexPt2);
-  if (pt1Search.has_value())
-    return pt1Search.value();
-  auto &pageTableLowLvl = pageTable.at(sect.indexPt1);
-  auto pt2Search = pageTableFindPage<PTLowLvl, op>(
-      pageTableLowLvl, sect.indexPt1, sect.indexPt2);
-  if (pt2Search.has_value())
-    return pt2Search.value();
-  return pageTableLowLvl.at(sect.indexPt2);
-}
+PagePtr PhysMemory::pageTableLookup(const AddrSections &sect) {
 
-template <isPTType T, PhysMemory::MemoryOp op>
-inline std::optional<listIt>
-PhysMemory::pageTableFindPage(T &pTable, uint16_t pt1, uint16_t pt2) {
   using MemOp = PhysMemory::MemoryOp;
-  using ptIt = typename T::iterator;
-  ptIt it_PT{};
-  if constexpr (std::is_same_v<T, PTHighLvl>) {
-    it_PT = pTable.find(pt1);
-  } else {
-    it_PT = pTable.find(pt2);
-  }
-  if (it_PT == pTable.end()) {
+  auto index = sect.indexPt;
+  auto it_PT = pageTable.find(index);
+  if (it_PT == pageTable.end()) {
     if constexpr (op == MemOp::LOAD)
       throw PhysMemory::PageFaultException(
           "Load on unmapped region in physical mem");
     else {
-      return getNewPage(pt1, pt2);
+      pageTable[index] = Page();
     }
   }
-  return std::nullopt;
-}
-
-inline listIt PhysMemory::getNewPage(uint16_t pt1, uint16_t pt2) {
-  pageStorage.emplace_back();
-  auto new_page = std::prev(pageStorage.end());
-  pageTable[pt1][pt2] = new_page;
-  return new_page;
+  return &pageTable.at(index);
 }
 
 template <std::forward_iterator It>
@@ -271,7 +238,7 @@ inline TLB::TLBIndex TLB::getTLBIndex(Addr addr) {
       getBits<(kTLBBits + kOffsetBits - 1), kOffsetBits>(addr));
 }
 
-inline std::optional<listIt> TLB::tlbLookup(Addr addr) {
+inline std::optional<PagePtr> TLB::tlbLookup(Addr addr) {
   stats.TLBRequests++;
   auto idx = getTLBIndex(addr);
   auto it = tlb.find(idx);
@@ -288,7 +255,7 @@ inline std::optional<listIt> TLB::tlbLookup(Addr addr) {
   }
 }
 
-inline void TLB::tlbUpdate(Addr addr, listIt page) {
+inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
 
   auto idx = getTLBIndex(addr);
   tlb[idx] = TLBEntry(addr, page);

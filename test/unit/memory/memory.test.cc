@@ -8,6 +8,7 @@ constexpr std::size_t kNumReqs = 10;
 using sim::Addr;
 using AddrSections = sim::PhysMemory::AddrSections;
 using Page = sim::Page;
+using PagePtr = sim::PagePtr;
 using MemOp = sim::PhysMemory::MemoryOp;
 
 TEST(Memory, Memory_store_load) {
@@ -41,41 +42,45 @@ TEST(Memory, Mem_stats) {
   EXPECT_EQ(stats.numLoads, 2 * kNumReqs);
 }
 
+
 TEST(PhysMemory, AddrSectionsCtor) {
 
   sim::PhysMemory phMem;
-
-  EXPECT_EQ(AddrSections(0xDEADBEEF), AddrSections(890, 731, 3823));
-  EXPECT_EQ(AddrSections(0x0), AddrSections(0, 0, 0));
-  EXPECT_EQ(AddrSections(0xFFFFFFFF), AddrSections(1023, 1023, 4095));
+  //0xDEADB, 0xEEF
+  EXPECT_EQ(AddrSections(0xDEADBEEF), AddrSections(912091, 3823));
+  EXPECT_EQ(AddrSections(0x0), AddrSections(0, 0));
+  //2^20 - 1, 2^12 - 1
+  EXPECT_EQ(AddrSections(0xFFFFFFFF), AddrSections(1048575, 4095));
 }
+
 
 
 TEST(PhysMemory, pageTableLookup) {
 
   sim::PhysMemory phMem;
   //Load on unmapped region (P1) and than store to it
-  AddrSections page1(0, 0, 0);
+  AddrSections page1(0, 0);
   EXPECT_THROW(phMem.pageTableLookup<MemOp::LOAD>(page1), sim::PhysMemory::PageFaultException);
-  auto iter_1 = phMem.pageTableLookup<MemOp::STORE>(page1);
+  PagePtr ptr_1 = phMem.pageTableLookup<MemOp::STORE>(page1);
 
   //Load on unmapped region (P2) and than store to it
-  AddrSections page2(0, 1, 0);
+  AddrSections page2(1, 1);
   EXPECT_THROW(phMem.pageTableLookup<MemOp::LOAD>(page2), sim::PhysMemory::PageFaultException);
-  auto iter_2 = phMem.pageTableLookup<MemOp::STORE>(page2);
+  PagePtr ptr_2 = phMem.pageTableLookup<MemOp::STORE>(page2);
 
   //Check previously stored values
-  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page1), iter_1);
-  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page2), iter_2);
+  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page1), ptr_1);
+  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page2), ptr_2);
 
   //Check that stores point on the same pages
-  AddrSections page3(3, 2, 1);
-  auto iter_3 = phMem.pageTableLookup<MemOp::STORE>(page3);
-  auto iter_4 = phMem.pageTableLookup<MemOp::STORE>(page3);
-  EXPECT_EQ(iter_3, iter_4);
-  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page3), iter_3);
+  AddrSections page3(3, 2);
+  auto ptr_3 = phMem.pageTableLookup<MemOp::STORE>(page3);
+  auto ptr_4 = phMem.pageTableLookup<MemOp::STORE>(page3);
+  EXPECT_EQ(ptr_3, ptr_4);
+  EXPECT_EQ(phMem.pageTableLookup<MemOp::LOAD>(page3), ptr_3);
 
 }
+
 
 TEST(PhysMemory, MixingWordHalf)
 {
@@ -125,31 +130,28 @@ TEST(TLB, getTLBIndex)
   EXPECT_EQ(tlb.getTLBIndex(0xFFFFFFFF),  1023);
 }
 
+
 TEST(TLB, tlbLookup)
 {
   sim::TLB tlb;
-  std::list<sim::Page> storage;
-  storage.emplace_back();
-  auto iter_1 = std::prev(storage.end());
-  tlb.tlbUpdate(0xDEADBEEF, iter_1);
+  Page page_1{};
+  tlb.tlbUpdate(0xDEADBEEF, &page_1);
 
   //Deadbeef is in TLB, BeafDead - not;
   EXPECT_EQ(tlb.tlbLookup(0xBEEFDEAD), std::nullopt);
-  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), iter_1);
+  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), &page_1);
 
   //Change value in the TLB
-  storage.emplace_back();
-  auto iter_2 = std::prev(storage.end());
-  tlb.tlbUpdate(0xDEADBEEF, iter_2);
-  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), iter_2);
-  EXPECT_NE(tlb.tlbLookup(0xDEADBEEF), iter_1);
+  Page page_2{};
+  tlb.tlbUpdate(0xDEADBEEF, &page_2);
+  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), &page_2);
+  EXPECT_NE(tlb.tlbLookup(0xDEADBEEF), &page_1);
 
   //FAADBDEA has the same TLBIndex with DEADBEEF
-  storage.emplace_back();
-  auto iter_3 = std::prev(storage.end());
-  tlb.tlbUpdate(0xFAADBDEA, iter_3);
+  Page page_3{};
+  tlb.tlbUpdate(0xFAADBDEA, &page_3);
   EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), std::nullopt);
-  EXPECT_EQ(tlb.tlbLookup(0xFAADBDEA), iter_3);
+  EXPECT_EQ(tlb.tlbLookup(0xFAADBDEA),  &page_3);
 
   auto stats = tlb.getTLBStats();
   EXPECT_EQ(stats.TLBHits, 4);

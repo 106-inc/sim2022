@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "common/common.hh"
+
 namespace sim {
 
 struct Page {

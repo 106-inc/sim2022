@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "common.hh"
 
@@ -15,11 +16,13 @@ struct Instruction final {
   RegId rs3{};
 
   RegId rd{};
-  RegId rm{};  // rounding mode (for future use w/ floating-point operations)
-  RegId csr{}; // a placeholder
+  RegId rm{}; // rounding mode (for future use w/ floating-point operations)
+  CSRegId csr{};
 
   OpType type{OpType::UNKNOWN};
   RegVal imm{};
+
+  bool isBranch{false};
 
   std::string str() const {
     std::stringstream ss{};
@@ -39,6 +42,8 @@ struct Instruction final {
     return ss.str();
   }
 };
+
+using BasicBlock = std::vector<Instruction>;
 
 } // namespace sim
 

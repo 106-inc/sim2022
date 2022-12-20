@@ -19,10 +19,6 @@ if(BUILD_TESTS)
 
     target_compile_features(${TEST} PRIVATE cxx_std_20)
     target_include_directories(${TEST} PRIVATE ${CMAKE_SOURCE_DIR}/include)
-    set_target_properties(${TEST}
-      PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/test"
-    )
   endforeach()
 
   # Unit tests

@@ -19,9 +19,11 @@ using Half = std::uint16_t;
 using Byte = std::uint8_t;
 using RegVal = Word;
 using Addr = std::uint32_t;
-using RegId = std::size_t;
+using RegId = std::uint8_t;
+using CSRegId = std::uint16_t;
 
 constexpr RegId kRegNum = 32;
+constexpr CSRegId kCSRegNum = 4096;
 constexpr std::uint8_t kBitsInByte = 8;
 constexpr Word kDummyWord = 0;
 constexpr std::uint8_t kXLENInBytes = sizeof(Word);
@@ -32,6 +34,10 @@ constexpr std::uint16_t kOffsetBits = 12;
 
 template <std::unsigned_integral T> constexpr auto signCast(T val) {
   return static_cast<std::make_signed_t<T>>(val);
+}
+
+template <std::signed_integral T> constexpr auto unsignedCast(T val) {
+  return static_cast<std::make_unsigned_t<T>>(val);
 }
 
 template <std::unsigned_integral T> constexpr auto signAdd(T lhs, T rhs) {

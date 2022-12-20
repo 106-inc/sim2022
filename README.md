@@ -1,4 +1,4 @@
-![Generated Button](https://tokei.rs/b1/github/106-inc/sim2022)
+![Generated Button](https://tokei.rs/b1/github/106-inc/sim2022?category=code)
 
 # sim2022
 RISC-V simulator

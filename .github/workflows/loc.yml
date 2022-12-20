@@ -1,0 +1,38 @@
+name: Lines of code
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  loc:
+    name: Create lines of code badge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Make Code Badge
+        # You may pin to the exact commit or the version.
+        # uses: shadowmoose/GHA-LoC-Badge@8c8191e02ebe2e4b4764f4711228bddcaeb88f19
+        uses: shadowmoose/GHA-LoC-Badge@1.0.0
+        id: badge
+        with:
+          # The output path to save the badge svg - including extension!
+          badge: ./output/badge.svg
+          # The file patterns to search for, separated by pipes ("|").
+          patterns: '*.cc|*.hh|*.py'
+          
+      - name: Print the output
+        run: |
+          echo "Scanned: ${{ steps.badge.outputs.counted_files }}";
+          echo "Line Count: ${{ steps.badge.outputs.total_lines }}";
+          
+      - name: Deploy to image-data branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./output
+          publish_branch: image-data
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

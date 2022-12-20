@@ -16,8 +16,6 @@ jobs:
         uses: shadowmoose/GHA-LoC-Badge@1.0.0
         id: badge
         with:
-          # The output path to save the badge svg - including extension!
-          badge: ./output/badge.svg
           # The file patterns to search for, separated by pipes ("|").
           ignore: '*.txt|*.yml|CMakeLists.txt|*.pdf|.clang-format|.gitignore|.gitmodules|LICENSE'
           badge_style: 'flat'

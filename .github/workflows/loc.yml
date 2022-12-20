@@ -21,6 +21,7 @@ jobs:
           # The file patterns to search for, separated by pipes ("|").
           patterns: '**'
           badge_style: 'flat'
+          badge_label: 'Liner'
           
       - name: Print the output
         run: |

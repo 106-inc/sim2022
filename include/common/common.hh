@@ -4,6 +4,8 @@
 #include <bit>
 #include <concepts>
 #include <cstdint>
+#include <string_view>
+#include <spdlog/spdlog.h>
 
 static_assert(std::endian::little == std::endian::native,
               "It seems that u r trying to run our sim on ur router");
@@ -31,6 +33,16 @@ constexpr std::uint16_t kPageSize = 4096;
 constexpr std::uint16_t kTLBSize = 1024;
 constexpr std::uint16_t kTLBBits = 10;
 constexpr std::uint16_t kOffsetBits = 12;
+
+constexpr std::string_view kCosimLoggerName = "cosim";
+
+template<typename... Args>
+void cosimLog(fmt::format_string<Args...> str, Args&&...args) {
+  auto coSimLogger = spdlog::get(kCosimLoggerName.data());
+  if(coSimLogger) {
+    coSimLogger->info(str, std::forward<Args>(args)...);
+  }
+}
 
 template <std::unsigned_integral T> constexpr auto signCast(T val) {
   return static_cast<std::make_signed_t<T>>(val);

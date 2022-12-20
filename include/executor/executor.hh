@@ -25,14 +25,18 @@ public:
   Executor &operator=(const Executor &) = delete;
   Executor &operator=(Executor &&) = delete;
 
-  void execute(const Instruction &inst, State &state) const;
+  void execute(const Instruction &inst, State &state);
 
   template <InstForwardIterator It>
-  void execute(It begin, It end, State &state) const {
+  void execute(It begin, It end, State &state) {
     std::for_each(begin, end, [this, &state](const auto &inst) {
+      cosimLog("-----------------------");
+      cosimLog("NUM={}", instrCount);
       this->execute(inst, state);
+      cosimLog("PC=0x{:08x}", state.pc);
       spdlog::trace("Instuction:\n  [0x{:08x}]{}", state.pc, inst.str());
       spdlog::trace("Current regfile state:\n{}", state.regs.str());
+      this->instrCount += 1;
     });
   }
 
@@ -40,6 +44,7 @@ private:
   static const std::unordered_map<
       OpType, std::function<void(const Instruction, State &)>>
       execMap_;
+  std::size_t instrCount{1};
 };
 
 } // namespace sim

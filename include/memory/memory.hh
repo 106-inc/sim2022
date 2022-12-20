@@ -76,12 +76,8 @@ public:
     AddrSections(uint32_t pt, uint16_t off) : indexPt(pt), offset(off) {}
     AddrSections(Addr addr) {
       constexpr std::pair<uint8_t, uint8_t> of_bits{kOffsetBits - 1, 0};
-<<<<<<< HEAD
-      constexpr std::pair<uint8_t, uint8_t> pt_bits{sizeofBits<Addr>() - 1, kOffsetBits};
-=======
       constexpr std::pair<uint8_t, uint8_t> pt_bits{sizeofBits<Addr>() - 1,
                                                     kOffsetBits};
->>>>>>> 13c0921 (Refactor)
       indexPt = getBits<pt_bits.first, pt_bits.second>(addr);
       offset =
           static_cast<uint16_t>(getBits<of_bits.first, of_bits.second>(addr));
@@ -124,6 +120,7 @@ public:
 private:
   MemoryStats stats{};
   PhysMemory physMem{};
+  bool isProgramStored{false};
 
 public:
   Memory() = default;
@@ -138,6 +135,7 @@ public:
   void storeHalf(Addr addr, Half half);
   Byte loadByte(Addr addr);
   void storeByte(Addr addr, Byte Byte);
+  void setProgramStoredFlag() { isProgramStored = true; }
 
   void printMemStats(std::ostream &ost) const;
   const MemoryStats &getMemStats() const;

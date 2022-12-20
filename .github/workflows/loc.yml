@@ -20,6 +20,7 @@ jobs:
           badge: ./output/badge.svg
           # The file patterns to search for, separated by pipes ("|").
           patterns: '**'
+          badge_style: 'flat'
           
       - name: Print the output
         run: |

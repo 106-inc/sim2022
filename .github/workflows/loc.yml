@@ -19,7 +19,7 @@ jobs:
           # The output path to save the badge svg - including extension!
           badge: ./output/badge.svg
           # The file patterns to search for, separated by pipes ("|").
-          patterns: '*.cc|*.hh|*.py'
+          patterns: '**'
           
       - name: Print the output
         run: |

@@ -52,10 +52,10 @@ public:
   };
 
   TLB() = default;
-  std::optional<PagePtr> tlbLookup(Addr addr);
+  PagePtr tlbLookup(Addr addr);
   void tlbUpdate(Addr addr, PagePtr page);
   TLBIndex getTLBIndex(Addr addr);
-  const TLBStats &getTLBStats();
+  const TLBStats &getTLBStats() const;
   void tlbFlush();
 
 private:
@@ -76,7 +76,12 @@ public:
     AddrSections(uint32_t pt, uint16_t off) : indexPt(pt), offset(off) {}
     AddrSections(Addr addr) {
       constexpr std::pair<uint8_t, uint8_t> of_bits{kOffsetBits - 1, 0};
+<<<<<<< HEAD
       constexpr std::pair<uint8_t, uint8_t> pt_bits{sizeofBits<Addr>() - 1, kOffsetBits};
+=======
+      constexpr std::pair<uint8_t, uint8_t> pt_bits{sizeofBits<Addr>() - 1,
+                                                    kOffsetBits};
+>>>>>>> 13c0921 (Refactor)
       indexPt = getBits<pt_bits.first, pt_bits.second>(addr);
       offset =
           static_cast<uint16_t>(getBits<of_bits.first, of_bits.second>(addr));
@@ -150,8 +155,8 @@ inline T *PhysMemory::getEntity(Addr addr) {
   auto offset = sections.offset;
   auto isInTLB = tlb.tlbLookup(addr);
   PagePtr page;
-  if (isInTLB.has_value()) {
-    page = isInTLB.value();
+  if (isInTLB) {
+    page = isInTLB;
   } else {
     page = PhysMemory::pageTableLookup<op>(sections);
     tlb.tlbUpdate(addr, page);
@@ -240,21 +245,20 @@ inline TLB::TLBIndex TLB::getTLBIndex(Addr addr) {
       getBits<(kTLBBits + kOffsetBits - 1), kOffsetBits>(addr));
 }
 
-inline std::optional<PagePtr> TLB::tlbLookup(Addr addr) {
+inline PagePtr TLB::tlbLookup(Addr addr) {
   stats.TLBRequests++;
   auto idx = getTLBIndex(addr);
   auto it = tlb.find(idx);
   if (it == tlb.end()) {
     stats.TLBMisses++;
-    return std::nullopt;
-  } else {
-    if (it->second.virtualAddress != addr) {
-      stats.TLBMisses++;
-      return std::nullopt;
-    }
-    stats.TLBHits++;
-    return it->second.physPage;
+    return nullptr;
   }
+  if (it->second.virtualAddress != addr) {
+    stats.TLBMisses++;
+    return nullptr;
+  }
+  stats.TLBHits++;
+  return it->second.physPage;
 }
 
 inline void TLB::tlbUpdate(Addr addr, PagePtr page) {

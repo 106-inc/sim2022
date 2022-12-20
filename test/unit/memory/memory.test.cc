@@ -135,7 +135,7 @@ TEST(TLB, tlbLookup)
   tlb.tlbUpdate(0xDEADBEEF, &page_1);
 
   //Deadbeef is in TLB, BeafDead - not;
-  EXPECT_EQ(tlb.tlbLookup(0xBEEFDEAD), std::nullopt);
+  EXPECT_EQ(tlb.tlbLookup(0xBEEFDEAD), nullptr);
   EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), &page_1);
 
   //Change value in the TLB
@@ -147,7 +147,7 @@ TEST(TLB, tlbLookup)
   //FAADBDEA has the same TLBIndex with DEADBEEF
   Page page_3{};
   tlb.tlbUpdate(0xFAADBDEA, &page_3);
-  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), std::nullopt);
+  EXPECT_EQ(tlb.tlbLookup(0xDEADBEEF), nullptr);
   EXPECT_EQ(tlb.tlbLookup(0xFAADBDEA),  &page_3);
 
   auto stats = tlb.getTLBStats();

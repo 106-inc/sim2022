@@ -44,16 +44,6 @@ void cosimLog(fmt::format_string<Args...> str, Args&&...args) {
   }
 }
 
-constexpr std::string_view kCosimLoggerName = "cosim";
-
-template<typename... Args>
-void cosimLog(fmt::format_string<Args...> str, Args&&...args) {
-  auto coSimLogger = spdlog::get(kCosimLoggerName.data());
-  if(coSimLogger) {
-    coSimLogger->info(str, std::forward<Args>(args)...);
-  }
-}
-
 template <std::unsigned_integral T> constexpr auto signCast(T val) {
   return static_cast<std::make_signed_t<T>>(val);
 }

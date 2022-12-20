@@ -17,7 +17,7 @@ jobs:
         id: badge
         with:
           # The output path to save the badge svg - including extension!
-          badge: .github/badge.svg
+          badge: ./output/badge.svg
           # The file patterns to search for, separated by pipes ("|").
           ignore: '*.txt|*.yml|*.md|*.pdf'
           badge_style: 'flat'

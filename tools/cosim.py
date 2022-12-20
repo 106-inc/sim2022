@@ -9,11 +9,12 @@ kPCRegx = r"PC=0x({})".format(kHexRegx)
 kRegAccessRegx = r"x({})=0x({})".format(kHexRegx, kHexRegx)
 kMemAccessRegx = r"M\[0x({})\]=0x({})".format(kHexRegx, kHexRegx)
 
+
 class State:
     def __init__(self, streamFilename):
         self.stream = streamFilename.open()
 
-        line = self.stream.readline() # skip first preambula in trace
+        line = self.stream.readline()  # skip first preambula in trace
         if not re.match(kPreambuleRegx, line):
             raise RuntimeError("{}: Invalid file format.".format(streamFilename))
 
@@ -28,7 +29,7 @@ class State:
 
     def update(self):
         finishState = self.EOF
-        while(not finishState):
+        while not finishState:
             line = self.stream.readline()
             if not line:
                 finishState = True
@@ -47,22 +48,23 @@ class State:
 
             match = re.match(kPCRegx, line)
             if match != None:
-                self.PC = int(match.group(1), base = 16)
+                self.PC = int(match.group(1), base=16)
                 break
 
             match = re.match(kRegAccessRegx, line)
             if match != None:
                 self.lastChangedRegNum = int(match.group(1))
-                self.lastChangedRegVal = int(match.group(2), base = 16)
+                self.lastChangedRegVal = int(match.group(2), base=16)
                 break
 
             match = re.match(kMemAccessRegx, line)
             if match != None:
-                self.lastChangedMemAddr = int(match.group(1), base = 16)
-                self.lastChangedMemVal = int(match.group(2), base = 16)
+                self.lastChangedMemAddr = int(match.group(1), base=16)
+                self.lastChangedMemVal = int(match.group(2), base=16)
                 break
 
             raise RuntimeError("{}: Invalid file format.".format(self.streamFilename))
+
 
 class Cosim:
     def __init__(self, masterFilename, slaveFilename):
@@ -75,7 +77,7 @@ class Cosim:
         masterState = self.masterState
         slaveState = self.slaveState
 
-        while(self.isSame and not (masterState.EOF and slaveState.EOF)):
+        while self.isSame and not (masterState.EOF and slaveState.EOF):
             masterState.update()
             slaveState.update()
 
@@ -86,16 +88,20 @@ class Cosim:
         slaveState = self.slaveState
 
         if masterState.currentInstrCount != slaveState.currentInstrCount:
-            self.errorMsg += ("master " if masterState.EOF else "slave ")
+            self.errorMsg += "master " if masterState.EOF else "slave "
             self.errorMsg += "trace unexpectedly finished"
             return False
 
-        if (masterState.PC != slaveState.PC) or \
-           (masterState.lastChangedRegNum != slaveState.lastChangedRegNum) or \
-           (masterState.lastChangedRegVal != slaveState.lastChangedRegVal) or \
-           (masterState.lastChangedMemAddr != slaveState.lastChangedMemAddr) or \
-           (masterState.lastChangedMemVal != slaveState.lastChangedMemVal):
-            self.errorMsg += "Mismatch at NUM = {}\n".format(masterState.currentInstrCount)
+        if (
+            (masterState.PC != slaveState.PC)
+            or (masterState.lastChangedRegNum != slaveState.lastChangedRegNum)
+            or (masterState.lastChangedRegVal != slaveState.lastChangedRegVal)
+            or (masterState.lastChangedMemAddr != slaveState.lastChangedMemAddr)
+            or (masterState.lastChangedMemVal != slaveState.lastChangedMemVal)
+        ):
+            self.errorMsg += "Mismatch at NUM = {}\n".format(
+                masterState.currentInstrCount
+            )
             return False
 
         return True
@@ -110,13 +116,16 @@ class Cosim:
 
 def main():
     parser = argparse.ArgumentParser(description="Cosimulation")
-    parser.add_argument("--master", type=Path, required=True, help="Path to master trace")
+    parser.add_argument(
+        "--master", type=Path, required=True, help="Path to master trace"
+    )
     parser.add_argument("--slave", type=Path, required=True, help="Path to slave trace")
     args = parser.parse_args()
 
     cosim = Cosim(args.master, args.slave)
     cosim.run()
     cosim.dumpResults()
+
 
 if __name__ == "__main__":
     main()

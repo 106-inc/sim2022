@@ -54,6 +54,7 @@ public:
   void tlbUpdate(Addr addr, PagePtr page);
   TLBIndex getTLBIndex(Addr addr);
   const TLBStats &getTLBStats();
+  void tlbFlush();
 
 private:
   std::unordered_map<TLBIndex, TLBEntry> tlb{};
@@ -262,6 +263,9 @@ inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
 }
 
 inline const TLB::TLBStats &TLB::getTLBStats() { return stats; }
+
+inline void TLB::tlbFlush() { tlb.clear(); }
+
 } // namespace sim
 
 // dummy comment

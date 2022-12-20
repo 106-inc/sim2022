@@ -75,8 +75,8 @@ public:
 
     AddrSections(uint32_t pt, uint16_t off) : indexPt(pt), offset(off) {}
     AddrSections(Addr addr) {
-      constexpr std::pair<uint8_t, uint8_t> of_bits{11, 0};
-      constexpr std::pair<uint8_t, uint8_t> pt_bits{31, 12};
+      constexpr std::pair<uint8_t, uint8_t> of_bits{kOffsetBits - 1, 0};
+      constexpr std::pair<uint8_t, uint8_t> pt_bits{sizeofBits<Addr>() - 1, kOffsetBits};
       indexPt = getBits<pt_bits.first, pt_bits.second>(addr);
       offset =
           static_cast<uint16_t>(getBits<of_bits.first, of_bits.second>(addr));

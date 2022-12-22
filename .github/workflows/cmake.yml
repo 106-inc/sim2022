@@ -15,7 +15,7 @@ jobs:
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     name: ${{ matrix.generator }} ${{ matrix.compiler }} ${{ matrix.build_type }}
-    # runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     container: takosan/sim2022
     strategy:
       matrix:

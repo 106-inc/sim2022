@@ -77,7 +77,7 @@ def get_bit_map_dict(
     }
 
 
-def gen_getbits(bit_dict: BitDict, arg: str = "binInst"):
+def gen_getbits(bit_dict: BitDict, arg: str):
     """Helper function to generate call of c++ getBits() function from bit dictionary"""
 
     to_ret = f"getBits<{bit_dict['msb']}, {bit_dict['lsb']}>({arg})"
@@ -138,14 +138,19 @@ IMM_DICT: dict[str, tuple[BitDict, ...]] = {
 }
 
 
-def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
+def gen_fill_inst(
+    dec_data: InstDict,
+    inst_name: str,
+    inst_var_name: str = "decodedInst",
+    bin_inst_name: str = "binInst",
+) -> str:
     """Generate instruction's fields filling function"""
     to_ret = ""
 
-    to_ret += f"    decodedInst.type = OpType::{inst_name.upper()};\n"
+    to_ret += f"    {inst_var_name}.type = OpType::{inst_name.upper()};\n"
 
     if inst_name in BRANCH_MNEMONICS:
-        to_ret += "    decodedInst.isBranch = true;\n"
+        to_ret += f"    {inst_var_name}.isBranch = true;\n"
 
     max_from = 0
     has_imm = False
@@ -154,10 +159,10 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
     for field_name in dec_data["variable_fields"]:
 
         if field_name in REG_DICT:
-            dst = f"decodedInst.{field_name}"
+            dst = f"{inst_var_name}.{field_name}"
             to_ret += (
                 f"    {dst} = static_cast<decltype({dst})>"
-                f"({gen_getbits(REG_DICT[field_name])});\n"
+                f"({gen_getbits(REG_DICT[field_name], bin_inst_name)});\n"
             )
 
         elif field_name in IMM_DICT:
@@ -167,7 +172,10 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
                     sign_ext = False
 
                 max_from = max(max_from, bits_dict["from"])
-                to_ret += f"    decodedInst.imm |= {gen_getbits(bits_dict)};\n"
+                to_ret += (
+                    f"    {inst_var_name}.imm |= "
+                    f"{gen_getbits(bits_dict, bin_inst_name)};\n"
+                )
 
         else:
             raise ValueError(f"Unrecognized field name {field_name}")
@@ -176,8 +184,8 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
     if has_imm and sign_ext:
         assert max_from <= 32
         to_ret += (
-            f"    decodedInst.imm = signExtend<{max_from + 1}>"
-            "(decodedInst.imm);\n"
+            f"    {inst_var_name}.imm = signExtend<{max_from + 1}>"
+            f"({inst_var_name}.imm);\n"
         )
 
     return to_ret
@@ -241,7 +249,7 @@ def gen_maps(yaml_dict: RiscVDict) -> str:
     def make_map_def(mask: int) -> str:
         return (
             "  static const std::unordered_map<decltype(binInst), "
-            + "std::function<void(Instruction &, decltype(binInst))>> "
+            + "std::function<Instruction(decltype(binInst))>> "
             + f"decMap_{mask:04X} = {{\n"
         )
 
@@ -257,8 +265,7 @@ def gen_maps(yaml_dict: RiscVDict) -> str:
             f"  if (auto it = {dec_map_name}.find(binInst & 0b{mask:032b}); "
             + f"it != {dec_map_name}.end()) {{\n"
         )
-        map_finds += "    it->second(decodedInst, binInst);\n"
-        map_finds += "    return decodedInst;\n"
+        map_finds += "    return it->second(binInst);\n"
         map_finds += "  }\n"
 
         maps_defs[mask] = make_map_def(mask)
@@ -269,10 +276,13 @@ def gen_maps(yaml_dict: RiscVDict) -> str:
 
             maps_defs[mask] += (
                 f"    {{0b{int(matched, 0):032b}, "
-                "[](Instruction &decodedInst, decltype(binInst) binInst) {\n"
-                + "      (void)binInst;\n"
+                "[]([[maybe_unused]] decltype(binInst) bInst) {\n"
+                + "      Instruction decInst;\n"
             )
-            maps_defs[mask] += gen_fill_inst(dec_dict, inst_name)
+            maps_defs[mask] += gen_fill_inst(
+                dec_dict, inst_name, "decInst", "bInst"
+            )
+            maps_defs[mask] += "    return decInst;\n"
             maps_defs[mask] += "    }},\n"
 
         maps_defs[mask] += "};\n"

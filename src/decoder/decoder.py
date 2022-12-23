@@ -6,6 +6,8 @@ import textwrap
 from collections import defaultdict
 from pathlib import Path
 
+from typing import Callable
+
 import yaml
 
 COMMENT = textwrap.dedent(
@@ -278,14 +280,19 @@ def gen_maps(yaml_dict: RiscVDict) -> str:
     return "\n".join(maps_defs.values()) + map_finds
 
 
-def gen_cc(filename: Path, yaml_dict: RiscVDict) -> None:
+GenFunc = Callable[[RiscVDict], str]
+
+
+def gen_cc(
+    filename: Path, yaml_dict: RiscVDict, generator_func: GenFunc
+) -> None:
     """Function tp generate decoder function c++ file"""
 
     to_write = COMMENT
     to_write += INCLUDES
     to_write += START_NAMESPACE
     to_write += FUNC_HEADER
-    to_write += gen_maps(yaml_dict)
+    to_write += generator_func(yaml_dict)
     to_write += "return decodedInst;\n"
     to_write += FUNC_FOOTER
     to_write += END_NAMESPACE
@@ -322,6 +329,9 @@ def gen_hh(filename: Path, yaml_dict: RiscVDict) -> None:
         fout.write(to_write)
 
 
+GENERATORS = {func.__name__: func for func in (gen_ifs, gen_maps, gen_switches)}
+
+
 def main() -> None:
     """Main function"""
 
@@ -348,6 +358,15 @@ def main() -> None:
         help="Output .hh file for OpType enum definition",
     )
 
+    parser.add_argument(
+        "-g",
+        "--generator",
+        type=str,
+        choices=GENERATORS.keys(),
+        default=gen_maps.__name__,
+        help="Choose decoding method (for debug)",
+    )
+
     args = parser.parse_args()
 
     with open(args.yaml, encoding="utf-8") as yml:
@@ -358,7 +377,7 @@ def main() -> None:
     args.enum_file.parent.mkdir(parents=True, exist_ok=True)
 
     # generate enum & decoder files
-    gen_cc(args.decoder_file, yaml_data)
+    gen_cc(args.decoder_file, yaml_data, GENERATORS[args.generator])
     gen_hh(args.enum_file, yaml_data)
 
 

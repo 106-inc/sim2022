@@ -1,5 +1,5 @@
 find_package(
-  Python3
+  Python3 3.10
   COMPONENTS Interpreter
   REQUIRED)
 

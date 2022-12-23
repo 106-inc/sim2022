@@ -17,3 +17,14 @@ RUN apt-get update && \
     \
     apt-get install -y libspdlog-dev && \
     apt-get install -y libgtest-dev
+
+WORKDIR /tmp
+
+RUN git clone --depth=1 --jobs $(($(nproc)/4)) --recursive https://github.com/riscv/riscv-gnu-toolchain \
+    && mkdir -p /opt/riscv32 \
+    && cd /tmp/riscv-gnu-toolchain \
+    && ./configure --prefix=/opt/riscv32 --with-arch=rv32gc --with-abi=ilp32d \
+    && make -j && make clean \
+    && rm -rf /tmp/riscv-gnu-toolchain
+
+ENV PATH="${PATH}:/opt/riscv32/bin"

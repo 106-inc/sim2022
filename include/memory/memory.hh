@@ -123,7 +123,6 @@ private:
   PhysMemory physMem{};
   bool isProgramStored{false};
 
-
 public:
   Memory() = default;
   Memory(const Memory &) = delete;

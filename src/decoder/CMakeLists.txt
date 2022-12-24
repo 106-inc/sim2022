@@ -30,11 +30,12 @@ add_custom_command(
 
 set(DEC_GEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/decoder.gen.cc)
 set(ENUM_GEN_FILE ${CMAKE_BINARY_DIR}/include/codegen/enum.gen.hh)
+set(MAP_GEN_FILE ${CMAKE_BINARY_DIR}/src/common/map.gen.cc)
 
 add_custom_command(
-  OUTPUT ${DEC_GEN_FILE} ${ENUM_GEN_FILE}
+  OUTPUT ${DEC_GEN_FILE} ${ENUM_GEN_FILE} ${MAP_GEN_FILE}
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/decoder.py -y
-          ${RISCV_YAML_DICT_PATH} -d ${DEC_GEN_FILE} -e ${ENUM_GEN_FILE}
+          ${RISCV_YAML_DICT_PATH} -d ${DEC_GEN_FILE} -e ${ENUM_GEN_FILE} -m ${MAP_GEN_FILE}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/decoder.py ${RISCV_YAML_DICT_PATH}
   COMMENT
     "Generating enum & decoder files from RISC-V config. Command: ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/decoder.py -y
@@ -43,10 +44,10 @@ add_custom_command(
 
 add_custom_target(
   DecoderGenerator
-  DEPENDS ${ENUM_GEN_FILE} ${DEC_GEN_FILE}
+  DEPENDS ${ENUM_GEN_FILE} ${DEC_GEN_FILE} ${MAP_GEN_FILE}
   COMMENT "Checking if regeneration is required")
 
-set(GEN_FILES ${DEC_GEN_FILE} ${ENUM_GEN_FILE})
+set(GEN_FILES ${DEC_GEN_FILE} ${ENUM_GEN_FILE} ${MAP_GEN_FILE})
 
 add_library(decoder decoder.cc ${DEC_GEN_FILE})
 format_sources(decoder "" "${GEN_FILES}" "decoder_gen" DecoderGenerator)

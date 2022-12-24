@@ -310,9 +310,7 @@ def gen_cc(
         fout.write(to_write)
 
 
-def gen_hh(filename: Path, yaml_dict: RiscVDict) -> None:
-    """Function to generate c++ header with enum with instructions"""
-
+def gen_hh_enum(hh_enum: Path, yaml_dict: RiscVDict) -> None:
     to_write = COMMENT
     to_write += "#include <string_view>\n"
     to_write += "#include <unordered_map>\n\n"
@@ -325,17 +323,36 @@ def gen_hh(filename: Path, yaml_dict: RiscVDict) -> None:
     to_write += "};\n\n"
 
     to_write += (
-        "inline std::unordered_map<OpType, std::string_view> opTypeToString {\n"
+        "extern const std::unordered_map<OpType, std::string_view> "
+        "opTypeToString;"
+    )
+    to_write += "}\n"
+
+    with open(hh_enum, "w", encoding="utf-8") as fout:
+        fout.write(to_write)
+
+
+def gen_cc_map(enum_hh: Path, map_cc: Path, yaml_dict: RiscVDict) -> None:
+    to_write = f'#include "{str(enum_hh.resolve())}"\n'
+    to_write += (
+        "const std::unordered_map<sim::OpType, std::string_view> "
+        "sim::opTypeToString {"
     )
     for inst_name in yaml_dict:
         iname = inst_name.upper()
-        to_write += f'{{OpType::{iname}, "{iname}"}},\n'
+        to_write += f'{{sim::OpType::{iname}, "{iname}"}},\n'
     to_write += "};\n\n"
 
-    to_write += "}\n"
-
-    with open(filename, "w", encoding="utf-8") as fout:
+    with open(map_cc, "w", encoding="utf-8") as fout:
         fout.write(to_write)
+
+
+def gen_enum(
+    filename_hh: Path, filename_cc: Path, yaml_dict: RiscVDict
+) -> None:
+    """Function to generate c++ header with enum with instructions"""
+    gen_hh_enum(filename_hh, yaml_dict)
+    gen_cc_map(filename_hh, filename_cc, yaml_dict)
 
 
 GENERATORS = {func.__name__: func for func in (gen_ifs, gen_maps, gen_switches)}
@@ -364,7 +381,14 @@ def main() -> None:
         "--enum-file",
         required=True,
         type=Path,
-        help="Output .hh file for OpType enum definition",
+        help="Output .hh file for OpType enum def & map decl",
+    )
+    parser.add_argument(
+        "-m",
+        "--map-file",
+        required=True,
+        type=Path,
+        help="Output .cc file for OpType map definition",
     )
 
     parser.add_argument(
@@ -387,7 +411,7 @@ def main() -> None:
 
     # generate enum & decoder files
     gen_cc(args.decoder_file, yaml_data, GENERATORS[args.generator])
-    gen_hh(args.enum_file, yaml_data)
+    gen_enum(args.enum_file, args.map_file, yaml_data)
 
 
 if "__main__" == __name__:

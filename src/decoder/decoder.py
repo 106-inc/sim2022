@@ -6,6 +6,8 @@ import textwrap
 from collections import defaultdict
 from pathlib import Path
 
+from typing import Callable
+
 import yaml
 
 COMMENT = textwrap.dedent(
@@ -21,6 +23,9 @@ COMMENT = textwrap.dedent(
 )
 INCLUDES = textwrap.dedent(
     """
+    #include <functional>
+    #include <unordered_map>
+
     #include "decoder/decoder.hh"
 
     """
@@ -72,7 +77,7 @@ def get_bit_map_dict(
     }
 
 
-def gen_getbits(bit_dict: BitDict, arg: str = "binInst"):
+def gen_getbits(bit_dict: BitDict, arg: str):
     """Helper function to generate call of c++ getBits() function from bit dictionary"""
 
     to_ret = f"getBits<{bit_dict['msb']}, {bit_dict['lsb']}>({arg})"
@@ -83,7 +88,17 @@ def gen_getbits(bit_dict: BitDict, arg: str = "binInst"):
     return to_ret
 
 
-BRANCH_MNEMONICS = ("beq", "bne", "bge", "bgeu", "blt", "bltu", "jal", "jalr", "ecall")
+BRANCH_MNEMONICS = (
+    "beq",
+    "bne",
+    "bge",
+    "bgeu",
+    "blt",
+    "bltu",
+    "jal",
+    "jalr",
+    "ecall",
+)
 
 REG_DICT = {
     "rm": get_bit_map_dict(14, 12),
@@ -94,37 +109,48 @@ REG_DICT = {
     "rs3": get_bit_map_dict(31, 27),
 }
 
-IMM_DICT = {
-    "imm20": [get_bit_map_dict(31, 12, 12)],
-    "jimm20": [
+IMM_DICT: dict[str, tuple[BitDict, ...]] = {
+    "imm20": (get_bit_map_dict(31, 12, 12),),
+    "jimm20": (
         get_bit_map_dict(31, lshift=20),
         get_bit_map_dict(30, 21, 1),
         get_bit_map_dict(20, lshift=11),
         get_bit_map_dict(19, 12, 12),
-    ],
-    "succ": [get_bit_map_dict(23, 20)],
-    "pred": [get_bit_map_dict(27, 24, 4)],
-    "fm": [get_bit_map_dict(31, 28, 8)],
-    "imm12": [get_bit_map_dict(31, 20)],
-    "zimm": [get_bit_map_dict(19, 15, signext=False)],
-    "aq": [get_bit_map_dict(26, lshift=1)],
-    "rl": [get_bit_map_dict(25)],
-    "bimm12hi": [get_bit_map_dict(31, lshift=12), get_bit_map_dict(30, 25, 5)],
-    "bimm12lo": [get_bit_map_dict(11, 8, 1), get_bit_map_dict(7, lshift=11)],
-    "imm12hi": [get_bit_map_dict(31, 25, 5)],
-    "imm12lo": [get_bit_map_dict(11, 7)],
-    "shamtw": [get_bit_map_dict(24, 20)],
+    ),
+    "succ": (get_bit_map_dict(23, 20),),
+    "pred": (get_bit_map_dict(27, 24, 4),),
+    "fm": (get_bit_map_dict(31, 28, 8),),
+    "imm12": (get_bit_map_dict(31, 20),),
+    "zimm": (get_bit_map_dict(19, 15, signext=False),),
+    "aq": (get_bit_map_dict(26, lshift=1),),
+    "rl": (get_bit_map_dict(25),),
+    "bimm12hi": (
+        get_bit_map_dict(31, lshift=12),
+        get_bit_map_dict(30, 25, 5),
+    ),
+    "bimm12lo": (
+        get_bit_map_dict(11, 8, 1),
+        get_bit_map_dict(7, lshift=11),
+    ),
+    "imm12hi": (get_bit_map_dict(31, 25, 5),),
+    "imm12lo": (get_bit_map_dict(11, 7),),
+    "shamtw": (get_bit_map_dict(24, 20),),
 }
 
 
-def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
+def gen_fill_inst(
+    dec_data: InstDict,
+    inst_name: str,
+    inst_var_name: str = "decodedInst",
+    bin_inst_name: str = "binInst",
+) -> str:
     """Generate instruction's fields filling function"""
     to_ret = ""
 
-    to_ret += f"    decodedInst.type = OpType::{inst_name.upper()};\n"
+    to_ret += f"    {inst_var_name}.type = OpType::{inst_name.upper()};\n"
 
     if inst_name in BRANCH_MNEMONICS:
-        to_ret += "    decodedInst.isBranch = true;\n"
+        to_ret += f"    {inst_var_name}.isBranch = true;\n"
 
     max_from = 0
     has_imm = False
@@ -133,10 +159,10 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
     for field_name in dec_data["variable_fields"]:
 
         if field_name in REG_DICT:
-            dst = f"decodedInst.{field_name}"
+            dst = f"{inst_var_name}.{field_name}"
             to_ret += (
                 f"    {dst} = static_cast<decltype({dst})>"
-                f"({gen_getbits(REG_DICT[field_name])});\n"
+                f"({gen_getbits(REG_DICT[field_name], bin_inst_name)});\n"
             )
 
         elif field_name in IMM_DICT:
@@ -146,7 +172,10 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
                     sign_ext = False
 
                 max_from = max(max_from, bits_dict["from"])
-                to_ret += f"    decodedInst.imm |= {gen_getbits(bits_dict)};\n"
+                to_ret += (
+                    f"    {inst_var_name}.imm |= "
+                    f"{gen_getbits(bits_dict, bin_inst_name)};\n"
+                )
 
         else:
             raise ValueError(f"Unrecognized field name {field_name}")
@@ -155,7 +184,8 @@ def gen_fill_inst(dec_data: InstDict, inst_name: str) -> str:
     if has_imm and sign_ext:
         assert max_from <= 32
         to_ret += (
-            f"    decodedInst.imm = signExtend<{max_from + 1}>(decodedInst.imm);\n"
+            f"    {inst_var_name}.imm = signExtend<{max_from + 1}>"
+            f"({inst_var_name}.imm);\n"
         )
 
     return to_ret
@@ -213,14 +243,66 @@ def gen_switches(yaml_dict: RiscVDict) -> str:
     return to_ret
 
 
-def gen_cc(filename: Path, yaml_dict: RiscVDict) -> None:
+def gen_maps(yaml_dict: RiscVDict) -> str:
+    """Generate decoding by maps function"""
+
+    def make_map_def(mask: int) -> str:
+        return (
+            "  static const std::unordered_map<decltype(binInst), "
+            + "std::function<Instruction(decltype(binInst))>> "
+            + f"decMap_{mask:04X} = {{\n"
+        )
+
+    maps_defs: defaultdict[int, str] = defaultdict(str)
+
+    map_finds = ""
+    masks_dict = gen_by_mask_dict(yaml_dict)
+
+    for mask, insts_dict in masks_dict.items():
+        dec_map_name = f"decMap_{mask:04X}"
+
+        map_finds += (
+            f"  if (auto it = {dec_map_name}.find(binInst & 0b{mask:032b}); "
+            + f"it != {dec_map_name}.end()) {{\n"
+        )
+        map_finds += "    return it->second(binInst);\n"
+        map_finds += "  }\n"
+
+        maps_defs[mask] = make_map_def(mask)
+
+        for inst_name, dec_dict in insts_dict.items():
+            matched = dec_dict["match"]
+            assert isinstance(matched, str)
+
+            maps_defs[mask] += (
+                f"    {{0b{int(matched, 0):032b}, "
+                "[]([[maybe_unused]] decltype(binInst) bInst) {\n"
+                + "      Instruction decInst;\n"
+            )
+            maps_defs[mask] += gen_fill_inst(
+                dec_dict, inst_name, "decInst", "bInst"
+            )
+            maps_defs[mask] += "    return decInst;\n"
+            maps_defs[mask] += "    }},\n"
+
+        maps_defs[mask] += "};\n"
+
+    return "\n".join(maps_defs.values()) + map_finds
+
+
+GenFunc = Callable[[RiscVDict], str]
+
+
+def gen_cc(
+    filename: Path, yaml_dict: RiscVDict, generator_func: GenFunc
+) -> None:
     """Function tp generate decoder function c++ file"""
 
     to_write = COMMENT
     to_write += INCLUDES
     to_write += START_NAMESPACE
     to_write += FUNC_HEADER
-    to_write += gen_switches(yaml_dict)
+    to_write += generator_func(yaml_dict)
     to_write += "return decodedInst;\n"
     to_write += FUNC_FOOTER
     to_write += END_NAMESPACE
@@ -243,7 +325,9 @@ def gen_hh(filename: Path, yaml_dict: RiscVDict) -> None:
         to_write += f"    {inst_name.upper()},\n"
     to_write += "};\n\n"
 
-    to_write += "inline std::unordered_map<OpType, std::string_view> opTypeToString {\n"
+    to_write += (
+        "inline std::unordered_map<OpType, std::string_view> opTypeToString {\n"
+    )
     for inst_name in yaml_dict:
         iname = inst_name.upper()
         to_write += f'    {{OpType::{iname}, "{iname}"}},\n'
@@ -255,11 +339,15 @@ def gen_hh(filename: Path, yaml_dict: RiscVDict) -> None:
         fout.write(to_write)
 
 
+GENERATORS = {func.__name__: func for func in (gen_ifs, gen_maps, gen_switches)}
+
+
 def main() -> None:
     """Main function"""
 
     parser = argparse.ArgumentParser(
-        description="Tool to generate decoder function according to riscv encoding"
+        description="Tool to generate decoder function according to "
+        "riscv encoding"
     )
 
     parser.add_argument(
@@ -280,6 +368,15 @@ def main() -> None:
         help="Output .hh file for OpType enum definition",
     )
 
+    parser.add_argument(
+        "-g",
+        "--generator",
+        type=str,
+        choices=GENERATORS.keys(),
+        default=gen_maps.__name__,
+        help="Choose decoding method (for debug)",
+    )
+
     args = parser.parse_args()
 
     with open(args.yaml, encoding="utf-8") as yml:
@@ -290,7 +387,7 @@ def main() -> None:
     args.enum_file.parent.mkdir(parents=True, exist_ok=True)
 
     # generate enum & decoder files
-    gen_cc(args.decoder_file, yaml_data)
+    gen_cc(args.decoder_file, yaml_data, GENERATORS[args.generator])
     gen_hh(args.enum_file, yaml_data)
 
 

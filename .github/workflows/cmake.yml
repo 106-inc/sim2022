@@ -57,4 +57,4 @@ jobs:
       run: ctest -C ${{matrix.build_type}} -VV -j ${{env.TEST_JOBS}} -L unit
 
     - name: Test for riscv toolchain
-      run: riscv32-unknown-elf-gcc
+      run: riscv32-unknown-elf-gcc --help

@@ -49,3 +49,8 @@ function(format_sources TARGET PREFIX SOURCE_LIST TAR_NAME DEP_TARGET)
   format_custom_target("${TARGET}" "${PREFIX}" "${SOURCE_LIST}" FALSE
                        "${TAR_NAME}" "${DEP_TARGET}")
 endfunction()
+
+macro(add_format_exec TARGET_NAME SOURCE_LIST)
+  add_executable(${TARGET_NAME} ${SOURCE_LIST})
+  format_custom_target(${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR} "${SOURCE_LIST}" FALSE ${TARGET_NAME} "")
+endmacro()

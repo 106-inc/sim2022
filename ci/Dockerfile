@@ -8,6 +8,8 @@ RUN apt-get update                     && \
     g++-10                                \
     clang++-12                            \
                                           \
+    p7zip-full                            \
+                                          \
     git                                   \
     ninja-build                           \
     make                                  \
@@ -24,4 +26,10 @@ RUN apt-get update                     && \
 
 WORKDIR /tmp
 
-COPY ./riscv32-unknown-elf-gcc /usr/bin
+COPY ./riscv_toolchain.7z /tmp/
+
+ENV RISCV /opt/riscv
+ENV PATH "${PATH}:${RISCV}/bin"
+
+RUN mkdir -p ${RISCV}                  && \
+    7z x -t7z riscv_toolchain.7z -o${RISCV}

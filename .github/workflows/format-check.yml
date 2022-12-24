@@ -1,4 +1,4 @@
-ame: CMake
+name: clang-format check
 
 on:
   push:

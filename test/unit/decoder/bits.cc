@@ -1,13 +1,9 @@
-#include "test_header.hh"
 #include "decoder/decoder.hh"
+#include "test_header.hh"
 
-TEST(sizeofBits, uint32)
-{
-  ASSERT_EQ(sim::sizeofBits<std::uint32_t>(), 32);
-}
+TEST(sizeofBits, uint32) { ASSERT_EQ(sim::sizeofBits<std::uint32_t>(), 32); }
 
-TEST(getBits, easy)
-{
+TEST(getBits, easy) {
   // Assign
   sim::Word val = 0xDEADBEEF;
   // Act
@@ -20,8 +16,7 @@ TEST(getBits, easy)
   EXPECT_EQ(one, 0x1);
 }
 
-TEST(signExtend, easy)
-{
+TEST(signExtend, easy) {
   // Assign
   sim::Word val = 0xBEEF;
   // Act
@@ -38,8 +33,7 @@ TEST(signExtend, easy)
   EXPECT_EQ(zext_leh, 0x3EEF);
 }
 
-TEST(signExtend, full)
-{
+TEST(signExtend, full) {
   // Assign
   sim::Word val = 0xBEEF;
   // Act
@@ -52,8 +46,7 @@ TEST(signExtend, full)
   EXPECT_EQ(zext_le, 0x3EEF);
 }
 
-TEST(setBit, easy)
-{
+TEST(setBit, easy) {
   // Assign
   sim::Word val = 0xBEEF;
   // Act
@@ -67,6 +60,5 @@ TEST(setBit, easy)
   EXPECT_EQ(one2, 0xBEEF);
   EXPECT_EQ(zero4, 0xBEEF);
 }
-
 
 #include "test_footer.hh"

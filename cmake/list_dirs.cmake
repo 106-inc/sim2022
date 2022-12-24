@@ -1,5 +1,8 @@
 macro(list_dirs result curdir)
-  file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  file(
+    GLOB children
+    RELATIVE ${curdir}
+    ${curdir}/*)
   set(dirlist "")
   foreach(child ${children})
     if(IS_DIRECTORY ${curdir}/${child})

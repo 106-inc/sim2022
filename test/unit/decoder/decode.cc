@@ -1,8 +1,7 @@
-#include "test_header.hh"
 #include "decoder/decoder.hh"
+#include "test_header.hh"
 
-TEST(decoder, unknown)
-{
+TEST(decoder, unknown) {
   // Arrange
   sim::Word raw = 0;
   // Act
@@ -18,8 +17,7 @@ TEST(decoder, unknown)
   EXPECT_EQ(inst.rs3, 0);
 }
 
-TEST(decoder, lui)
-{
+TEST(decoder, lui) {
   // Arrange
   sim::Word raw = 0b10000000000000000001'10001'0110111;
   // Act
@@ -30,8 +28,7 @@ TEST(decoder, lui)
   EXPECT_EQ(inst.imm, 0b10000000000000000001000000000000);
 }
 
-TEST(decoder, jal)
-{
+TEST(decoder, jal) {
   // Arrange
   sim::Word raw = 0b1'1111111111'0'10000000'00011'1101111;
   // Act
@@ -42,8 +39,7 @@ TEST(decoder, jal)
   EXPECT_EQ(inst.imm, 0b11111111111110000000011111111110);
 }
 
-TEST(decoder, jalr)
-{
+TEST(decoder, jalr) {
   // Arrange
   sim::Word raw = 0b011110111110'10000'000'00100'1100111;
   // Act
@@ -55,8 +51,7 @@ TEST(decoder, jalr)
   EXPECT_EQ(inst.imm, 0b011110111110);
 }
 
-TEST(decoder, bge)
-{
+TEST(decoder, bge) {
   // Arrange
   sim::Word raw = 0b0110101'11110'10110'101'10011'1100011;
   // Act
@@ -68,8 +63,7 @@ TEST(decoder, bge)
   EXPECT_EQ(inst.imm, 0b111010110010);
 }
 
-TEST(decoder, sw)
-{
+TEST(decoder, sw) {
   // Arrange
   sim::Word raw = 0b1000000'11111'01000'010'10001'0100011;
   // Act
@@ -81,8 +75,7 @@ TEST(decoder, sw)
   EXPECT_EQ(inst.imm, 0b11111111111111111111100000010001);
 }
 
-TEST(decoder, srai)
-{
+TEST(decoder, srai) {
   // Arrange
   sim::Word raw = 0b0100000'10011'01101'101'11000'0010011;
   // Act
@@ -94,8 +87,7 @@ TEST(decoder, srai)
   EXPECT_EQ(inst.imm, 0xFFFFFFF3);
 }
 
-TEST(decoder, fence)
-{
+TEST(decoder, fence) {
   // Arrange
   sim::Word raw = 0b010010011001'11111'000'11001'0001111;
   // Act
@@ -107,8 +99,7 @@ TEST(decoder, fence)
   EXPECT_EQ(inst.imm, 0b10010011001);
 }
 
-TEST(decoder, csrrsi)
-{
+TEST(decoder, csrrsi) {
   // Arrange
   sim::Word raw = 0b110110011001'11110'110'10101'1110011;
   // Act
@@ -120,8 +111,7 @@ TEST(decoder, csrrsi)
   EXPECT_EQ(inst.imm, 0x1E);
 }
 
-TEST(decoder, lr_w)
-{
+TEST(decoder, lr_w) {
   // Arrange
   sim::Word raw = 0b10'10'00000'00010'010'10001'0101111;
   // Act
@@ -133,8 +123,7 @@ TEST(decoder, lr_w)
   EXPECT_EQ(inst.imm, 0xFFFFFFFE);
 }
 
-TEST(decoder, fnmsub_s)
-{
+TEST(decoder, fnmsub_s) {
   // Arrange
   sim::Word raw = 0b11110'00'01110'00111'011'10101'1001011;
   // Act
@@ -148,8 +137,7 @@ TEST(decoder, fnmsub_s)
   EXPECT_EQ(inst.rs3, 0x1E);
 }
 
-TEST(decoder, xor)
-{
+TEST(decoder, xor) {
   // Arrange
   sim::Word raw = 0b0000000'01111'00101'100'10000'0110011;
   // Act
@@ -160,6 +148,5 @@ TEST(decoder, xor)
   EXPECT_EQ(inst.rs1, 5);
   EXPECT_EQ(inst.rs2, 0xF);
 }
-
 
 #include "test_footer.hh"

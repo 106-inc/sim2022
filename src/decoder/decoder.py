@@ -5,7 +5,6 @@ import sys
 import textwrap
 from collections import defaultdict
 from pathlib import Path
-
 from typing import Callable
 
 import yaml
@@ -147,10 +146,10 @@ def gen_fill_inst(
     """Generate instruction's fields filling function"""
     to_ret = ""
 
-    to_ret += f"    {inst_var_name}.type = OpType::{inst_name.upper()};\n"
+    to_ret += f"{inst_var_name}.type = OpType::{inst_name.upper()};\n"
 
     if inst_name in BRANCH_MNEMONICS:
-        to_ret += f"    {inst_var_name}.isBranch = true;\n"
+        to_ret += f"{inst_var_name}.isBranch = true;\n"
 
     max_from = 0
     has_imm = False
@@ -161,7 +160,7 @@ def gen_fill_inst(
         if field_name in REG_DICT:
             dst = f"{inst_var_name}.{field_name}"
             to_ret += (
-                f"    {dst} = static_cast<decltype({dst})>"
+                f"{dst} = static_cast<decltype({dst})>"
                 f"({gen_getbits(REG_DICT[field_name], bin_inst_name)});\n"
             )
 
@@ -173,7 +172,7 @@ def gen_fill_inst(
 
                 max_from = max(max_from, bits_dict["from"])
                 to_ret += (
-                    f"    {inst_var_name}.imm |= "
+                    f"{inst_var_name}.imm |= "
                     f"{gen_getbits(bits_dict, bin_inst_name)};\n"
                 )
 
@@ -184,7 +183,7 @@ def gen_fill_inst(
     if has_imm and sign_ext:
         assert max_from <= 32
         to_ret += (
-            f"    {inst_var_name}.imm = signExtend<{max_from + 1}>"
+            f"{inst_var_name}.imm = signExtend<{max_from + 1}>"
             f"({inst_var_name}.imm);\n"
         )
 
@@ -205,7 +204,7 @@ def gen_ifs(yaml_dict: RiscVDict) -> str:
         matched = int(match_str, 0)
         to_ret += f"if ((binInst & 0b{mask:032b}) == 0b{matched:032b}) {{\n"
         to_ret += gen_fill_inst(dec_data, inst_name)
-        to_ret += "    return decodedInst;\n}\n"
+        to_ret += "return decodedInst;\n}\n"
 
     return to_ret
 
@@ -228,17 +227,17 @@ def gen_switches(yaml_dict: RiscVDict) -> str:
     mask_dict = gen_by_mask_dict(yaml_dict)
 
     for mask, insts_dict in mask_dict.items():
-        to_ret += f"  switch (binInst & 0b{mask:032b}) {{\n"
+        to_ret += f"switch (binInst & 0b{mask:032b}) {{\n"
 
         for inst_name, dec_dict in insts_dict.items():
             matched = dec_dict["match"]
             assert isinstance(matched, str)
 
-            to_ret += f"  case 0b{int(matched, 0):032b}:\n"
+            to_ret += f"case 0b{int(matched, 0):032b}:\n"
             to_ret += gen_fill_inst(dec_dict, inst_name)
-            to_ret += "    return decodedInst;\n"
+            to_ret += "return decodedInst;\n"
 
-        to_ret += "  default:\n    break;\n  }\n"
+        to_ret += "default:\nbreak;\n}\n"
 
     return to_ret
 
@@ -248,7 +247,7 @@ def gen_maps(yaml_dict: RiscVDict) -> str:
 
     def make_map_def(mask: int) -> str:
         return (
-            "  static const std::unordered_map<decltype(binInst), "
+            "static const std::unordered_map<decltype(binInst), "
             + "std::function<Instruction(decltype(binInst))>> "
             + f"decMap_{mask:04X} = {{\n"
         )
@@ -262,11 +261,11 @@ def gen_maps(yaml_dict: RiscVDict) -> str:
         dec_map_name = f"decMap_{mask:04X}"
 
         map_finds += (
-            f"  if (auto it = {dec_map_name}.find(binInst & 0b{mask:032b}); "
+            f"if (auto it = {dec_map_name}.find(binInst & 0b{mask:032b}); "
             + f"it != {dec_map_name}.end()) {{\n"
         )
-        map_finds += "    return it->second(binInst);\n"
-        map_finds += "  }\n"
+        map_finds += "return it->second(binInst);\n"
+        map_finds += "}\n"
 
         maps_defs[mask] = make_map_def(mask)
 
@@ -275,15 +274,15 @@ def gen_maps(yaml_dict: RiscVDict) -> str:
             assert isinstance(matched, str)
 
             maps_defs[mask] += (
-                f"    {{0b{int(matched, 0):032b}, "
+                f"{{0b{int(matched, 0):032b}, "
                 "[]([[maybe_unused]] decltype(binInst) bInst) {\n"
-                + "      Instruction decInst;\n"
+                + "Instruction decInst;\n"
             )
             maps_defs[mask] += gen_fill_inst(
                 dec_dict, inst_name, "decInst", "bInst"
             )
-            maps_defs[mask] += "    return decInst;\n"
-            maps_defs[mask] += "    }},\n"
+            maps_defs[mask] += "return decInst;\n"
+            maps_defs[mask] += "}},\n"
 
         maps_defs[mask] += "};\n"
 
@@ -311,32 +310,48 @@ def gen_cc(
         fout.write(to_write)
 
 
-def gen_hh(filename: Path, yaml_dict: RiscVDict) -> None:
-    """Function to generate c++ header with enum with instructions"""
-
+def gen_hh_enum(hh_enum: Path, yaml_dict: RiscVDict) -> None:
     to_write = COMMENT
     to_write += "#include <string_view>\n"
     to_write += "#include <unordered_map>\n\n"
 
     to_write += "namespace sim {\n"
     to_write += "enum class OpType {\n"
-    to_write += "    UNKNOWN = 0,\n"
+    to_write += "UNKNOWN = 0,\n"
     for inst_name in yaml_dict:
-        to_write += f"    {inst_name.upper()},\n"
+        to_write += f"{inst_name.upper()},\n"
     to_write += "};\n\n"
 
     to_write += (
-        "inline std::unordered_map<OpType, std::string_view> opTypeToString {\n"
+        "extern const std::unordered_map<OpType, std::string_view> "
+        "opTypeToString;"
+    )
+    to_write += "}\n"
+
+    with open(hh_enum, "w", encoding="utf-8") as fout:
+        fout.write(to_write)
+
+
+def gen_cc_map(map_cc: Path, yaml_dict: RiscVDict) -> None:
+    to_write = (
+        "const std::unordered_map<sim::OpType, std::string_view> "
+        "sim::opTypeToString {"
     )
     for inst_name in yaml_dict:
         iname = inst_name.upper()
-        to_write += f'    {{OpType::{iname}, "{iname}"}},\n'
+        to_write += f'{{sim::OpType::{iname}, "{iname}"}},\n'
     to_write += "};\n\n"
 
-    to_write += "}\n"
-
-    with open(filename, "w", encoding="utf-8") as fout:
+    with open(map_cc, "w", encoding="utf-8") as fout:
         fout.write(to_write)
+
+
+def gen_enum(
+    filename_hh: Path, filename_cc: Path, yaml_dict: RiscVDict
+) -> None:
+    """Function to generate c++ header with enum with instructions"""
+    gen_hh_enum(filename_hh, yaml_dict)
+    gen_cc_map(filename_cc, yaml_dict)
 
 
 GENERATORS = {func.__name__: func for func in (gen_ifs, gen_maps, gen_switches)}
@@ -365,7 +380,14 @@ def main() -> None:
         "--enum-file",
         required=True,
         type=Path,
-        help="Output .hh file for OpType enum definition",
+        help="Output .hh file for OpType enum def & map decl",
+    )
+    parser.add_argument(
+        "-m",
+        "--map-file",
+        required=True,
+        type=Path,
+        help="Output .ii file for OpType map definition",
     )
 
     parser.add_argument(
@@ -388,7 +410,7 @@ def main() -> None:
 
     # generate enum & decoder files
     gen_cc(args.decoder_file, yaml_data, GENERATORS[args.generator])
-    gen_hh(args.enum_file, yaml_data)
+    gen_enum(args.enum_file, args.map_file, yaml_data)
 
 
 if "__main__" == __name__:

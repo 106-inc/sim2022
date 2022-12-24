@@ -1,8 +1,3 @@
-find_package(
-  Python3
-  COMPONENTS Interpreter
-  REQUIRED)
-
 set(SIM_RISCV_DIR ${CMAKE_SOURCE_DIR}/thirdparty/riscv-opcodes)
 
 execute_process(

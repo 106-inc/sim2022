@@ -1,7 +1,7 @@
 from os import path
 import lit.formats
 
-config.name = 'Triangles testing'
+config.name = 'sim2022 testing'
 config.test_format = lit.formats.ShTest(True)
 
 config.suffixes = ['.c', '.s']

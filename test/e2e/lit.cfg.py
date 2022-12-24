@@ -16,5 +16,8 @@ config.substitutions.append(
     ("%fc", "FileCheck-10 --allow-empty --match-full-lines")
 )
 config.substitutions.append(
-    ("%gcc", "riscv32-unknown-elf-gcc -O0 -nostdlib -e main -static-libgcc")
+    (
+        "%gcc",
+        "riscv32-unknown-elf-gcc -O0 -nostdlib -e main -static-libgcc -ffreestanding",
+    )
 )

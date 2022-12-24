@@ -10,4 +10,6 @@ foreach(LIB ${LIBLIST})
   format_target(${LIB} ${CMAKE_CURRENT_SOURCE_DIR}/${LIB} ${LIB}.cc)
 endforeach()
 
-set(LIBLIST "${LIBLIST}" PARENT_SCOPE)
+set(LIBLIST
+    "${LIBLIST}"
+    PARENT_SCOPE)

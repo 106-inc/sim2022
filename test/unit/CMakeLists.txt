@@ -13,7 +13,8 @@ if(BUILD_TESTS)
   message(STATUS "Collected unit tests: ${TESTLIST}")
 
   foreach(TEST ${TESTLIST})
-    target_include_directories(${TEST} PRIVATE ${GTEST_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${TEST} PRIVATE ${GTEST_INCLUDE_DIRS}
+                                               ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(${TEST} PRIVATE ${GTEST_BOTH_LIBRARIES} pthread)
     target_link_libraries(${TEST} PRIVATE ${LIBLIST})
 

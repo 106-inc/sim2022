@@ -46,4 +46,7 @@ add_custom_target(
   DEPENDS ${ENUM_GEN_FILE} ${DEC_GEN_FILE}
   COMMENT "Checking if regeneration is required")
 
+set(GEN_FILES ${DEC_GEN_FILE} ${ENUM_GEN_FILE})
+
 add_library(decoder decoder.cc ${DEC_GEN_FILE})
+format_sources(decoder "" "${GEN_FILES}" "decoder_gen" DecoderGenerator)

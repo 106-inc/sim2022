@@ -30,7 +30,7 @@ add_custom_command(
 
 set(DEC_GEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/decoder.gen.cc)
 set(ENUM_GEN_FILE ${CMAKE_BINARY_DIR}/include/codegen/enum.gen.hh)
-set(MAP_GEN_FILE ${CMAKE_BINARY_DIR}/src/common/map.gen.cc)
+set(MAP_GEN_FILE ${CMAKE_BINARY_DIR}/src/common/map.gen.ii)
 
 add_custom_command(
   OUTPUT ${DEC_GEN_FILE} ${ENUM_GEN_FILE} ${MAP_GEN_FILE}

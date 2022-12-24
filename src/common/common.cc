@@ -38,3 +38,5 @@ std::string RegFile::str() const {
   return ss.str();
 }
 } // namespace sim
+
+#include "map.gen.ii"

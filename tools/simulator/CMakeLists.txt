@@ -1,2 +1,1 @@
-add_executable(simulator main.cc)
-format_target(simulator ${CMAKE_CURRENT_SOURCE_DIR} main.cc)
+add_format_exec(simulator main.cc)

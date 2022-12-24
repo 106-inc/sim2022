@@ -332,9 +332,8 @@ def gen_hh_enum(hh_enum: Path, yaml_dict: RiscVDict) -> None:
         fout.write(to_write)
 
 
-def gen_cc_map(enum_hh: Path, map_cc: Path, yaml_dict: RiscVDict) -> None:
-    to_write = f'#include "{str(enum_hh.resolve())}"\n'
-    to_write += (
+def gen_cc_map(map_cc: Path, yaml_dict: RiscVDict) -> None:
+    to_write = (
         "const std::unordered_map<sim::OpType, std::string_view> "
         "sim::opTypeToString {"
     )
@@ -352,7 +351,7 @@ def gen_enum(
 ) -> None:
     """Function to generate c++ header with enum with instructions"""
     gen_hh_enum(filename_hh, yaml_dict)
-    gen_cc_map(filename_hh, filename_cc, yaml_dict)
+    gen_cc_map(filename_cc, yaml_dict)
 
 
 GENERATORS = {func.__name__: func for func in (gen_ifs, gen_maps, gen_switches)}
@@ -388,7 +387,7 @@ def main() -> None:
         "--map-file",
         required=True,
         type=Path,
-        help="Output .cc file for OpType map definition",
+        help="Output .ii file for OpType map definition",
     )
 
     parser.add_argument(

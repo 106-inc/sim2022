@@ -1,6 +1,6 @@
 find_package(
   Python3 3.10
-  COMPONENTS Interpreter
+  COMPONENTS Interpreter Development
   REQUIRED)
 
 set(SIM_RISCV_DIR ${CMAKE_SOURCE_DIR}/thirdparty/riscv-opcodes)

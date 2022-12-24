@@ -8,6 +8,6 @@ unsigned fact(unsigned n) {
 }
 
 int main() {
-  unsigned res = fact(5);
+  fact(5);
   asm("ecall");
 }

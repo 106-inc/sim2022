@@ -18,6 +18,6 @@ config.substitutions.append(
 config.substitutions.append(
     (
         "%gcc",
-        "riscv32-unknown-elf-gcc -O0 -e main",
+        "riscv32-unknown-elf-gcc -O0 -e main -nostdlib -march=rv32g",
     )
 )

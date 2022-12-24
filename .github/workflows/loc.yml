@@ -1,8 +1,6 @@
 name: Lines of code
 
-on:
-  push:
-    branches: [ "master" ]
+on: push
 
 jobs:
   loc:

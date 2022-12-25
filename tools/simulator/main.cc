@@ -7,6 +7,7 @@
 #include <CLI/Formatter.hpp>
 
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 #include "common/common.hh"
@@ -15,9 +16,10 @@
 namespace fs = std::filesystem;
 namespace lvl = spdlog::level;
 
-void initCosimLogger(const fs::path &cosimFile) {
-  auto logger =
-      spdlog::basic_logger_mt(sim::kCosimLoggerName.data(), cosimFile, true);
+void initCosimLogger(const fs::path &cosimFile, bool toStdout) {
+  auto logger = toStdout ? spdlog::stdout_color_mt(sim::kCosimLoggerName.data())
+                         : spdlog::basic_logger_mt(sim::kCosimLoggerName.data(),
+                                                   cosimFile, true);
   logger->set_pattern("%v");
   logger->set_level(spdlog::level::info);
 }
@@ -40,12 +42,24 @@ int main(int argc, char **argv) try {
       ->required()
       ->check(CLI::ExistingFile);
 
+  bool isCosim{false};
+  auto *isCosimOpt = app.add_flag("--cosim", isCosim, "Enable cosim mode");
+
   fs::path cosimFile{};
-  auto *cosimOpt = app.add_option("--cosim", cosimFile,
-                                  "Cosimulation mode. Dump to specified file")
-                       ->expected(0, 1)
-                       ->default_val("./trace.txt")
-                       ->check(!CLI::ExistingDirectory);
+  auto *cosimFileOpt = app.add_option("--cosim-file", cosimFile,
+                                      "Dump cosim to file instead of stdout")
+                           ->expected(0, 1)
+                           ->default_val("./trace.txt")
+                           ->check(!CLI::ExistingDirectory)
+                           ->needs(isCosimOpt);
+
+  isCosimOpt->check(
+      [&loggingLevel, &cosimFileOpt](const std::string &) -> std::string {
+        if (loggingLevel < lvl::warn && !*cosimFileOpt)
+          return "To dump cosim data to stdout, at least warn log level is "
+                 "required";
+        return "";
+      });
 
   try {
     app.parse(argc, argv);
@@ -54,8 +68,8 @@ int main(int argc, char **argv) try {
   }
 
   spdlog::set_level(loggingLevel);
-  if (*cosimOpt) {
-    initCosimLogger(cosimFile);
+  if (isCosim) {
+    initCosimLogger(cosimFile, !*cosimFileOpt);
   }
   sim::Hart hart{input};
   hart.run();

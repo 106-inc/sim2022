@@ -7,7 +7,6 @@
 #include <CLI/Formatter.hpp>
 
 #include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 #include "common/common.hh"
@@ -17,10 +16,8 @@ namespace fs = std::filesystem;
 namespace lvl = spdlog::level;
 
 void initCosimLogger(const fs::path &cosimFile) {
-  auto logger = cosimFile.empty()
-                    ? spdlog::stdout_color_mt(sim::kCosimLoggerName.data())
-                    : spdlog::basic_logger_mt(sim::kCosimLoggerName.data(),
-                                              cosimFile, true);
+  auto logger =
+      spdlog::basic_logger_mt(sim::kCosimLoggerName.data(), cosimFile, true);
   logger->set_pattern("%v");
   logger->set_level(spdlog::level::info);
 }
@@ -34,19 +31,21 @@ int main(int argc, char **argv) try {
       {"warn", lvl::warn},   {"warning", lvl::warn},      {"err", lvl::err},
       {"error", lvl::err},   {"critical", lvl::critical}, {"off", lvl::off}};
 
-  auto *logOpt = app.add_option("-l,--log", loggingLevel, "Level settings")
-                     ->transform(CLI::CheckedTransformer(map, CLI::ignore_case))
-                     ->default_val("warn");
+  app.add_option("-l,--log", loggingLevel, "Level settings")
+      ->transform(CLI::CheckedTransformer(map, CLI::ignore_case))
+      ->default_val("warn");
 
   fs::path input{};
-  app.add_option("input", input, "Executable file")->required();
+  app.add_option("input", input, "Executable file")
+      ->required()
+      ->check(CLI::ExistingFile);
 
   fs::path cosimFile{};
-  auto *cosimOpt =
-      app.add_option("--cosim", cosimFile,
-                     "Cosimulation mode. Dump to specified file or to stdout")
-          ->expected(0, 1)
-          ->excludes(logOpt);
+  auto *cosimOpt = app.add_option("--cosim", cosimFile,
+                                  "Cosimulation mode. Dump to specified file")
+                       ->expected(0, 1)
+                       ->default_val("./trace.txt")
+                       ->check(!CLI::ExistingDirectory);
 
   try {
     app.parse(argc, argv);

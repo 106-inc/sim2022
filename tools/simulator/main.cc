@@ -42,8 +42,7 @@ int main(int argc, char **argv) try {
       ->required()
       ->check(CLI::ExistingFile);
 
-  bool isCosim{false};
-  auto *isCosimOpt = app.add_flag("--cosim", isCosim, "Enable cosim mode");
+  auto *isCosimOpt = app.add_flag("--cosim", "Enable cosim mode");
 
   fs::path cosimFile{};
   auto *cosimFileOpt = app.add_option("--cosim-file", cosimFile,
@@ -68,7 +67,7 @@ int main(int argc, char **argv) try {
   }
 
   spdlog::set_level(loggingLevel);
-  if (isCosim) {
+  if (*isCosimOpt) {
     initCosimLogger(cosimFile, !*cosimFileOpt);
   }
   sim::Hart hart{input};

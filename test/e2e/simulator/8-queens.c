@@ -1,10 +1,12 @@
+// RUN: %gcc %s -o queens
+
 /*
- *		8-queens.c
- *			Solve the eight queens problem using backtracking
+ *    8-queens.c
+ *      Solve the eight queens problem using backtracking
  *
- *				begun: March 1, 2002
- *					by: Steven Skiena
- *					*/
+ *        begun: March 1, 2002
+ *          by: Steven Skiena
+ *          */
 
 /*
  * Copyright 2003 by Steven S. Skiena; all rights reserved.
@@ -38,6 +40,10 @@ int solution_count; /* how many solutions are there? */
 
 bool finished = FALSE; /* found all solutions yet? */
 
+int is_a_solution(int a[], int k, int n);
+void process_solution(int a[], int k);
+void construct_candidates(int a[], int k, int n, int c[], int *ncandidates);
+
 void backtrack(int a[], int k, data input) {
   int c[MAXCANDIDATES]; /* candidates for next position */
   int ncandidates;      /* next position candidate count */
@@ -65,9 +71,9 @@ void process_solution(int a[], int k) {
 
 int is_a_solution(int a[], int k, int n) { return (k == n); }
 
-/*	What are possible elements of the next slot in the 8-queens
- *		problem?
- *		*/
+/*  What are possible elements of the next slot in the 8-queens
+ *    problem?
+ *    */
 
 int abs(int v) { return v > 0 ? v : -v; }
 

@@ -46,6 +46,9 @@ endif()
 find_package(spdlog REQUIRED)
 message("Found package: spdlog")
 
+find_package( Python3 3.10 COMPONENTS Interpreter Development REQUIRED)
+message("Found package: python")
+
 add_subdirectory(docs)
 add_subdirectory(src)
 add_subdirectory(tools)

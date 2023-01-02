@@ -6,16 +6,16 @@ std::string Instruction::str() const {
   std::stringstream ss{};
 
   ss << std::setw(9) << opTypeToString.at(type) << " {";
-  ss << "rs1 = " << std::setw(2) << rs1 << ", ";
-  ss << "rs2 = " << std::setw(2) << rs2 << ", ";
-  ss << "rs3 = " << std::setw(2) << rs3 << ", ";
+  ss << "rs1 = " << std::setw(2) << std::to_string(rs1) << ", ";
+  ss << "rs2 = " << std::setw(2) << std::to_string(rs2) << ", ";
+  ss << "rs3 = " << std::setw(2) << std::to_string(rs3) << ", ";
 
-  ss << "rd = " << std::setw(2) << rd << ", ";
-  ss << "rm = " << std::setw(2) << rm << ", ";
-  ss << "csr = " << std::setw(2) << csr << ", ";
+  ss << "rd = " << std::setw(2) << std::to_string(rd) << ", ";
+  ss << "rm = " << std::setw(2) << std::to_string(rm) << ", ";
+  ss << "csr = " << std::setw(2) << std::to_string(csr) << ", ";
 
   ss << "imm = 0x" << std::hex << std::setfill('0')
-     << std::setw(sizeof(imm) * 2) << imm << "}";
+     << std::setw(sizeof(imm) * 2) << std::to_string(imm) << "}";
 
   return ss.str();
 }

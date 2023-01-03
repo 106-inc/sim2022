@@ -20,7 +20,9 @@ RUN apt-get update                     && \
     python3-pip                           \
                                           \
     libspdlog-dev                         \
-    libgtest-dev                       && \
+    libgtest-dev                          \
+                                          \
+    llvm-14-tools                      && \
                                           \
     pip3 install -r /opt/requirements.txt
 

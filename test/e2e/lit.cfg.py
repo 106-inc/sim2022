@@ -13,7 +13,7 @@ config.substitutions.append(
     ("%simulator", path.join(config.my_obj_root, "bin/simulator"))
 )
 config.substitutions.append(
-    ("%fc", "FileCheck-10 --allow-empty --match-full-lines")
+    ("%fc", "FileCheck-14 --allow-empty --match-full-lines")
 )
 config.substitutions.append(
     (

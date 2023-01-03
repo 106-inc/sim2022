@@ -1,8 +1,8 @@
 // RUN: %gcc %s -o fact.out
 // RUN: %simulator fact.out --cosim > %t
-// RUN: FileCheck-11 %s --input-file %t --check-prefix=CHECK02
-// RUN: FileCheck-11 %s --input-file %t --check-prefix=CHECK01
-// RUN: FileCheck-11 %s --input-file %t --check-prefix=CHECK00
+// RUN: %fc %s --input-file %t --check-prefix=CHECK02
+// RUN: %fc %s --input-file %t --check-prefix=CHECK01
+// RUN: %fc %s --input-file %t --check-prefix=CHECK00
 // RUN: rm fact.out
 
 unsigned fact(unsigned n) {

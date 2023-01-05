@@ -74,14 +74,7 @@ public:
     uint16_t offset{};
 
     AddrSections(uint32_t pt, uint16_t off) : indexPt(pt), offset(off) {}
-    AddrSections(Addr addr) {
-      constexpr std::pair<uint8_t, uint8_t> of_bits{kOffsetBits - 1, 0};
-      constexpr std::pair<uint8_t, uint8_t> pt_bits{sizeofBits<Addr>() - 1,
-                                                    kOffsetBits};
-      indexPt = getBits<pt_bits.first, pt_bits.second>(addr);
-      offset =
-          static_cast<uint16_t>(getBits<of_bits.first, of_bits.second>(addr));
-    }
+    AddrSections(Addr addr) : AddrSections(getPt(addr), getOffset(addr)) {}
     bool operator==(const AddrSections &) const = default;
   };
 
@@ -102,7 +95,8 @@ public:
   template <MemoryOp op> PagePtr pageTableLookup(const AddrSections &sect);
 
   template <isSimType T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
-  uint16_t getOffset(Addr addr);
+  constexpr static uint16_t getOffset(Addr addr);
+  constexpr static uint8_t getPt(Addr addr);
 
 private:
   PT pageTable{};
@@ -149,19 +143,22 @@ public:
 
 template <isSimType T, PhysMemory::MemoryOp op>
 inline T *PhysMemory::getEntity(Addr addr) {
-  if (addr % sizeof(T) || ((getOffset(addr) + sizeof(T)) > (1 << kOffsetBits)))
+  auto offset = getOffset(addr);
+
+  if (addr % sizeof(T) || ((offset + sizeof(T)) > (1 << kOffsetBits)))
     throw PhysMemory::MisAlignedAddrException(
         "Misaligned memory access is not supported!");
-  AddrSections sections(addr);
-  auto offset = sections.offset;
+
   auto isInTLB = tlb.tlbLookup(addr);
   PagePtr page;
+
   if (isInTLB) {
     page = isInTLB;
   } else {
-    page = PhysMemory::pageTableLookup<op>(sections);
+    page = PhysMemory::pageTableLookup<op>({getPt(addr), offset});
     tlb.tlbUpdate(addr, page);
   }
+
   Word *word = &page->wordStorage.at(offset / sizeof(Word));
   Byte *byte = reinterpret_cast<Byte *>(word) + (offset % sizeof(Word));
   return reinterpret_cast<T *>(byte);
@@ -201,8 +198,13 @@ inline void Memory::printMemStats(std::ostream &ost) const {
 
 inline const Memory::MemoryStats &Memory::getMemStats() const { return stats; }
 
-inline uint16_t PhysMemory::getOffset(Addr addr) {
+constexpr inline uint16_t PhysMemory::getOffset(Addr addr) {
   return static_cast<uint16_t>(getBits<kOffsetBits - 1, 0>(addr));
+}
+
+constexpr inline uint8_t PhysMemory::getPt(Addr addr) {
+  return static_cast<uint8_t>(
+      getBits<sizeofBits<Addr>() - 1, kOffsetBits>(addr));
 }
 
 inline Word Memory::loadWord(Addr addr) {
@@ -257,12 +259,13 @@ inline PagePtr TLB::tlbLookup(Addr addr) {
     stats.TLBMisses++;
     return nullptr;
   }
-  if (it->second.virtualAddress != addr) {
+  const auto &entry = it->second;
+  if (entry.virtualAddress != addr) {
     stats.TLBMisses++;
     return nullptr;
   }
   stats.TLBHits++;
-  return it->second.physPage;
+  return entry.physPage;
 }
 
 inline void TLB::tlbUpdate(Addr addr, PagePtr page) {

@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <spdlog/fmt/fmt.h>
+
 #include "common.hh"
 
 namespace sim {
@@ -30,5 +32,14 @@ struct Instruction final {
 using BasicBlock = std::vector<Instruction>;
 
 } // namespace sim
+
+template <> struct fmt::formatter<sim::Instruction> {
+  constexpr auto parse(format_parse_context &ctx) { return ctx.end(); }
+
+  template <typename FormatContext>
+  auto format(const sim::Instruction &inst, FormatContext &ctx) const {
+    return fmt::format_to(ctx.out(), "{}", inst.str());
+  }
+};
 
 #endif // __INCLUDE_COMMON_INST_HH__

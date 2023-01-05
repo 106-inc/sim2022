@@ -2,12 +2,14 @@
 #define __INCLUDE_COMMON_STATE_HH__
 
 #include <array>
+#include <fmt/core.h>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 
 #include "common/common.hh"
@@ -59,5 +61,14 @@ struct State final {
 };
 
 } // namespace sim
+
+template <> struct fmt::formatter<sim::RegFile> {
+  constexpr auto parse(format_parse_context &ctx) { return ctx.end(); }
+
+  template <typename FormatContext>
+  auto format(const sim::RegFile &regFile, FormatContext &ctx) const {
+    return fmt::format_to(ctx.out(), "{}", regFile.str());
+  }
+};
 
 #endif // __INCLUDE_COMMON_STATE_HH__

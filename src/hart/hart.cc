@@ -30,7 +30,7 @@ BasicBlock Hart::createBB(Addr addr) {
       throw std::logic_error{
           "Unknown instruction found while decoding basic block" + inst.str()};
 
-    spdlog::trace(inst.str());
+    spdlog::trace("{}", inst);
     isBranch = inst.isBranch;
     bb.push_back(inst);
   }

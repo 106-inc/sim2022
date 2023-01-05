@@ -41,10 +41,12 @@ BasicBlock Hart::createBB(Addr addr) {
 
 void Hart::run() {
   while (!state_.complete) {
-    if (cache_.find(getPC()) == cache_.end())
-      cache_[getPC()] = createBB(getPC());
+    auto [iter, inserted] = cache_.try_emplace(getPC());
 
-    const auto &bb = cache_[getPC()];
+    if (inserted)
+      iter->second = createBB(getPC());
+
+    const auto &bb = iter->second;
     exec_.execute(bb.begin(), bb.end(), state_);
   }
 }

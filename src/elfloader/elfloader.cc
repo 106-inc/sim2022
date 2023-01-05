@@ -59,8 +59,7 @@ std::vector<Word> ELFLoader::getSegment(IndexT index) const {
   auto segmentSize = segment->get_memory_size() / factor;
 
   if (data == nullptr)
-    return std::vector<Word>(
-        static_cast<std::vector<Word>::size_type>(segmentSize));
+    return std::vector<Word>(segmentSize);
 
   return std::vector<Word>{data, data + segmentSize};
 }

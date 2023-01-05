@@ -1,5 +1,5 @@
 // RUN: %gcc %s -o %t
-// RUN: %simulator %t
+// RUN: %simulator --cosim %t | %fc %s
 
 typedef int bool;
 
@@ -70,26 +70,16 @@ int main() {
 
   solution_count = 0;
   backtrack(a, 0, 8);
+
+  // CHECK: NUM=2952531
+  // CHECK: M[0x110003b0]=0x0000005d
+  // CHECK: PC=0x00010394
   solution_count += 1;
+
+  // CHECK: NUM=2952532
+  // CHECK: PC=0x00010398
   asm("ecall");
 }
-
-#if 0
-int main() {
-  int a[NMAX]; /* solution vector */
-  int i;       /* counter */
-  int compare[] = {1, 0, 0, 2, 10, 4, 40, 92};
-
-  for (i = 1; i <= 8; i++) {
-    solution_count = 0;
-    backtrack(a, 0, i);
-    printf("n=%d  solution_count=%d\n", i, solution_count);
-    if (compare[i - 1] != solution_count)
-      return 1;
-  }
-  return 0;
-}
-#endif
 
 /*
  *    8-queens.c

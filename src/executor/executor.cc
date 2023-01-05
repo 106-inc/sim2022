@@ -209,6 +209,8 @@ const std::unordered_map<OpType,
              state.npc = state.pc + inst.imm;
            }
          }},
-    };
+        {OpType::XOR, [](const Instruction &inst, State &state) {
+           executeRegisterRegisterOp(inst, state, std::bit_xor<RegVal>());
+         }}};
 
 } // namespace sim

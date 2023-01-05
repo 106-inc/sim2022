@@ -172,16 +172,16 @@ PagePtr PhysMemory::pageTableLookup(const AddrSections &sect) {
 
   using MemOp = PhysMemory::MemoryOp;
   auto index = sect.indexPt;
-  auto it_PT = pageTable.find(index);
-  if (it_PT == pageTable.end()) {
-    if constexpr (op == MemOp::LOAD)
+  auto [it_PT, inserted] = pageTable.try_emplace(index);
+
+  if constexpr (op == MemOp::LOAD) {
+    if (inserted) {
       throw PhysMemory::PageFaultException(
           "Load on unmapped region in physical mem");
-    else {
-      pageTable[index] = Page();
     }
   }
-  return &pageTable.at(index);
+
+  return &it_PT->second;
 }
 
 template <std::forward_iterator It>
@@ -268,7 +268,7 @@ inline PagePtr TLB::tlbLookup(Addr addr) {
 inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
 
   auto idx = getTLBIndex(addr);
-  tlb[idx] = TLBEntry(addr, page);
+  tlb.insert_or_assign(idx, TLBEntry(addr, page));
 }
 
 inline const TLB::TLBStats &TLB::getTLBStats() const { return stats; }

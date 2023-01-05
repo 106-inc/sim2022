@@ -31,7 +31,7 @@ public:
     if (!regnum)
       return;
 
-    cosimLog("x{}=0x{:08x}", regnum, val);
+    // cosimLog("x{}=0x{:08x}", regnum, val);
     regs.at(regnum) = val;
   }
 

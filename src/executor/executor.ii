@@ -1,0 +1,154 @@
+#ifndef SIM2022_MAKE_EXEC_DEF
+#define SIM2022_MAKE_EXEC_DEF
+#error "Define the macro before including this file"
+#endif
+
+SIM2022_MAKE_EXEC_DEF(ADD, {
+  executeRegisterRegisterOp(inst, state, std::plus<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(SUB, {
+  executeRegisterRegisterOp(inst, state, std::minus<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(MUL, {
+  executeRegisterRegisterOp(inst, state, std::multiplies<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(DIV, {
+  auto rs2 = state.regs.get(inst.rs2);
+  if (rs2 == 0) {
+    throw std::logic_error("division by zero");
+  }
+  executeRegisterRegisterOp(inst, state, std::divides<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(LW, {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto word = state.mem.loadWord(rs1 + inst.imm);
+  state.regs.set(inst.rd, word);
+})
+
+SIM2022_MAKE_EXEC_DEF(SW, {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto rs2 = state.regs.get(inst.rs2);
+  state.mem.storeWord(rs1 + inst.imm, rs2);
+})
+
+SIM2022_MAKE_EXEC_DEF(JAL, {
+  state.branchIsTaken = true;
+  state.regs.set(inst.rd, state.pc + kXLENInBytes);
+  state.npc = state.pc + inst.imm;
+})
+
+SIM2022_MAKE_EXEC_DEF(JALR, {
+  state.branchIsTaken = true;
+  state.regs.set(inst.rd, state.pc + kXLENInBytes);
+  auto rs1 = state.regs.get(inst.rs1);
+  state.npc = (setBit<0, 0>(rs1 + inst.imm)); // setting the least-significant
+                                            // bit of the result to zero.
+})
+
+SIM2022_MAKE_EXEC_DEF(ECALL, { state.complete = true; })
+
+SIM2022_MAKE_EXEC_DEF(ADDI, {
+  executeRegisterImmidiateOp(inst, state, std::plus<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(ANDI, {
+  executeRegisterImmidiateOp(inst, state, std::bit_and<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(XORI, {
+  executeRegisterImmidiateOp(inst, state, std::bit_xor<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(ORI, {
+  executeRegisterImmidiateOp(inst, state, std::bit_or<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(SLTI, {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto lhs = signCast(rs1);
+  auto rhs = signCast(inst.imm);
+  auto res = unsignedCast(executeSLT(lhs, rhs));
+  state.regs.set(inst.rd, res);
+})
+
+SIM2022_MAKE_EXEC_DEF(SLTIU, {
+  auto rs1 = state.regs.get(inst.rs1);
+  state.regs.set(inst.rd, executeSLT(rs1, inst.imm));
+})
+
+SIM2022_MAKE_EXEC_DEF(LUI, { state.regs.set(inst.rd, inst.imm << 12); })
+
+SIM2022_MAKE_EXEC_DEF(AUIPC,
+                      { state.regs.set(inst.rd, state.pc + (inst.imm << 12)); })
+
+SIM2022_MAKE_EXEC_DEF(SLLI, {
+  auto shamt = (getBits<4, 0>(inst.imm));
+  auto rs1 = state.regs.get(inst.rs1);
+  state.regs.set(inst.rd, rs1 << shamt);
+})
+
+SIM2022_MAKE_EXEC_DEF(SRLI, {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto res = executeSRLT(rs1, inst.imm);
+  state.regs.set(inst.rd, res);
+})
+
+SIM2022_MAKE_EXEC_DEF(SRAI, {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto signedRs1 = signCast(rs1);
+  auto res = unsignedCast(executeSRLT(signedRs1, inst.imm));
+  state.regs.set(inst.rd, res);
+})
+
+SIM2022_MAKE_EXEC_DEF(SLL, {
+  auto rs1 = state.regs.get(inst.rs1);
+  auto rs2 = state.regs.get(inst.rs2);
+  state.regs.set(inst.rd, rs1 << rs2);
+})
+
+SIM2022_MAKE_EXEC_DEF(SRL, {
+  executeRegisterRegisterOp(inst, state, executeSR<RegVal>);
+})
+
+SIM2022_MAKE_EXEC_DEF(SRA, {
+  auto rs1 = signCast(state.regs.get(inst.rs1));
+  auto rs2 = signCast(state.regs.get(inst.rs2));
+  auto res = unsignedCast(executeSR(rs1, rs2));
+  state.regs.set(inst.rd, res);
+})
+
+SIM2022_MAKE_EXEC_DEF(BEQ, {
+  executeCondBranch(inst, state, std::equal_to<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(BNE, {
+  executeCondBranch(inst, state, std::not_equal_to<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(BLT,
+                      { executeCondBranch(inst, state, std::less<RegVal>()); })
+
+SIM2022_MAKE_EXEC_DEF(BLTU, {
+  executeCondBranch(inst, state, std::greater<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(BGEU, {
+  executeCondBranch(inst, state, std::greater_equal<RegVal>());
+})
+
+SIM2022_MAKE_EXEC_DEF(BGE, {
+  auto rs1 = signCast(state.regs.get(inst.rs1));
+  auto rs2 = signCast(state.regs.get(inst.rs2));
+  if (rs1 >= rs2) {
+    state.branchIsTaken = true;
+    state.npc = state.pc + inst.imm;
+  }
+})
+
+SIM2022_MAKE_EXEC_DEF(XOR, {
+  executeRegisterRegisterOp(inst, state, std::bit_xor<RegVal>());
+})

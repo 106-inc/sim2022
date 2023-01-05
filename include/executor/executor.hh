@@ -19,8 +19,8 @@ concept InstForwardIterator = std::input_iterator<T> &&
 
 class Executor final {
 public:
-  using ExecutorMap = std::unordered_map<
-      OpType, std::function<void(const Instruction &inst, State &state)>>;
+  using ExecutorMap =
+      std::unordered_map<OpType, void (*)(const Instruction &, State &)>;
 
   Executor() = default;
   Executor(const Executor &) = delete;

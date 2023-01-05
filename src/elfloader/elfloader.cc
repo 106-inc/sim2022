@@ -24,13 +24,13 @@ Addr ELFLoader::getEntryPoint() const {
   return static_cast<Addr>(elfFile_.get_entry());
 }
 
-std::span<const Word> ELFLoader::getSection(const std::string &name) const {
+std::vector<Word> ELFLoader::getSection(const std::string &name) const {
   auto *section = getSectionPtr(name);
 
   auto *data = reinterpret_cast<const Word *>(section->get_data());
   constexpr auto factor = sizeof(Word) / sizeof(char);
 
-  return std::span<const Word>{data, section->get_size() / factor};
+  return std::vector<Word>{data, data + section->get_size() / factor};
 }
 
 Addr ELFLoader::getSectionAddr(const std::string &name) const {
@@ -50,13 +50,19 @@ std::vector<ELFLoader::IndexT> ELFLoader::getLoadableSegments() const {
   return res;
 }
 
-std::span<const Word> ELFLoader::getSegment(IndexT index) const {
+std::vector<Word> ELFLoader::getSegment(IndexT index) const {
   auto *segment = getSegmentPtr(index);
 
   auto *data = reinterpret_cast<const Word *>(segment->get_data());
   constexpr auto factor = sizeof(Word) / sizeof(char);
 
-  return std::span<const Word>{data, segment->get_memory_size() / factor};
+  auto segmentSize = segment->get_memory_size() / factor;
+
+  if (data == nullptr)
+    return std::vector<Word>(
+        static_cast<std::vector<Word>::size_type>(segmentSize));
+
+  return std::vector<Word>{data, data + segmentSize};
 }
 
 Addr ELFLoader::getSegmentAddr(IndexT index) const {

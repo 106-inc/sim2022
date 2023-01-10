@@ -19,6 +19,9 @@ concept InstForwardIterator = std::input_iterator<T> &&
 
 class Executor final {
 public:
+  using ExecutorMap =
+      std::unordered_map<OpType, void (*)(const Instruction &, State &)>;
+
   Executor() = default;
   Executor(const Executor &) = delete;
   Executor(Executor &&) = delete;
@@ -30,20 +33,18 @@ public:
   template <InstForwardIterator It>
   void execute(It begin, It end, State &state) {
     std::for_each(begin, end, [this, &state](const auto &inst) {
-      cosimLog("-----------------------");
-      cosimLog("NUM={}", instrCount);
+      // cosimLog("-----------------------");
+      // cosimLog("NUM={}", instrCount);
       this->execute(inst, state);
-      cosimLog("PC=0x{:08x}", state.pc);
-      spdlog::trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst.str());
-      spdlog::trace("Current regfile state:\n{}", state.regs.str());
+      // cosimLog("PC=0x{:08x}", state.pc);
+      // spdlog::trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst);
+      // spdlog::trace("Current regfile state:\n{}", state.regs);
       this->instrCount += 1;
     });
   }
 
 private:
-  static const std::unordered_map<
-      OpType, std::function<void(const Instruction, State &)>>
-      execMap_;
+  static const ExecutorMap execMap_;
   std::size_t instrCount{1};
 };
 

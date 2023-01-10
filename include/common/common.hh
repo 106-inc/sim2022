@@ -37,9 +37,14 @@ constexpr std::uint16_t kOffsetBits = 12;
 
 constexpr std::string_view kCosimLoggerName = "cosim";
 
+inline const auto &getCosimLogger() {
+  static auto coSimLogger = spdlog::get(kCosimLoggerName.data());
+  return coSimLogger;
+}
+
 template <typename... Args>
 void cosimLog(fmt::format_string<Args...> str, Args &&...args) {
-  auto coSimLogger = spdlog::get(kCosimLoggerName.data());
+  const auto &coSimLogger = getCosimLogger();
   if (coSimLogger) {
     coSimLogger->info(str, std::forward<Args>(args)...);
   }

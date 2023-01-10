@@ -14,9 +14,9 @@ int solution_count; /* how many solutions are there? */
 
 bool finished = FALSE; /* found all solutions yet? */
 
-bool is_a_solution(int[], int k, int n) { return (k == n); }
+bool is_a_solution(int a[], int k, int n) { return (k == n); }
 
-void process_solution(int[], int) { solution_count++; }
+void process_solution(int a[], int b) { solution_count++; }
 
 void construct_candidates(int a[], int k, int n, int c[], int *ncandidates);
 

@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <fmt/core.h>
+#include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 
 #include "common/common.hh"
@@ -29,7 +31,7 @@ public:
     if (!regnum)
       return;
 
-    cosimLog("x{}=0x{:08x}", regnum, val);
+    // cosimLog("x{}=0x{:08x}", regnum, val);
     regs.at(regnum) = val;
   }
 
@@ -59,5 +61,14 @@ struct State final {
 };
 
 } // namespace sim
+
+template <> struct fmt::formatter<sim::RegFile> {
+  constexpr auto parse(format_parse_context &ctx) { return ctx.end(); }
+
+  template <typename FormatContext>
+  auto format(const sim::RegFile &regFile, FormatContext &ctx) const {
+    return fmt::format_to(ctx.out(), "{}", regFile.str());
+  }
+};
 
 #endif // __INCLUDE_COMMON_STATE_HH__

@@ -23,28 +23,30 @@ Hart::Hart(const fs::path &executable) {
 BasicBlock Hart::createBB(Addr addr) {
   BasicBlock bb{};
 
-  spdlog::trace("Creating basic block:");
+  // spdlog::trace("Creating basic block:");
   for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {
     auto inst = decoder_.decode(getMem().loadWord(addr));
     if (inst.type == OpType::UNKNOWN)
       throw std::logic_error{
           "Unknown instruction found while decoding basic block" + inst.str()};
 
-    spdlog::trace(inst.str());
+    // spdlog::trace("{}", inst);
     isBranch = inst.isBranch;
     bb.push_back(inst);
   }
 
-  spdlog::trace("Basic blok created.");
+  // spdlog::trace("Basic blok created.");
   return bb;
 }
 
 void Hart::run() {
   while (!state_.complete) {
-    if (cache_.find(getPC()) == cache_.end())
-      cache_[getPC()] = createBB(getPC());
+    auto [iter, inserted] = cache_.try_emplace(getPC());
 
-    const auto &bb = cache_[getPC()];
+    if (inserted)
+      iter->second = createBB(getPC());
+
+    const auto &bb = iter->second;
     exec_.execute(bb.begin(), bb.end(), state_);
   }
 }

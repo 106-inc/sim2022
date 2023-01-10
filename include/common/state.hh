@@ -2,13 +2,13 @@
 #define __INCLUDE_COMMON_STATE_HH__
 
 #include <array>
-#include <fmt/core.h>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include <fmt/core.h>
 #include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 

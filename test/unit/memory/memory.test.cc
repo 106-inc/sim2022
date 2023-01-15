@@ -43,7 +43,7 @@ TEST(PhysMemory, AddrSectionsCtor) {
 
   sim::PhysMemory phMem;
   // 0xDEADB, 0xEEF
-  EXPECT_EQ(AddrSections(0xDEADBEEF), AddrSections(912091, 3823));
+  EXPECT_EQ(AddrSections(0xDEADBEEF), AddrSections(0xDEADB, 0xEEF));
   EXPECT_EQ(AddrSections(0x0), AddrSections(0, 0));
   // 2^20 - 1, 2^12 - 1
   EXPECT_EQ(AddrSections(0xFFFFFFFF), AddrSections(1048575, 4095));

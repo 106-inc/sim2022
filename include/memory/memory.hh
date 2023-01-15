@@ -96,7 +96,7 @@ public:
 
   template <isSimType T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
   constexpr static uint16_t getOffset(Addr addr);
-  constexpr static uint8_t getPt(Addr addr);
+  constexpr static uint32_t getPt(Addr addr);
 
 private:
   PT pageTable{};
@@ -202,8 +202,8 @@ constexpr inline uint16_t PhysMemory::getOffset(Addr addr) {
   return static_cast<uint16_t>(getBits<kOffsetBits - 1, 0>(addr));
 }
 
-constexpr inline uint8_t PhysMemory::getPt(Addr addr) {
-  return static_cast<uint8_t>(
+constexpr inline uint32_t PhysMemory::getPt(Addr addr) {
+  return static_cast<uint32_t>(
       getBits<sizeofBits<Addr>() - 1, kOffsetBits>(addr));
 }
 

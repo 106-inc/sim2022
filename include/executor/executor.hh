@@ -37,8 +37,8 @@ public:
       cosimLog("NUM={}", instrCount);
       this->execute(inst, state);
       cosimLog("PC=0x{:08x}", state.pc);
-      spdlog::trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst);
-      spdlog::trace("Current regfile state:\n{}", state.regs);
+      globalLogger()->trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst);
+      globalLogger()->trace("Current regfile state:\n{}", state.regs);
       this->instrCount += 1;
     });
   }

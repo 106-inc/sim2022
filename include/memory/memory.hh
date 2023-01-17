@@ -203,8 +203,7 @@ constexpr inline uint16_t PhysMemory::getOffset(Addr addr) {
 }
 
 constexpr inline uint32_t PhysMemory::getPt(Addr addr) {
-  return static_cast<uint32_t>(
-      getBits<sizeofBits<Addr>() - 1, kOffsetBits>(addr));
+  return getBits<sizeofBits<Addr>() - 1, kOffsetBits>(addr);
 }
 
 inline Word Memory::loadWord(Addr addr) {

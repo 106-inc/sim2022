@@ -19,6 +19,9 @@ concept InstForwardIterator = std::input_iterator<T> &&
 
 class Executor final {
 public:
+  using ExecutorMap = std::unordered_map<
+      OpType, std::function<void(const Instruction &inst, State &state)>>;
+
   Executor() = default;
   Executor(const Executor &) = delete;
   Executor(Executor &&) = delete;
@@ -34,16 +37,14 @@ public:
       cosimLog("NUM={}", instrCount);
       this->execute(inst, state);
       cosimLog("PC=0x{:08x}", state.pc);
-      spdlog::trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst.str());
-      spdlog::trace("Current regfile state:\n{}", state.regs.str());
+      getGlobalLogger()->trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst);
+      getGlobalLogger()->trace("Current regfile state:\n{}", state.regs);
       this->instrCount += 1;
     });
   }
 
 private:
-  static const std::unordered_map<
-      OpType, std::function<void(const Instruction, State &)>>
-      execMap_;
+  static const ExecutorMap execMap_;
   std::size_t instrCount{1};
 };
 

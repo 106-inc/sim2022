@@ -36,13 +36,24 @@ constexpr std::uint16_t kTLBBits = 10;
 constexpr std::uint16_t kOffsetBits = 12;
 
 constexpr std::string_view kCosimLoggerName = "cosim";
+constexpr std::string_view kGlobalLoggerName = "global";
+
+inline const auto &getCosimLogger() {
+  static auto coSimLogger = spdlog::get(kCosimLoggerName.data());
+  return coSimLogger;
+}
 
 template <typename... Args>
 void cosimLog(fmt::format_string<Args...> str, Args &&...args) {
-  auto coSimLogger = spdlog::get(kCosimLoggerName.data());
+  const auto &coSimLogger = getCosimLogger();
   if (coSimLogger) {
     coSimLogger->info(str, std::forward<Args>(args)...);
   }
+}
+
+inline const auto &getGlobalLogger() {
+  static auto logger = spdlog::get(kGlobalLoggerName.data());
+  return logger;
 }
 
 template <std::unsigned_integral T> constexpr auto signCast(T val) {

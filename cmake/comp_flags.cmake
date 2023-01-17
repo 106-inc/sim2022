@@ -81,17 +81,19 @@ set(GCC_WARNINGS
     -flto-odr-type-merging
     -fno-omit-frame-pointer)
 
-function(apply_compiler_flags TARGET VISIBILIY)
+function(apply_compiler_flags TARGET VISIBILITY)
   # Add sanitizers
-  target_link_options(${TARGET} ${VISIBILIY} "$<$<CONFIG:Debug>:${SANITIZERS}>")
-  target_compile_options(${TARGET} ${VISIBILIY}
+  target_link_options(${TARGET} ${VISIBILITY} "$<$<CONFIG:Debug>:${SANITIZERS}>")
+  target_compile_options(${TARGET} ${VISIBILITY}
                          "$<$<CONFIG:Debug>:${SANITIZERS}>")
 
   # Compile stuff
-  target_compile_options(${TARGET} ${VISIBILIY}
+  target_compile_options(${TARGET} ${VISIBILITY}
                          "$<$<CONFIG:Debug>:${COMMON_WARNINGS}>")
+  target_compile_options(${TARGET} ${VISIBILITY}
+                         "$<$<CONFIG:Debug>:-g>")
   target_compile_options(
-    ${TARGET} ${VISIBILIY}
+    ${TARGET} ${VISIBILITY}
     "$<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:Debug>:${GCC_WARNINGS}>>")
 endfunction()
 

@@ -21,7 +21,13 @@ void initCosimLogger(const fs::path &cosimFile, bool toStdout) {
                          : spdlog::basic_logger_mt(sim::kCosimLoggerName.data(),
                                                    cosimFile, true);
   logger->set_pattern("%v");
-  logger->set_level(spdlog::level::info);
+  logger->set_level(lvl::info);
+}
+
+void initGlobalLogger(lvl::level_enum lvl) {
+  auto logger = spdlog::stdout_color_mt(sim::kGlobalLoggerName.data());
+  logger->set_pattern("%v");
+  logger->set_level(lvl);
 }
 
 int main(int argc, char **argv) try {
@@ -66,7 +72,7 @@ int main(int argc, char **argv) try {
     return app.exit(e);
   }
 
-  spdlog::set_level(loggingLevel);
+  initGlobalLogger(loggingLevel);
   if (*isCosimOpt) {
     initCosimLogger(cosimFile, !*cosimFileOpt);
   }

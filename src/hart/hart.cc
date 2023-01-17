@@ -23,19 +23,19 @@ Hart::Hart(const fs::path &executable) {
 BasicBlock Hart::createBB(Addr addr) {
   BasicBlock bb{};
 
-  globalLogger()->trace("Creating basic block:");
+  getGlobalLogger()->trace("Creating basic block:");
   for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {
     auto inst = decoder_.decode(getMem().loadWord(addr));
     if (inst.type == OpType::UNKNOWN)
       throw std::logic_error{
           "Unknown instruction found while decoding basic block" + inst.str()};
 
-    globalLogger()->trace("{}", inst);
+    getGlobalLogger()->trace("{}", inst);
     isBranch = inst.isBranch;
     bb.push_back(inst);
   }
 
-  globalLogger()->trace("Basic blok created.");
+  getGlobalLogger()->trace("Basic blok created.");
   return bb;
 }
 

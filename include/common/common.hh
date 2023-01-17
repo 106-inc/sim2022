@@ -51,8 +51,8 @@ void cosimLog(fmt::format_string<Args...> str, Args &&...args) {
   }
 }
 
-inline const auto &globalLogger() {
-  static auto logger = spdlog::get(kCosimLoggerName.data());
+inline const auto &getGlobalLogger() {
+  static auto logger = spdlog::get(kGlobalLoggerName.data());
   return logger;
 }
 

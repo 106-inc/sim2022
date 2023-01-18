@@ -34,12 +34,12 @@ std::vector<ELFLoader::IndexT> ELFLoader::getLoadableSegments() const {
 
 std::size_t ELFLoader::getSegmentFileSize(IndexT index) const {
   auto *segment = getSegmentPtr(index);
-  return segment->get_file_size() / sizeof(Word);
+  return segment->get_file_size();
 }
 
 std::size_t ELFLoader::getSegmentMemorySize(IndexT index) const {
   auto *segment = getSegmentPtr(index);
-  return segment->get_memory_size() / sizeof(Word);
+  return segment->get_memory_size();
 }
 
 std::span<const Word> ELFLoader::getSegment(IndexT index) const {

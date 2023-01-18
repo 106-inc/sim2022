@@ -2,7 +2,7 @@
 #define __INCLUDE_ELFLOADER_ELFLOADER_HH__
 
 #include <filesystem>
-#include <vector>
+#include <span>
 
 #include <elfio/elfio.hpp>
 
@@ -22,14 +22,12 @@ public:
 
   Addr getEntryPoint() const;
 
-  std::vector<Word> getSection(const std::string &name) const;
-  Addr getSectionAddr(const std::string &name) const;
-  bool hasSection(const std::string &name) const;
-
   using IndexT = unsigned;
   std::vector<IndexT> getLoadableSegments() const;
 
-  std::vector<Word> getSegment(IndexT index) const;
+  std::size_t getSegmentFileSize(IndexT index) const;
+  std::size_t getSegmentMemorySize(IndexT index) const;
+  std::span<const Word> getSegment(IndexT index) const;
   Addr getSegmentAddr(IndexT index) const;
   bool hasSegment(IndexT index) const;
 

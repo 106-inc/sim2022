@@ -4,10 +4,20 @@
 #include "common/counters.hh"
 
 TEST(execute, timersUpdate) {
-  ASSERT_EQ(0, simulationState.csregs.get(sim::Counters::CSRBindings::instret));
+  ASSERT_EQ(0, simulationState.csregs.get(sim::Counters::CSRBindings::INSTRET));
+  ASSERT_EQ(0, simulationState.csregs.get(sim::Counters::CSRBindings::CYCLE));
   simulationState.csregs.updateTimers(sim::OpType::JAL);
-  ASSERT_EQ(1, simulationState.csregs.get(sim::Counters::CSRBindings::instret));
-  ASSERT_EQ(36, simulationState.csregs.get(sim::Counters::CSRBindings::cycle));
+  ASSERT_EQ(1, simulationState.csregs.get(sim::Counters::CSRBindings::INSTRET));
+  ASSERT_EQ(36, simulationState.csregs.get(sim::Counters::CSRBindings::CYCLE));
+
+  ASSERT_EQ(0,
+            simulationState.csregs.get(sim::Counters::CSRBindings::INSTRETH));
+  simulationState.csregs.set(sim::Counters::CSRBindings::INSTRET,
+                             std::numeric_limits<sim::Word>::max());
+  simulationState.csregs.updateTimers(sim::OpType::JAL);
+  ASSERT_EQ(0, simulationState.csregs.get(sim::Counters::CSRBindings::INSTRET));
+  ASSERT_EQ(1,
+            simulationState.csregs.get(sim::Counters::CSRBindings::INSTRETH));
 }
 
 TEST(execute, CSRRW) {

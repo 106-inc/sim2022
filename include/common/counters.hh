@@ -17,31 +17,38 @@ public:
   using Throughput = std::uint16_t;
   /* name bindings to CSR */
   enum CSRBindings {
-    cycle = 0xC00,   /* Cycle counter for RDCYCLE instruction */
-    time = 0xC01,    /* Timer for RDTIME instruction */
-    instret = 0xC02, /* Instructions-retired counter for RDINSTRET */
+    CYCLE = 0xC00,   /* Cycle counter for RDCYCLE instruction */
+    TIME = 0xC01,    /* Timer for RDTIME instruction */
+    INSTRET = 0xC02, /* Instructions-retired counter for RDINSTRET */
 
-    cycleh = 0xC80,  /* Upper 32 bits of cycle, RV32 only */
-    timeh = 0xC81,   /* Upper 32 bits of time, RV32 only */
-    insreth = 0xC82, /* Upper 32 bits of instret, RV32 only */
+    CYCLEH = 0xC80,   /* Upper 32 bits of cycle, RV32 only */
+    TIMEH = 0xC81,    /* Upper 32 bits of time, RV32 only */
+    INSTRETH = 0xC82, /* Upper 32 bits of instret, RV32 only */
   };
 
   static Throughput getThroughput(OpType type) {
-    static const std::unordered_map<OpType, Throughput> throughput_ = {
-        {OpType::UNKNOWN, 0}, {OpType::ADD, 1},   {OpType::SUB, 1},
-        {OpType::MUL, 3},     {OpType::DIV, 36},  {OpType::LW, 6},
-        {OpType::SW, 6},      {OpType::JAL, 36},  {OpType::JALR, 36},
-        {OpType::ECALL, 36},  {OpType::ADDI, 1},  {OpType::ANDI, 1},
-        {OpType::XORI, 1},    {OpType::ORI, 1},   {OpType::SLTI, 2},
-        {OpType::SLTIU, 1},   {OpType::LUI, 2},   {OpType::AUIPC, 3},
-        {OpType::SLLI, 2},    {OpType::SRLI, 2},  {OpType::SRAI, 2},
-        {OpType::SLL, 2},     {OpType::SRL, 2},   {OpType::SRA, 2},
-        {OpType::BEQ, 36},    {OpType::BNE, 36},  {OpType::BLT, 36},
-        {OpType::BLTU, 36},   {OpType::BGEU, 36}, {OpType::BGE, 36},
-        {OpType::XOR, 1},
+    static const std::unordered_map<OpType, Throughput> throughput = {
+        {OpType::UNKNOWN, 0}, {OpType::ADD, 1},    {OpType::SUB, 1},
+        {OpType::MUL, 3},     {OpType::DIV, 36},   {OpType::LW, 6},
+        {OpType::SW, 6},      {OpType::JAL, 36},   {OpType::JALR, 36},
+        {OpType::ECALL, 36},  {OpType::ADDI, 1},   {OpType::ANDI, 1},
+        {OpType::XORI, 1},    {OpType::ORI, 1},    {OpType::SLTI, 2},
+        {OpType::SLTIU, 1},   {OpType::LUI, 2},    {OpType::AUIPC, 3},
+        {OpType::SLLI, 2},    {OpType::SRLI, 2},   {OpType::SRAI, 2},
+        {OpType::SLL, 2},     {OpType::SRL, 2},    {OpType::SRA, 2},
+        {OpType::BEQ, 36},    {OpType::BNE, 36},   {OpType::BLT, 36},
+        {OpType::BLTU, 36},   {OpType::BGEU, 36},  {OpType::BGE, 36},
+        {OpType::XOR, 1},     {OpType::CSRRW, 1},  {OpType::CSRRS, 1},
+        {OpType::CSRRC, 1},   {OpType::CSRRWI, 1}, {OpType::CSRRSI, 1},
+        {OpType::CSRRCI, 1},
     };
-
-    return throughput_.at(type);
+    auto it = throughput.find(type);
+    if (it == throughput.end()) {
+      spdlog::warn("Cant calculate {} throughput",
+                   static_cast<std::uint8_t>(type));
+      return 0;
+    }
+    return it->second;
   }
 }; // class Counters
 

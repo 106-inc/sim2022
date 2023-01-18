@@ -76,7 +76,7 @@ template <typename T> consteval std::size_t sizeofBits() {
  * @param[in] word number to get bits from
  * @return Word bits from range [high, low] (shifted to the beginning)
  */
-template <std::size_t high, std::size_t low, std::integral T = Word>
+template <std::size_t high, std::size_t low, std::unsigned_integral T = Word>
 constexpr T getBits(T word) {
   static_assert(high >= low, "Incorrect bits range");
   static_assert(high < sizeofBits<T>(), "Bit index out of range");
@@ -85,7 +85,7 @@ constexpr T getBits(T word) {
   if constexpr (high != sizeofBits<T>() - 1)
     mask = ~(mask << (high + 1));
 
-  return (word & mask) >> low;
+  return static_cast<T>((word & mask) >> low);
 }
 
 /**

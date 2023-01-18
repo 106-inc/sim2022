@@ -52,24 +52,24 @@ public:
     using CSRBindings = Counters::CSRBindings;
 
     auto join = [](Word lower, Word upper) -> DWord {
-      auto tmp = static_cast<DWord>(upper) << (kBitsInByte * sizeof(Word));
+      auto tmp = static_cast<DWord>(upper) << sizeofBits<Word>();
       return tmp | lower;
     };
 
     auto split = [](DWord res, Word &lower, Word &upper) {
-      constexpr auto separator = kBitsInByte * sizeof(Word);
-      constexpr auto end = kBitsInByte * sizeof(DWord);
+      constexpr auto separator = sizeofBits<Word>();
+      constexpr auto end = sizeofBits<DWord>();
       lower = static_cast<Word>(getBits<separator - 1, 0, DWord>(res));
       upper = static_cast<Word>(getBits<end - 1, separator, DWord>(res));
     };
 
-    auto tmp = join(regs[CSRBindings::instret], regs[CSRBindings::insreth]);
+    auto tmp = join(regs[CSRBindings::INSTRET], regs[CSRBindings::INSTRETH]);
     tmp += 1;
-    split(tmp, regs[CSRBindings::instret], regs[CSRBindings::insreth]);
+    split(tmp, regs[CSRBindings::INSTRET], regs[CSRBindings::INSTRETH]);
 
-    tmp = join(regs[CSRBindings::cycle], regs[CSRBindings::cycleh]);
+    tmp = join(regs[CSRBindings::CYCLE], regs[CSRBindings::CYCLEH]);
     tmp += Counters::getThroughput(type);
-    split(tmp, regs[CSRBindings::cycle], regs[CSRBindings::cycleh]);
+    split(tmp, regs[CSRBindings::CYCLE], regs[CSRBindings::CYCLEH]);
   }
 };
 

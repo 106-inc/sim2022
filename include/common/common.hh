@@ -17,6 +17,7 @@ static_assert(
 
 namespace sim {
 
+using DWord = std::uint64_t;
 using Word = std::uint32_t;
 using Half = std::uint16_t;
 using Byte = std::uint8_t;
@@ -75,12 +76,13 @@ template <typename T> consteval std::size_t sizeofBits() {
  * @param[in] word number to get bits from
  * @return Word bits from range [high, low] (shifted to the beginning)
  */
-template <std::size_t high, std::size_t low> constexpr Word getBits(Word word) {
+template <std::size_t high, std::size_t low, std::integral T = Word>
+constexpr T getBits(T word) {
   static_assert(high >= low, "Incorrect bits range");
-  static_assert(high < sizeofBits<Word>(), "Bit index out of range");
+  static_assert(high < sizeofBits<T>(), "Bit index out of range");
 
-  auto mask = ~Word(0);
-  if constexpr (high != sizeofBits<Word>() - 1)
+  auto mask = ~T(0);
+  if constexpr (high != sizeofBits<T>() - 1)
     mask = ~(mask << (high + 1));
 
   return (word & mask) >> low;

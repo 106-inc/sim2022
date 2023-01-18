@@ -37,6 +37,7 @@ public:
       spdlog::trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst.str());
       spdlog::trace("Current regfile state:\n{}", state.regs.str());
       this->instrCount += 1;
+      state.csregs.updateTimers(inst.type);
     });
   }
 

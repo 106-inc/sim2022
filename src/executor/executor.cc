@@ -209,8 +209,52 @@ const std::unordered_map<OpType,
              state.npc = state.pc + inst.imm;
            }
          }},
-        {OpType::XOR, [](const Instruction &inst, State &state) {
+        {OpType::XOR,
+         [](const Instruction &inst, State &state) {
            executeRegisterRegisterOp(inst, state, std::bit_xor<RegVal>());
-         }}};
+         }},
+        {OpType::CSRRW,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto csr = state.csregs.get(inst.csr);
+           state.csregs.set(inst.csr, rs1);
+           state.regs.set(inst.rd, csr);
+         }},
+        {OpType::CSRRS,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto csr = state.csregs.get(inst.csr);
+           state.csregs.set(inst.csr, rs1 | csr);
+           state.regs.set(inst.rd, csr);
+         }},
+        {OpType::CSRRC,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = state.regs.get(inst.rs1);
+           auto csr = state.csregs.get(inst.csr);
+           state.csregs.set(inst.csr, rs1 & (~csr));
+           state.regs.set(inst.rd, csr);
+         }},
+        {OpType::CSRRWI,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = inst.rs1;
+           auto csr = state.csregs.get(inst.csr);
+           state.regs.set(inst.rd, csr);
+           state.csregs.set(inst.csr, getBits<4, 0>(rs1));
+         }},
+        {OpType::CSRRSI,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = inst.rs1;
+           auto csr = state.csregs.get(inst.csr);
+           state.regs.set(inst.rd, csr);
+           state.csregs.set(inst.csr, csr | getBits<4, 0>(rs1));
+         }},
+        {OpType::CSRRCI,
+         [](const Instruction &inst, State &state) {
+           auto rs1 = inst.rs1;
+           auto csr = state.csregs.get(inst.csr);
+           state.regs.set(inst.rd, csr);
+           state.csregs.set(inst.csr, csr & (~getBits<4, 0>(rs1)));
+         }},
+    };
 
 } // namespace sim

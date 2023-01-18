@@ -46,7 +46,7 @@ public:
     if (it == throughput.end()) {
       spdlog::warn("Cant calculate {} throughput",
                    static_cast<std::uint8_t>(type));
-      return 0;
+      return 1;
     }
     return it->second;
   }

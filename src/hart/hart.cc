@@ -91,7 +91,7 @@ Hart::Hart(const fs::path &executable, std::int64_t bbCacheSize) {
 BasicBlock Hart::createBB(Addr addr) {
   BasicBlock bb{};
 
-#if SPDLOG
+#ifdef SPDLOG
   spdlog::trace("Creating basic block:");
 #endif
   for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {

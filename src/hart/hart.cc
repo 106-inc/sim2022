@@ -65,7 +65,6 @@ public:
 };
 
 Hart::Hart(const fs::path &executable, std::int64_t bbCacheSize) {
-  spdlog::debug("bbCacheSize = {}", bbCacheSize);
   if (bbCacheSize < 0)
     bbc_ = std::make_unique<InfCache>();
   else if (bbCacheSize == 0)

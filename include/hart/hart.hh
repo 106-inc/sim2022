@@ -17,8 +17,6 @@ namespace sim {
 
 namespace fs = std::filesystem;
 
-using BBCache = std::unordered_map<Addr, BasicBlock>;
-
 class IBBCache {
 public:
   virtual ~IBBCache() {}

@@ -88,7 +88,8 @@ int main(int argc, char **argv) try {
     auto tm = elapsedSeconds.count();
     std::cout << "Instruction number: " << ic << std::endl;
     std::cout << "Elapsed time: " << tm << "s" << std::endl;
-    std::cout << "Perf: " << (ic / tm / 1e6) << "MIPS" << std::endl;
+    std::cout << "Perf: " << (static_cast<double>(ic) / tm / 1e6) << "MIPS"
+              << std::endl;
   }
 
   return 0;

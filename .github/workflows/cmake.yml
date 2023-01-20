@@ -62,7 +62,7 @@ jobs:
       run: ctest -C ${{matrix.build_type}} -VV -j ${{env.TEST_JOBS}} -L e2e
 
     - name: Perf
-      working-derectory: ./build/bin
+      working-directory: ./build/bin
       run: |
         riscv32-unknown-elf-gcc -O0 -e main -nostdlib -march=rv32g ../../test/e2e/simulator/8-queens.c -o 8q && \
         ./simulator 8q --print-perf

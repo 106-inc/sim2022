@@ -49,7 +49,7 @@ public:
       spdlog::trace("Current regfile state:\n{}", state.regs.str());
 #endif
       this->instrCount += 1;
-      state.csregs.updateTimers(inst.type);
+      // state.csregs.updateTimers(inst.type);
     });
   }
 

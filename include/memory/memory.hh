@@ -162,13 +162,13 @@ inline T *PhysMemory::getEntity(Addr addr) {
 #endif
   AddrSections sections(addr);
   auto offset = sections.offset;
-  auto isInTLB = tlb.tlbLookup(addr);
+  auto isInTLB = tlb.tlbLookup(addr & ~0xFFF);
   PagePtr page;
   if (isInTLB) {
     page = isInTLB;
   } else {
     page = PhysMemory::pageTableLookup<op>(sections);
-    tlb.tlbUpdate(addr, page);
+    tlb.tlbUpdate(addr & ~0xFFF, page);
   }
   Word *word = &page->wordStorage.at(offset / sizeof(Word));
   Byte *byte = reinterpret_cast<Byte *>(word) + (offset % sizeof(Word));

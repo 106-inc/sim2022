@@ -83,3 +83,5 @@ endforeach()
 foreach(TOOL ${TOOLLIST})
   target_link_libraries(${TOOL} PRIVATE ${LIBLIST})
 endforeach()
+
+add_compile_options(-g3 -O3)

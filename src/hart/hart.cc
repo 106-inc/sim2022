@@ -114,11 +114,15 @@ BasicBlock Hart::createBB(Addr addr) {
 }
 
 void Hart::run() {
+  auto lCreateBB = [this](Addr addr) { return createBB(addr); };
   while (!state_.complete) {
-    auto lCreateBB = [this](Addr addr) { return createBB(addr); };
     const auto &bb = bbc_->lookupUpdate(getPC(), lCreateBB);
     exec_.execute(bb.begin(), bb.end(), state_);
   }
+  sim::TLB::TLBStats stats = state_.mem.getTLBStats();
+  std::cout << "Hits: "
+            << static_cast<double>(stats.TLBHits) / stats.TLBRequests * 100
+            << std::endl;
 }
 
 } // namespace sim

@@ -68,8 +68,10 @@ void construct_candidates(int a[], int k, int n, int c[], int *ncandidates) {
 int main() {
   int a[NMAX];
 
-  solution_count = 0;
-  backtrack(a, 0, 8);
+  for (int i = 1; i <= 8; i++) {
+    solution_count = 0;
+    backtrack(a, 0, i);
+  }
 
   // CHECK: NUM=2952531
   // CHECK: M[0x110003b0]=0x0000005d

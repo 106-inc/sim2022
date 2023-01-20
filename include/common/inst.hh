@@ -12,6 +12,8 @@
 namespace sim {
 
 struct Instruction final {
+  typedef void (*fp)(const Instruction &, State &);
+
   RegId rs1{};
   RegId rs2{};
   RegId rs3{};
@@ -27,7 +29,7 @@ struct Instruction final {
 
   std::string str() const;
 
-  std::function<void(const Instruction &, State &)> callback = nullptr;
+  fp callback = nullptr;
 };
 
 using BasicBlock = std::vector<Instruction>;

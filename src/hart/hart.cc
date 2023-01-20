@@ -8,7 +8,9 @@
 
 namespace sim {
 
-Hart::Hart(const fs::path &executable) {
+Hart::Hart(const fs::path &executable, std::int64_t bbCacheSize) {
+  spdlog::debug("bbCacheSize = {}", bbCacheSize);
+
   ELFLoader loader{executable};
   getPC() = loader.getEntryPoint();
 

@@ -60,6 +60,10 @@ int main(int argc, char **argv) try {
         return "";
       });
 
+  std::int64_t bbCacheSize{};
+  app.add_option("--bbc-size", bbCacheSize, "Set size of basic block cache")
+      ->default_val(-1);
+
   try {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
@@ -70,7 +74,7 @@ int main(int argc, char **argv) try {
   if (*isCosimOpt) {
     initCosimLogger(cosimFile, !*cosimFileOpt);
   }
-  sim::Hart hart{input};
+  sim::Hart hart{input, bbCacheSize};
   hart.run();
 
   return 0;

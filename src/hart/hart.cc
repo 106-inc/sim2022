@@ -20,8 +20,7 @@ public:
       return hit->second;
 
     auto bb = slowGetData(key);
-    hash_[key] = std::move(bb);
-    return hash_[key];
+    return hash_[key] = std::move(bb);
   }
 };
 

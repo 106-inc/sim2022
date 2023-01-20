@@ -63,6 +63,7 @@ jobs:
 
     - name: Perf
       working-directory: ./build/bin
+      if: matrix.build_type == 'Release'
       run: |
         riscv32-unknown-elf-gcc -O0 -e main -nostdlib -march=rv32g ../../test/e2e/simulator/8-queens.c -o 8q && \
         ./simulator 8q --print-perf

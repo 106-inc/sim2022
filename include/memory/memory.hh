@@ -104,6 +104,8 @@ public:
   template <isSimType T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
   uint16_t getOffset(Addr addr);
 
+  const TLB::TLBStats getTLBStats() { return tlb.getTLBStats(); }
+
 private:
   PT pageTable{};
   TLB tlb{};
@@ -145,13 +147,17 @@ public:
 
   template <std::forward_iterator It>
   void storeRange(Addr start, It begin, It end);
+
+  const TLB::TLBStats getTLBStats() { return physMem.getTLBStats(); }
 };
 
 template <isSimType T, PhysMemory::MemoryOp op>
 inline T *PhysMemory::getEntity(Addr addr) {
+#ifdef MISALIGNED_CHECK
   if (addr % sizeof(T) || ((getOffset(addr) + sizeof(T)) > (1 << kOffsetBits)))
     throw PhysMemory::MisAlignedAddrException(
         "Misaligned memory access is not supported!");
+#endif
   AddrSections sections(addr);
   auto offset = sections.offset;
   auto isInTLB = tlb.tlbLookup(addr);

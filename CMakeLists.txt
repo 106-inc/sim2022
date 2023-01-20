@@ -37,10 +37,15 @@ option(BUILD_DOC "Build docs" OFF)
 option(BUILD_TESTS "Build tests" ON)
 # add -Werror option
 option(ENABLE_WERROR "Enable -Werror option (CI)" OFF)
-
+# enable spdlog
+option(ENABLE_LOG "Enable spdlog" OFF)
 # Test running stuff
 if(BUILD_TESTS)
   enable_testing()
+endif()
+
+if(ENABLE_LOG)
+  add_compile_options(-DSPDLOG)
 endif()
 
 find_package(spdlog REQUIRED)

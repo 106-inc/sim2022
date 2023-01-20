@@ -1,4 +1,4 @@
-name: performance
+name: Performance
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       matrix:
         compiler: [g++-10, clang++-12]
         generator: [Unix Makefiles, Ninja]
-        build_type: [Debug, Release]
+        build_type: [Release]
         include:
           - build_type: Debug
             enable_werror: ON

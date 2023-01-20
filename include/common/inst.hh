@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "common.hh"
+#include "state.hh"
 
 namespace sim {
 
@@ -25,6 +26,8 @@ struct Instruction final {
   bool isBranch{false};
 
   std::string str() const;
+
+  std::function<void(const Instruction &, State &)> callback = nullptr;
 };
 
 using BasicBlock = std::vector<Instruction>;

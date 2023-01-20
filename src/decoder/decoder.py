@@ -25,6 +25,7 @@ INCLUDES = textwrap.dedent(
     #include <functional>
     #include <unordered_map>
 
+    #include "executor/executor.hh"
     #include "decoder/decoder.hh"
 
     """
@@ -147,6 +148,8 @@ def gen_fill_inst(
     to_ret = ""
 
     to_ret += f"{inst_var_name}.type = OpType::{inst_name.upper()};\n"
+
+    to_ret += f"{inst_var_name}.callback = execute{inst_name.upper()};\n";
 
     if inst_name in BRANCH_MNEMONICS:
         to_ret += f"{inst_var_name}.isBranch = true;\n"

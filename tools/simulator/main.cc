@@ -85,8 +85,14 @@ int main(int argc, char **argv) try {
   timer::Timer timer;
   hart.run();
   auto time = timer.elapsedMcs();
-  std::cout << "MIPS: " << static_cast<long double>(hart.getInstrCount()) / time
-            << std::endl;
+
+  if (printPerf) {
+    auto ic = hart.getInstrCount();
+    std::cout << "Instruction number: " << ic << std::endl;
+    std::cout << "Elapsed time: " << time << "s" << std::endl;
+    std::cout << "Perf: " << (static_cast<double>(ic) / time) << " MIPS"
+              << std::endl;
+  }
 
   return 0;
 } catch (const std::exception &e) {

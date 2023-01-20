@@ -3,6 +3,7 @@
 
 #include <array>
 #include <filesystem>
+#include <memory>
 #include <unordered_map>
 
 #include "common/common.hh"
@@ -16,14 +17,19 @@ namespace sim {
 
 namespace fs = std::filesystem;
 
-using BBCache = std::unordered_map<Addr, BasicBlock>;
+class IBBCache {
+public:
+  virtual ~IBBCache() {}
+  virtual const BasicBlock &
+  lookupUpdate(Addr key, std::function<BasicBlock(Addr)> slowGetData) = 0;
+};
 
 class Hart final {
 private:
   State state_{};
   Executor exec_{};
   Decoder decoder_{};
-  BBCache cache_{};
+  std::unique_ptr<IBBCache> bbc_{};
 
   Memory &getMem() { return state_.mem; };
   Addr &getPC() { return state_.pc; };
@@ -31,7 +37,7 @@ private:
   BasicBlock createBB(Addr entry);
 
 public:
-  Hart(const fs::path &executable);
+  Hart(const fs::path &executable, std::int64_t bbCacheSize);
   std::size_t getInstrCount() const;
   void run();
 };

@@ -238,327 +238,327 @@ void executeCSRRCI(const Instruction &inst, State &state) {
   state.csregs.set(inst.csr, csr & (~getBits<4, 0>(rs1)));
 }
 
-void executeAND(const Instruction &inst, State &state) {
+void executeAND(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeDIVU(const Instruction &inst, State &state) {
+void executeDIVU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFEQ_D(const Instruction &inst, State &state) {
+void executeFEQ_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFEQ_S(const Instruction &inst, State &state) {
+void executeFEQ_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFLE_D(const Instruction &inst, State &state) {
+void executeFLE_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFLE_S(const Instruction &inst, State &state) {
+void executeFLE_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFLT_D(const Instruction &inst, State &state) {
+void executeFLT_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFLT_S(const Instruction &inst, State &state) {
+void executeFLT_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMAX_D(const Instruction &inst, State &state) {
+void executeFMAX_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMAX_S(const Instruction &inst, State &state) {
+void executeFMAX_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMIN_D(const Instruction &inst, State &state) {
+void executeFMIN_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMIN_S(const Instruction &inst, State &state) {
+void executeFMIN_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSGNJ_D(const Instruction &inst, State &state) {
+void executeFSGNJ_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSGNJ_S(const Instruction &inst, State &state) {
+void executeFSGNJ_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSGNJN_D(const Instruction &inst, State &state) {
+void executeFSGNJN_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSGNJN_S(const Instruction &inst, State &state) {
+void executeFSGNJN_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSGNJX_D(const Instruction &inst, State &state) {
+void executeFSGNJX_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSGNJX_S(const Instruction &inst, State &state) {
+void executeFSGNJX_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeMULH(const Instruction &inst, State &state) {
+void executeMULH(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeMULHSU(const Instruction &inst, State &state) {
+void executeMULHSU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeMULHU(const Instruction &inst, State &state) {
+void executeMULHU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeOR(const Instruction &inst, State &state) {
+void executeOR(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeREM(const Instruction &inst, State &state) {
+void executeREM(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeREMU(const Instruction &inst, State &state) {
+void executeREMU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeSLT(const Instruction &inst, State &state) {
+void executeSLT(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeSLTU(const Instruction &inst, State &state) {
+void executeSLTU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFENCE(const Instruction &inst, State &state) {
+void executeFENCE(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFLD(const Instruction &inst, State &state) {
+void executeFLD(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFLW(const Instruction &inst, State &state) {
+void executeFLW(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSD(const Instruction &inst, State &state) {
+void executeFSD(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSW(const Instruction &inst, State &state) {
+void executeFSW(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeLB(const Instruction &inst, State &state) {
+void executeLB(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeLBU(const Instruction &inst, State &state) {
+void executeLBU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeLH(const Instruction &inst, State &state) {
+void executeLH(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeLHU(const Instruction &inst, State &state) {
+void executeLHU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeSB(const Instruction &inst, State &state) {
+void executeSB(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeSH(const Instruction &inst, State &state) {
+void executeSH(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOADD_W(const Instruction &inst, State &state) {
+void executeAMOADD_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOAND_W(const Instruction &inst, State &state) {
+void executeAMOAND_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOMAX_W(const Instruction &inst, State &state) {
+void executeAMOMAX_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOMAXU_W(const Instruction &inst, State &state) {
+void executeAMOMAXU_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOMIN_W(const Instruction &inst, State &state) {
+void executeAMOMIN_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOMINU_W(const Instruction &inst, State &state) {
+void executeAMOMINU_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOOR_W(const Instruction &inst, State &state) {
+void executeAMOOR_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOSWAP_W(const Instruction &inst, State &state) {
+void executeAMOSWAP_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeAMOXOR_W(const Instruction &inst, State &state) {
+void executeAMOXOR_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeSC_W(const Instruction &inst, State &state) {
+void executeSC_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeEBREAK(const Instruction &inst, State &state) {
+void executeEBREAK(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFADD_D(const Instruction &inst, State &state) {
+void executeFADD_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFADD_S(const Instruction &inst, State &state) {
+void executeFADD_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFDIV_D(const Instruction &inst, State &state) {
+void executeFDIV_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFDIV_S(const Instruction &inst, State &state) {
+void executeFDIV_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMUL_D(const Instruction &inst, State &state) {
+void executeFMUL_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMUL_S(const Instruction &inst, State &state) {
+void executeFMUL_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSUB_D(const Instruction &inst, State &state) {
+void executeFSUB_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSUB_S(const Instruction &inst, State &state) {
+void executeFSUB_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCLASS_D(const Instruction &inst, State &state) {
+void executeFCLASS_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCLASS_S(const Instruction &inst, State &state) {
+void executeFCLASS_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMV_W_X(const Instruction &inst, State &state) {
+void executeFMV_W_X(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMV_X_W(const Instruction &inst, State &state) {
+void executeFMV_X_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_D_S(const Instruction &inst, State &state) {
+void executeFCVT_D_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_D_W(const Instruction &inst, State &state) {
+void executeFCVT_D_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_D_WU(const Instruction &inst, State &state) {
+void executeFCVT_D_WU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_S_D(const Instruction &inst, State &state) {
+void executeFCVT_S_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_S_W(const Instruction &inst, State &state) {
+void executeFCVT_S_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_S_WU(const Instruction &inst, State &state) {
+void executeFCVT_S_WU(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_W_D(const Instruction &inst, State &state) {
+void executeFCVT_W_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_W_S(const Instruction &inst, State &state) {
+void executeFCVT_W_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_WU_D(const Instruction &inst, State &state) {
+void executeFCVT_WU_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFCVT_WU_S(const Instruction &inst, State &state) {
+void executeFCVT_WU_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSQRT_D(const Instruction &inst, State &state) {
+void executeFSQRT_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFSQRT_S(const Instruction &inst, State &state) {
+void executeFSQRT_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMADD_D(const Instruction &inst, State &state) {
+void executeFMADD_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMADD_S(const Instruction &inst, State &state) {
+void executeFMADD_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMSUB_D(const Instruction &inst, State &state) {
+void executeFMSUB_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFMSUB_S(const Instruction &inst, State &state) {
+void executeFMSUB_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFNMADD_D(const Instruction &inst, State &state) {
+void executeFNMADD_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFNMADD_S(const Instruction &inst, State &state) {
+void executeFNMADD_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFNMSUB_D(const Instruction &inst, State &state) {
+void executeFNMSUB_D(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeFNMSUB_S(const Instruction &inst, State &state) {
+void executeFNMSUB_S(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 
-void executeLR_W(const Instruction &inst, State &state) {
+void executeLR_W(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};
 }
 

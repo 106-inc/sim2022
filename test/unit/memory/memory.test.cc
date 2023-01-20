@@ -97,12 +97,14 @@ TEST(PhysMemory, getOffset) {
 
 TEST(PhysMemory, getEntity) {
   sim::Memory mem;
+#ifdef MISALIGNED_CHECK
   // Misaligned Address (Not alogned to word_size)
   EXPECT_THROW(mem.storeWord(0xDEADBE01, 0x0),
                sim::PhysMemory::MisAlignedAddrException);
   // Misaligned Address (Between the pages)
   EXPECT_THROW(mem.storeWord(0xDEADFFFE, 0x0),
                sim::PhysMemory::MisAlignedAddrException);
+#endif
   // Load on unmapped region
   EXPECT_THROW(mem.loadWord(0x0), sim::PhysMemory::PageFaultException);
 

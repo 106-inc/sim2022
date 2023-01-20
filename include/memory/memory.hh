@@ -37,10 +37,12 @@ class TLB final {
 public:
   using TLBIndex = uint16_t;
   struct TLBEntry {
-    Addr virtualAddress{};
-    PagePtr physPage{};
+    Addr virtualAddress{0};
+    PagePtr physPage{nullptr};
+    bool valid{false};
     TLBEntry() = default;
-    TLBEntry(Addr addr, PagePtr page) : virtualAddress(addr), physPage(page) {}
+    TLBEntry(Addr addr, PagePtr page, bool vld)
+        : virtualAddress(addr), physPage(page), valid(vld) {}
   };
 
   struct TLBStats {
@@ -51,7 +53,7 @@ public:
     TLBStats() = default;
   };
 
-  TLB() = default;
+  TLB() { tlb.resize(kTLBSize); }
   PagePtr tlbLookup(Addr addr);
   void tlbUpdate(Addr addr, PagePtr page);
   TLBIndex getTLBIndex(Addr addr);
@@ -59,7 +61,7 @@ public:
   void tlbFlush();
 
 private:
-  std::unordered_map<TLBIndex, TLBEntry> tlb{};
+  std::vector<TLBEntry> tlb{};
   TLBStats stats{};
 };
 
@@ -104,6 +106,8 @@ public:
   template <isSimType T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
   uint16_t getOffset(Addr addr);
 
+  const TLB::TLBStats getTLBStats() { return tlb.getTLBStats(); }
+
 private:
   PT pageTable{};
   TLB tlb{};
@@ -145,13 +149,17 @@ public:
 
   template <std::forward_iterator It>
   void storeRange(Addr start, It begin, It end);
+
+  const TLB::TLBStats getTLBStats() { return physMem.getTLBStats(); }
 };
 
 template <isSimType T, PhysMemory::MemoryOp op>
 inline T *PhysMemory::getEntity(Addr addr) {
+#ifdef MISALIGNED_CHECK
   if (addr % sizeof(T) || ((getOffset(addr) + sizeof(T)) > (1 << kOffsetBits)))
     throw PhysMemory::MisAlignedAddrException(
         "Misaligned memory access is not supported!");
+#endif
   AddrSections sections(addr);
   auto offset = sections.offset;
   auto isInTLB = tlb.tlbLookup(addr);
@@ -254,23 +262,23 @@ inline TLB::TLBIndex TLB::getTLBIndex(Addr addr) {
 inline PagePtr TLB::tlbLookup(Addr addr) {
   stats.TLBRequests++;
   auto idx = getTLBIndex(addr);
-  auto it = tlb.find(idx);
-  if (it == tlb.end()) {
+  auto found = tlb[idx];
+  if (!found.valid) {
     stats.TLBMisses++;
     return nullptr;
   }
-  if (it->second.virtualAddress != addr) {
+  if (found.virtualAddress != addr) {
     stats.TLBMisses++;
     return nullptr;
   }
   stats.TLBHits++;
-  return it->second.physPage;
+  return found.physPage;
 }
 
 inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
 
   auto idx = getTLBIndex(addr);
-  tlb[idx] = TLBEntry(addr, page);
+  tlb[idx] = TLBEntry(addr, page, true);
 }
 
 inline const TLB::TLBStats &TLB::getTLBStats() const { return stats; }

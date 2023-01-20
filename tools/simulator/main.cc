@@ -90,8 +90,9 @@ int main(int argc, char **argv) try {
     auto ic = hart.getInstrCount();
     std::cout << "Instruction number: " << ic << std::endl;
     std::cout << "Elapsed time: " << time << "s" << std::endl;
-    std::cout << "Perf: " << (static_cast<double>(ic) / static_cast<double>(time)) << " MIPS"
-              << std::endl;
+    std::cout << "Perf: "
+              << (static_cast<double>(ic) / static_cast<double>(time))
+              << " MIPS" << std::endl;
   }
 
   return 0;

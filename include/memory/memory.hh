@@ -37,9 +37,10 @@ class TLB final {
 public:
   using TLBIndex = uint16_t;
   struct TLBEntry {
-    Addr virtualAddress{};
-    PagePtr physPage{};
-    TLBEntry() = default;
+    Addr virtualAddress;
+    PagePtr physPage;
+    bool valid;
+    TLBEntry() : virtualAddress(0), physPage(nullptr), valid(false) {}
     TLBEntry(Addr addr, PagePtr page) : virtualAddress(addr), physPage(page) {}
   };
 
@@ -51,7 +52,7 @@ public:
     TLBStats() = default;
   };
 
-  TLB() = default;
+  TLB() { tlb.resize(kTLBSize); }
   PagePtr tlbLookup(Addr addr);
   void tlbUpdate(Addr addr, PagePtr page);
   TLBIndex getTLBIndex(Addr addr);
@@ -59,7 +60,7 @@ public:
   void tlbFlush();
 
 private:
-  std::unordered_map<TLBIndex, TLBEntry> tlb{};
+  std::vector<TLBEntry> tlb{};
   TLBStats stats{};
 };
 
@@ -260,23 +261,25 @@ inline TLB::TLBIndex TLB::getTLBIndex(Addr addr) {
 inline PagePtr TLB::tlbLookup(Addr addr) {
   stats.TLBRequests++;
   auto idx = getTLBIndex(addr);
-  auto it = tlb.find(idx);
-  if (it == tlb.end()) {
+  auto found = tlb[idx];
+  if (!found.valid) {
     stats.TLBMisses++;
     return nullptr;
   }
-  if (it->second.virtualAddress != addr) {
+  if (found.virtualAddress != addr) {
     stats.TLBMisses++;
     return nullptr;
   }
   stats.TLBHits++;
-  return it->second.physPage;
+  return found.physPage;
 }
 
 inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
 
   auto idx = getTLBIndex(addr);
-  tlb[idx] = TLBEntry(addr, page);
+  tlb[idx].virtualAddress = addr;
+  tlb[idx].valid = true;
+  tlb[idx].physPage = page;
 }
 
 inline const TLB::TLBStats &TLB::getTLBStats() const { return stats; }

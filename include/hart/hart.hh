@@ -32,6 +32,7 @@ private:
 
 public:
   Hart(const fs::path &executable);
+  std::size_t getInstrCount() const;
   void run();
 };
 

@@ -41,6 +41,8 @@ public:
     });
   }
 
+  std::size_t getInstrCount() const { return instrCount; }
+
 private:
   static const std::unordered_map<
       OpType, std::function<void(const Instruction, State &)>>

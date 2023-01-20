@@ -1,4 +1,6 @@
+#include <chrono>
 #include <filesystem>
+#include <iostream>
 #include <map>
 #include <stdexcept>
 
@@ -60,6 +62,10 @@ int main(int argc, char **argv) try {
         return "";
       });
 
+  bool printPerf{false};
+  app.add_flag("--print-perf", printPerf,
+               "Print information about performance");
+
   try {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
@@ -71,7 +77,19 @@ int main(int argc, char **argv) try {
     initCosimLogger(cosimFile, !*cosimFileOpt);
   }
   sim::Hart hart{input};
+
+  auto start = std::chrono::steady_clock::now();
   hart.run();
+  auto end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> elapsedSeconds = end - start;
+
+  if (printPerf) {
+    auto ic = hart.getInstrCount();
+    auto tm = elapsedSeconds.count();
+    std::cout << "Instruction number: " << ic << std::endl;
+    std::cout << "Elapsed time: " << tm << "s" << std::endl;
+    std::cout << "Perf: " << (ic / tm / 1e6) << "MIPS" << std::endl;
+  }
 
   return 0;
 } catch (const std::exception &e) {

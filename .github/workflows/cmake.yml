@@ -44,7 +44,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
           -DENABLE_WERROR=${{matrix.enable_werror}} \
           -DSKIP_CLANG_FORMAT=ON \
-          -DENABLE_LOG
+          -DENABLE_LOG=ON
 
     - name: Build
       # Build your program with the given configuration

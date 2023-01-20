@@ -41,7 +41,8 @@ public:
     PagePtr physPage{nullptr};
     bool valid{false};
     TLBEntry() = default;
-    TLBEntry(Addr addr, PagePtr page) : virtualAddress(addr), physPage(page) {}
+    TLBEntry(Addr addr, PagePtr page, bool vld)
+        : virtualAddress(addr), physPage(page), valid(vld) {}
   };
 
   struct TLBStats {
@@ -277,9 +278,7 @@ inline PagePtr TLB::tlbLookup(Addr addr) {
 inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
 
   auto idx = getTLBIndex(addr);
-  tlb[idx].virtualAddress = addr;
-  tlb[idx].valid = true;
-  tlb[idx].physPage = page;
+  tlb[idx] = TLBEntry(addr, page, true);
 }
 
 inline const TLB::TLBStats &TLB::getTLBStats() const { return stats; }

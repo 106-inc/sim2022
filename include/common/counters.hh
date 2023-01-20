@@ -44,8 +44,10 @@ public:
     };
     auto it = throughput.find(type);
     if (it == throughput.end()) {
+#ifdef SPDLOG
       spdlog::warn("Cant calculate {} throughput",
                    static_cast<std::uint8_t>(type));
+#endif
       return 1;
     }
     return it->second;

@@ -30,24 +30,28 @@ public:
   template <InstForwardIterator It>
   void execute(It begin, It end, State &state) {
     std::for_each(begin, end, [this, &state](const auto &inst) {
+#ifdef SPDLOG
       cosimLog("-----------------------");
       cosimLog("NUM={}", instrCount);
+#endif
       this->execute(inst, state);
+#ifdef SPDLOG
       cosimLog("PC=0x{:08x}", state.pc);
       spdlog::trace("Instruction:\n  [0x{:08x}]{}", state.pc, inst.str());
       spdlog::trace("Current regfile state:\n{}", state.regs.str());
+#endif
       this->instrCount += 1;
       state.csregs.updateTimers(inst.type);
     });
   }
 
-  std::size_t getInstrCount() const { return instrCount; }
+std::uint64_t getInstrCount() const { return instrCount; }
 
 private:
   static const std::unordered_map<
       OpType, std::function<void(const Instruction, State &)>>
       execMap_;
-  std::size_t instrCount{1};
+  std::uint64_t instrCount{1};
 };
 
 } // namespace sim

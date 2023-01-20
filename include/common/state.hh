@@ -30,8 +30,9 @@ public:
     // (to store return address if it is not needed).
     if (!regnum)
       return;
-
+#ifdef SPDLOG
     cosimLog("x{}=0x{:08x}", regnum, val);
+#endif
     regs.at(regnum) = val;
   }
 

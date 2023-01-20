@@ -91,19 +91,25 @@ Hart::Hart(const fs::path &executable, std::int64_t bbCacheSize) {
 BasicBlock Hart::createBB(Addr addr) {
   BasicBlock bb{};
 
+#if SPDLOG
   spdlog::trace("Creating basic block:");
+#endif
   for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {
     auto inst = decoder_.decode(getMem().loadWord(addr));
     if (inst.type == OpType::UNKNOWN)
       throw std::logic_error{
           "Unknown instruction found while decoding basic block" + inst.str()};
 
+#ifdef SPDLOG
     spdlog::trace(inst.str());
+#endif
     isBranch = inst.isBranch;
     bb.push_back(inst);
   }
 
+#ifdef SPDLOG
   spdlog::trace("Basic blok created.");
+#endif
   return bb;
 }
 

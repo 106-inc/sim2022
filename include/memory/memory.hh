@@ -215,9 +215,11 @@ inline Word Memory::loadWord(Addr addr) {
 inline void Memory::storeWord(Addr addr, Word word) {
   stats.numStores++;
   *physMem.getEntity<Word, PhysMemory::MemoryOp::STORE>(addr) = word;
+#ifdef SPDLOG
   if (isProgramStored) {
     cosimLog("M[0x{:08x}]=0x{:08x}", addr, word);
   }
+#endif
 }
 
 inline Half Memory::loadHalf(Addr addr) {

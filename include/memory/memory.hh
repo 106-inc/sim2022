@@ -37,10 +37,10 @@ class TLB final {
 public:
   using TLBIndex = uint16_t;
   struct TLBEntry {
-    Addr virtualAddress;
-    PagePtr physPage;
-    bool valid;
-    TLBEntry() : virtualAddress(0), physPage(nullptr), valid(false) {}
+    Addr virtualAddress{0};
+    PagePtr physPage{nullptr};
+    bool valid{false};
+    TLBEntry() = default;
     TLBEntry(Addr addr, PagePtr page) : virtualAddress(addr), physPage(page) {}
   };
 

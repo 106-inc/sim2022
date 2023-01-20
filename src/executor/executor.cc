@@ -87,9 +87,7 @@ void executeJALR(const Instruction &inst, State &state) {
                                             // bit of the result to zero.
 }
 
-void executeECALL(const Instruction &, State &state) {
-  state.complete = true;
-}
+void executeECALL(const Instruction &, State &state) { state.complete = true; }
 
 void executeADDI(const Instruction &inst, State &state) {
   executeRegisterImmidiateOp(inst, state, std::plus<RegVal>());

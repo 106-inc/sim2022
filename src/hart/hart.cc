@@ -113,8 +113,6 @@ BasicBlock Hart::createBB(Addr addr) {
   return bb;
 }
 
-std::size_t Hart::getInstrCount() const { return exec_.getInstrCount(); }
-
 void Hart::run() {
   while (!state_.complete) {
     auto lCreateBB = [this](Addr addr) { return createBB(addr); };

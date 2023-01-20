@@ -38,7 +38,6 @@ private:
 
 public:
   Hart(const fs::path &executable, std::int64_t bbCacheSize);
-  std::size_t getInstrCount() const;
   void run();
   std::uint64_t getInstrCount() const { return exec_.getInstrCount(); }
 };

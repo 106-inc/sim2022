@@ -45,7 +45,7 @@ public:
     });
   }
 
-std::uint64_t getInstrCount() const { return instrCount; }
+  std::uint64_t getInstrCount() const { return instrCount; }
 
 private:
   static const std::unordered_map<

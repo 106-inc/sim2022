@@ -115,6 +115,7 @@ BasicBlock Hart::createBB(Addr addr) {
 
 void Hart::run() {
   auto lCreateBB = [this](Addr addr) { return createBB(addr); };
+
   while (!state_.complete) {
     const auto &bb = bbc_->lookupUpdate(getPC(), lCreateBB);
     exec_.execute(bb.begin(), bb.end(), state_);

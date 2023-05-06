@@ -14,7 +14,8 @@
 namespace sim {
 
 template <typename T>
-concept InstForwardIterator = std::input_iterator<T> &&
+concept InstForwardIterator =
+    std::input_iterator<T> &&
     std::is_same_v<typename std::iterator_traits<T>::value_type, Instruction>;
 
 class Executor final {
@@ -24,6 +25,7 @@ public:
   Executor(Executor &&) = delete;
   Executor &operator=(const Executor &) = delete;
   Executor &operator=(Executor &&) = delete;
+  ~Executor() = default;
 
   void execute(const Instruction &inst, State &state) {
     inst.callback(inst, state);
@@ -53,7 +55,7 @@ public:
     });
   }
 
-  std::uint64_t getInstrCount() const { return instrCount; }
+  [[nodiscard]] std::uint64_t getInstrCount() const { return instrCount; }
 
 private:
   std::uint64_t instrCount{1};

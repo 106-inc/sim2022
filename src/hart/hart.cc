@@ -42,9 +42,9 @@ class LRUCache final : public IBBCache {
   std::unordered_map<Addr, ListIt> hash_{};
 
 public:
-  LRUCache(std::size_t size) : size_(size) {}
+  explicit LRUCache(std::size_t size) : size_(size) {}
 
-  bool isFull() const { return (cache_.size() == size_); }
+  [[nodiscard]] bool isFull() const { return (cache_.size() == size_); }
 
   const BasicBlock &
   lookupUpdate(Addr key, std::function<BasicBlock(Addr)> slowGetData) override {

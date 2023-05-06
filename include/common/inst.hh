@@ -26,7 +26,7 @@ struct Instruction final {
 
   bool isBranch{false};
 
-  std::string str() const;
+  [[nodiscard]] std::string str() const;
 
   using Callback = void (*)(const Instruction &, State &);
   Callback callback = nullptr;

@@ -12,7 +12,7 @@ static_assert(std::endian::little == std::endian::native,
               "It seems that u r trying to run our sim on ur router");
 
 static_assert(
-    -1 == ~0,
+    -1 == ~0U,
     "Two's complement representation is required. It is fixed since c++20");
 
 namespace sim {
@@ -68,6 +68,18 @@ template <typename T> consteval std::size_t sizeofBits() {
   return sizeof(T) * kBitsInByte;
 }
 
+template <std::size_t high, std::size_t low, std::unsigned_integral T = Word>
+constexpr T getBitsNoShift(T word) {
+  static_assert(high >= low, "Incorrect bits range");
+  static_assert(high < sizeofBits<T>(), "Bit index out of range");
+
+  auto mask = ~T(0);
+  if constexpr (high != sizeofBits<T>() - 1)
+    mask = ~(mask << (high + 1));
+
+  return word & mask;
+}
+
 /**
  * @brief Get bits from number function
  *
@@ -78,14 +90,7 @@ template <typename T> consteval std::size_t sizeofBits() {
  */
 template <std::size_t high, std::size_t low, std::unsigned_integral T = Word>
 constexpr T getBits(T word) {
-  static_assert(high >= low, "Incorrect bits range");
-  static_assert(high < sizeofBits<T>(), "Bit index out of range");
-
-  auto mask = ~T(0);
-  if constexpr (high != sizeofBits<T>() - 1)
-    mask = ~(mask << (high + 1));
-
-  return static_cast<T>((word & mask) >> low);
+  return static_cast<T>(getBitsNoShift<high, low>(word) >> low);
 }
 
 /**
@@ -99,7 +104,7 @@ constexpr T getBits(T word) {
 template <std::size_t pos, bool toSet> constexpr Word setBit(Word word) {
   static_assert(pos < sizeofBits<Word>(), "Bit index out of range");
 
-  constexpr auto mask = Word(1) << pos;
+  constexpr auto mask = static_cast<Word>(1) << pos;
   if constexpr (toSet)
     return word | mask;
 
@@ -145,7 +150,7 @@ constexpr Word signExtend(Word word) {
     return word;
 
   Word zeroed = getBits<oldSize - 1, 0>(word);
-  constexpr Word mask = Word(1) << (oldSize - 1);
+  constexpr Word mask = static_cast<Word>(1) << (oldSize - 1);
   Word res = (zeroed ^ mask) - mask;
 
   return getBits<newSize - 1, 0>(res);

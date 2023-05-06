@@ -22,7 +22,7 @@ private:
   std::array<RegVal, kRegNum> regs{};
 
 public:
-  RegVal get(RegId regnum) const { return regs.at(regnum); }
+  [[nodiscard]] RegVal get(RegId regnum) const { return regs.at(regnum); }
 
   void set(RegId regnum, RegVal val) {
     // NOP instruction looks like ADD x0, x0, 0 - assignment to x0,
@@ -36,7 +36,7 @@ public:
     regs.at(regnum) = val;
   }
 
-  std::string str() const;
+  [[nodiscard]] std::string str() const;
 };
 
 class CSRegFile final {
@@ -46,7 +46,7 @@ private:
 public:
   CSRegFile() : regs(kCSRegNum) {}
 
-  RegVal get(CSRegId regnum) const { return regs.at(regnum); }
+  [[nodiscard]] RegVal get(CSRegId regnum) const { return regs.at(regnum); }
   void set(CSRegId regnum, RegVal val) { regs.at(regnum) = val; }
 
   void updateTimers(OpType type) {

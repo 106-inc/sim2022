@@ -16,7 +16,7 @@
 namespace sim {
 
 struct Page {
-  Page() { wordStorage.resize(kPageSize / sizeof(Word)); }
+  Page() : wordStorage(kPageSize / sizeof(Word)) {}
 
   std::vector<Word> wordStorage{};
 };
@@ -53,11 +53,11 @@ public:
     TLBStats() = default;
   };
 
-  TLB() { tlb.resize(kTLBSize); }
+  TLB() : tlb(kTLBSize) {}
   PagePtr tlbLookup(Addr addr);
   void tlbUpdate(Addr addr, PagePtr page);
   TLBIndex getTLBIndex(Addr addr);
-  const TLBStats &getTLBStats() const;
+  [[nodiscard]] const TLBStats &getTLBStats() const;
   void tlbFlush();
 
 private:
@@ -76,7 +76,7 @@ public:
     uint16_t offset{};
 
     AddrSections(uint32_t pt, uint16_t off) : indexPt(pt), offset(off) {}
-    AddrSections(Addr addr) {
+    explicit AddrSections(Addr addr) {
       constexpr std::pair<uint8_t, uint8_t> of_bits{kOffsetBits - 1, 0};
       constexpr std::pair<uint8_t, uint8_t> pt_bits{sizeofBits<Addr>() - 1,
                                                     kOffsetBits};
@@ -89,12 +89,13 @@ public:
 
   class PageFaultException : public std::runtime_error {
   public:
-    PageFaultException(const char *msg) : std::runtime_error(msg) {}
+    explicit PageFaultException(const char *msg) : std::runtime_error(msg) {}
   };
 
   class MisAlignedAddrException : public std::runtime_error {
   public:
-    MisAlignedAddrException(const char *msg) : std::runtime_error(msg) {}
+    explicit MisAlignedAddrException(const char *msg)
+        : std::runtime_error(msg) {}
   };
 
   enum struct MemoryOp { STORE = 0, LOAD = 1 };
@@ -106,7 +107,7 @@ public:
   template <isSimType T, PhysMemory::MemoryOp op> T *getEntity(Addr addr);
   uint16_t getOffset(Addr addr);
 
-  const TLB::TLBStats getTLBStats() { return tlb.getTLBStats(); }
+  [[nodiscard]] const TLB::TLBStats getTLBStats() { return tlb.getTLBStats(); }
 
 private:
   PT pageTable{};
@@ -133,6 +134,7 @@ public:
   Memory(Memory &&) = delete;
   Memory &operator=(const Memory &) = delete;
   Memory &operator=(Memory &&) = delete;
+  ~Memory() = default;
 
   Word loadWord(Addr addr);
   void storeWord(Addr addr, Word word);
@@ -145,12 +147,12 @@ public:
   void setProgramStoredFlag() { isProgramStored = true; }
 
   void printMemStats(std::ostream &ost) const;
-  const MemoryStats &getMemStats() const;
+  [[nodiscard]] const MemoryStats &getMemStats() const;
 
   template <std::forward_iterator It>
   void storeRange(Addr start, It begin, It end);
 
-  const TLB::TLBStats getTLBStats() { return physMem.getTLBStats(); }
+  [[nodiscard]] TLB::TLBStats getTLBStats() { return physMem.getTLBStats(); }
 };
 
 template <isSimType T, PhysMemory::MemoryOp op>
@@ -162,9 +164,12 @@ inline T *PhysMemory::getEntity(Addr addr) {
 #endif
   AddrSections sections(addr);
   auto offset = sections.offset;
-  auto addrZerored = getBits<sizeofBits<decltype(addr)>(), 12>(addr);
+  auto addrZerored =
+      getBitsNoShift<sizeofBits<decltype(addr)>() - 1, kOffsetBits>(addr);
+
   auto isInTLB = tlb.tlbLookup(addrZerored);
-  PagePtr page;
+  PagePtr page{};
+
   if (isInTLB) {
     page = isInTLB;
   } else {

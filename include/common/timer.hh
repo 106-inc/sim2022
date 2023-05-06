@@ -13,14 +13,14 @@ public:
 
   void reset() { start = std::chrono::high_resolution_clock::now(); }
 
-  auto elapsedMs() {
+  [[nodiscard]] auto elapsedMs() {
     auto end = std::chrono::high_resolution_clock::now();
 
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
         .count();
   }
 
-  auto elapsedMcs() {
+  [[nodiscard]] auto elapsedMcs() {
     auto end = std::chrono::high_resolution_clock::now();
 
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start)

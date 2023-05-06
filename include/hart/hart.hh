@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 
 class IBBCache {
 public:
-  virtual ~IBBCache() {}
+  virtual ~IBBCache() = default;
   virtual const BasicBlock &
   lookupUpdate(Addr key, std::function<BasicBlock(Addr)> slowGetData) = 0;
 };
@@ -39,7 +39,9 @@ private:
 public:
   Hart(const fs::path &executable, std::int64_t bbCacheSize);
   void run();
-  std::uint64_t getInstrCount() const { return exec_.getInstrCount(); }
+  [[nodiscard]] std::uint64_t getInstrCount() const {
+    return exec_.getInstrCount();
+  }
 };
 
 } // namespace sim

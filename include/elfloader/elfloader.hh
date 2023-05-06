@@ -17,24 +17,25 @@ private:
   ELFIO::elfio elfFile_{};
 
 public:
-  ELFLoader(const fs::path &file);
-  ELFLoader(std::istream &stream);
+  explicit ELFLoader(const fs::path &file);
+  explicit ELFLoader(std::istream &stream);
 
-  Addr getEntryPoint() const;
+  [[nodiscard]] Addr getEntryPoint() const;
 
   using IndexT = unsigned;
-  std::vector<IndexT> getLoadableSegments() const;
+  [[nodiscard]] std::vector<IndexT> getLoadableSegments() const;
 
-  std::size_t getSegmentFileSize(IndexT index) const;
-  std::size_t getSegmentMemorySize(IndexT index) const;
-  std::span<const Word> getSegment(IndexT index) const;
-  Addr getSegmentAddr(IndexT index) const;
-  bool hasSegment(IndexT index) const;
+  [[nodiscard]] std::size_t getSegmentFileSize(IndexT index) const;
+  [[nodiscard]] std::size_t getSegmentMemorySize(IndexT index) const;
+  [[nodiscard]] std::span<const Word> getSegment(IndexT index) const;
+  [[nodiscard]] Addr getSegmentAddr(IndexT index) const;
+  [[nodiscard]] bool hasSegment(IndexT index) const;
 
 private:
   void check() const;
-  const ELFIO::section *getSectionPtr(const std::string &name) const;
-  const ELFIO::segment *getSegmentPtr(IndexT index) const;
+  [[nodiscard]] const ELFIO::section *
+  getSectionPtr(const std::string &name) const;
+  [[nodiscard]] const ELFIO::segment *getSegmentPtr(IndexT index) const;
 };
 
 } // namespace sim

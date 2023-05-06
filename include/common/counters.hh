@@ -42,15 +42,15 @@ public:
         {OpType::CSRRC, 1},   {OpType::CSRRWI, 1}, {OpType::CSRRSI, 1},
         {OpType::CSRRCI, 1},
     };
-    auto it = throughput.find(type);
-    if (it == throughput.end()) {
+    auto iter = throughput.find(type);
+    if (iter == throughput.end()) {
 #ifdef SPDLOG
       spdlog::warn("Cant calculate {} throughput",
                    static_cast<std::uint8_t>(type));
 #endif
       return 1;
     }
-    return it->second;
+    return iter->second;
   }
 }; // class Counters
 

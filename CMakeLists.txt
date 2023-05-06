@@ -38,14 +38,10 @@ option(BUILD_TESTS "Build tests" ON)
 # add -Werror option
 option(ENABLE_WERROR "Enable -Werror option (CI)" OFF)
 # enable spdlog
-option(ENABLE_LOG "Enable spdlog" ON)
+option(ENABLE_LOG "Enable spdlog" OFF)
 # Test running stuff
 if(BUILD_TESTS)
   enable_testing()
-endif()
-
-if(ENABLE_LOG)
-  add_compile_options(-DSPDLOG)
 endif()
 
 find_package(spdlog REQUIRED)
@@ -77,6 +73,10 @@ foreach(TARGET ${TARGETS})
   apply_compiler_flags(${TARGET} PUBLIC)
   if(ENABLE_WERROR)
     target_compile_options(${TARGET} PRIVATE -Werror)
+  endif()
+
+  if(ENABLE_LOG)
+    target_compile_definitions(${TARGET} PRIVATE SPDLOG)
   endif()
 endforeach()
 

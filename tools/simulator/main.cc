@@ -57,7 +57,7 @@ int main(int argc, char **argv) try {
 
   isCosimOpt->check(
       [&loggingLevel, &cosimFileOpt](const std::string &) -> std::string {
-        if (loggingLevel < lvl::warn && !*cosimFileOpt)
+        if (loggingLevel >= lvl::warn && !*cosimFileOpt)
           return "To dump cosim data to stdout, at least warn log level is "
                  "required";
         return "";

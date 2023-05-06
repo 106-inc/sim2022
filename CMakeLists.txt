@@ -38,7 +38,7 @@ option(BUILD_TESTS "Build tests" ON)
 # add -Werror option
 option(ENABLE_WERROR "Enable -Werror option (CI)" OFF)
 # enable spdlog
-option(ENABLE_LOG "Enable spdlog" OFF)
+option(ENABLE_LOG "Enable spdlog" ON)
 # Test running stuff
 if(BUILD_TESTS)
   enable_testing()

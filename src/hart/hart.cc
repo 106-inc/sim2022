@@ -120,7 +120,7 @@ void Hart::run() {
     const auto &bb = bbc_->lookupUpdate(getPC(), lCreateBB);
     exec_.execute(bb.begin(), bb.end(), state_);
   }
-  sim::TLB::TLBStats stats = state_.mem.getTLBStats();
+  auto stats = state_.mem.getTLBStats();
   std::cout << "Hits: "
             << static_cast<double>(stats.TLBHits) /
                    static_cast<double>(stats.TLBRequests) * 100.0

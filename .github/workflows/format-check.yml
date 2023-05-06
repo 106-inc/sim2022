@@ -8,7 +8,7 @@ on:
 
 jobs:
   formatting-check:
-    name: Formatting Check of ${{ matrix.path }} directory
+    name: Formatting Check of ${{ github.workspace }}/${{ matrix.path }} directory
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,5 +22,5 @@ jobs:
     - name: Run clang-format style check for C/C++/Protobuf programs.
       uses: jidicula/clang-format-action@v4.9.0
       with:
-        clang-format-version: '14'
-        check-path: ${{ matrix.path }}
+        clang-format-version: '16'
+        check-path: ${{ github.workspace }}/${{ matrix.path }}

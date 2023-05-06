@@ -76,12 +76,15 @@ foreach(TARGET ${TARGETS})
   endif()
 
   if(ENABLE_LOG)
-    target_compile_definitions(${TARGET} PRIVATE SPDLOG)
+    target_compile_definitions(${TARGET} PUBLIC -DSPDLOG=1)
   endif()
 endforeach()
 
 foreach(TOOL ${TOOLLIST})
   target_link_libraries(${TOOL} PRIVATE ${LIBLIST})
+  if(ENABLE_LOG)
+    target_compile_definitions(${TOOL} PRIVATE SPDLOG=1)
+  endif()
 endforeach()
 
 add_compile_options(-g3 -O3)

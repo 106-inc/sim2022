@@ -73,13 +73,13 @@ int main() {
     backtrack(a, 0, i);
   }
 
-  // CHECK: NUM=2952531
-  // CHECK: M[0x110003b0]=0x0000005d
-  // CHECK: PC=0x00010394
+  // CHECK: NUM=3709836
+  // CHECK: M[0x110003d4]=0x0000005d
+  // CHECK: PC=0x000103b8
   solution_count += 1;
 
-  // CHECK: NUM=2952532
-  // CHECK: PC=0x00010398
+  // CHECK: NUM=3709837
+  // CHECK: PC=0x000103bc
   asm("ecall");
 }
 

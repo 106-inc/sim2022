@@ -3,8 +3,7 @@
 	url = https://github.com/CLIUtils/CLI11.git
 [submodule "thirdparty/riscv-opcodes"]
 	path = thirdparty/riscv-opcodes
-	url = https://github.com/riscv/riscv-opcodes.git
-	branch = sim2022
+	url = https://github.com/106-inc/riscv-opcodes.git
 
 [submodule "thirdparty/ELFIO"]
 	path = thirdparty/ELFIO

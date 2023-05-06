@@ -12,7 +12,7 @@ static_assert(std::endian::little == std::endian::native,
               "It seems that u r trying to run our sim on ur router");
 
 static_assert(
-    -1 == ~0U,
+    -1U == ~0U,
     "Two's complement representation is required. It is fixed since c++20");
 
 namespace sim {

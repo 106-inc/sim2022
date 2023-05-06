@@ -77,7 +77,7 @@ constexpr T getBitsNoShift(T word) {
   if constexpr (high != sizeofBits<T>() - 1)
     mask = ~(mask << (high + 1));
 
-  return word & mask;
+  return static_cast<T>(word & mask);
 }
 
 /**

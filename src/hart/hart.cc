@@ -122,7 +122,8 @@ void Hart::run() {
   }
   sim::TLB::TLBStats stats = state_.mem.getTLBStats();
   std::cout << "Hits: "
-            << static_cast<double>(stats.TLBHits) / stats.TLBRequests * 100
+            << static_cast<double>(stats.TLBHits) /
+                   static_cast<double>(stats.TLBRequests) * 100.0
             << std::endl;
 }
 

@@ -9,3 +9,6 @@
 [submodule "thirdparty/ELFIO"]
 	path = thirdparty/ELFIO
 	url = https://github.com/serge1/ELFIO.git
+[submodule "thirdparty/LLVMPractice"]
+	path = thirdparty/LLVMPractice
+	url = https://github.com/derzhavin3016/LLVMPractice.git

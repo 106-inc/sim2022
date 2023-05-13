@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <spdlog/spdlog.h>
@@ -17,12 +18,53 @@
 
 namespace sim {
 
+enum class RegAliases : RegId {
+  ZERO = 0,
+  RA,
+  SP,
+  GP,
+  TP,
+  T0,
+  T1,
+  T2,
+  FP,
+  S1,
+  A0,
+  A1,
+  A2,
+  A3,
+  A4,
+  A5,
+  A6,
+  A7,
+  S2,
+  S3,
+  S4,
+  S5,
+  S6,
+  S7,
+  S8,
+  S9,
+  S10,
+  S11,
+  T3,
+  T4,
+  T5,
+  T6
+};
+
 class RegFile final {
 private:
   std::array<RegVal, kRegNum> regs{};
 
 public:
+  using enum RegAliases;
+
   [[nodiscard]] RegVal get(RegId regnum) const { return regs.at(regnum); }
+
+  [[nodiscard]] RegVal get(RegAliases name) const {
+    return get(static_cast<std::underlying_type_t<decltype(name)>>(name));
+  }
 
   void set(RegId regnum, RegVal val) {
     // NOP instruction looks like ADD x0, x0, 0 - assignment to x0,
@@ -34,6 +76,10 @@ public:
     cosimLog("x{}=0x{:08x}", regnum, val);
 #endif
     regs.at(regnum) = val;
+  }
+
+  void set(RegAliases name, RegVal val) {
+    set(static_cast<std::underlying_type_t<decltype(name)>>(name), val);
   }
 
   [[nodiscard]] std::string str() const;

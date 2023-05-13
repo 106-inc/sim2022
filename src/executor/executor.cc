@@ -1,6 +1,10 @@
 #include <algorithm>
 
+#include "common/common.hh"
+#include "common/state.hh"
 #include "executor/executor.hh"
+
+#include "Life/graph.h"
 
 namespace sim {
 
@@ -239,8 +243,12 @@ void executeCSRRCI(const Instruction &inst, State &state) {
 
 /* Glang support functions */
 
-void executeGBOOL(const Instruction &inst, State &state) {
-  throw std::runtime_error{"Not implemented yet"};
+void executeGBOOL(const Instruction &, State &state) {
+  auto val = static_cast<std::uint64_t>(genRandomBool());
+  static_assert(sizeof(val) == 8);
+
+  state.regs.set(RegFile::A0, static_cast<RegVal>(val));
+  state.regs.set(RegFile::A1, static_cast<RegVal>(getBits<63, 32>(val)));
 }
 void executeCRWND(const Instruction &inst, State &state) {
   throw std::runtime_error{"Not implemented yet"};

@@ -5,15 +5,16 @@
 namespace sim {
 
 template <std::regular_invocable<RegVal, RegVal> Func>
-void executeRegisterRegisterOp(const Instruction &inst, State &state, Func op) {
+static void executeRegisterRegisterOp(const Instruction &inst, State &state,
+                                      Func op) {
   auto rs1 = state.regs.get(inst.rs1);
   auto rs2 = state.regs.get(inst.rs2);
   state.regs.set(inst.rd, op(rs1, rs2));
 }
 
 template <std::regular_invocable<RegVal, RegVal> Func>
-void executeRegisterImmidiateOp(const Instruction &inst, State &state,
-                                Func op) {
+static void executeRegisterImmidiateOp(const Instruction &inst, State &state,
+                                       Func op) {
   auto rs1 = state.regs.get(inst.rs1);
   state.regs.set(inst.rd, op(rs1, inst.imm));
 }
@@ -32,7 +33,7 @@ template <std::integral T> static T executeSR(T lhs, T rhs) {
 }
 
 template <std::predicate<RegVal, RegVal> Func>
-void executeCondBranch(const Instruction &inst, State &state, Func op) {
+static void executeCondBranch(const Instruction &inst, State &state, Func op) {
   auto rs1 = state.regs.get(inst.rs1);
   auto rs2 = state.regs.get(inst.rs2);
   if (op(rs1, rs2)) {
@@ -235,6 +236,32 @@ void executeCSRRCI(const Instruction &inst, State &state) {
   state.regs.set(inst.rd, csr);
   state.csregs.set(inst.csr, csr & (~getBits<4, 0>(rs1)));
 }
+
+/* Glang support functions */
+
+void executeGBOOL(const Instruction &inst, State &state) {
+  throw std::runtime_error{"Not implemented yet"};
+}
+void executeCRWND(const Instruction &inst, State &state) {
+  throw std::runtime_error{"Not implemented yet"};
+}
+void executeISOPEN(const Instruction &inst, State &state) {
+  throw std::runtime_error{"Not implemented yet"};
+}
+void executeHANDEV(const Instruction &inst, State &state) {
+  throw std::runtime_error{"Not implemented yet"};
+}
+void executeCLRWND(const Instruction &inst, State &state) {
+  throw std::runtime_error{"Not implemented yet"};
+}
+void executePUPI(const Instruction &inst, State &state) {
+  throw std::runtime_error{"Not implemented yet"};
+}
+void executeFLWND(const Instruction &inst, State &state) {
+  throw std::runtime_error{"Not implemented yet"};
+}
+
+/* End of glang functions */
 
 [[noreturn]] void executeAND(const Instruction &, State &) {
   throw std::runtime_error{"Not implemented yet"};

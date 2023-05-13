@@ -4,6 +4,7 @@
 [submodule "thirdparty/riscv-opcodes"]
 	path = thirdparty/riscv-opcodes
 	url = https://github.com/106-inc/riscv-opcodes.git
+	branch = glang
 
 [submodule "thirdparty/ELFIO"]
 	path = thirdparty/ELFIO

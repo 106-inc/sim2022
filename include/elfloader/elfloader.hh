@@ -31,6 +31,8 @@ public:
   [[nodiscard]] Addr getSegmentAddr(IndexT index) const;
   [[nodiscard]] bool hasSegment(IndexT index) const;
 
+  [[nodiscard]] auto getTextSection() const { return getSectionPtr(".text"); }
+
 private:
   void check() const;
   [[nodiscard]] const ELFIO::section *

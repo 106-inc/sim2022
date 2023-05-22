@@ -33,7 +33,7 @@ PagePtr TLB::tlbLookup(Addr addr) {
     stats.TLBMisses++;
     return nullptr;
   }
-  if (found.virtualAddress != addr) {
+  if (found.virtualAddress != (addr & kTLBMask)) {
     stats.TLBMisses++;
     return nullptr;
   }
@@ -44,7 +44,7 @@ PagePtr TLB::tlbLookup(Addr addr) {
 void TLB::tlbUpdate(Addr addr, PagePtr page) {
 
   auto idx = getTLBIndex(addr);
-  tlb[idx] = TLBEntry(addr, page, true);
+  tlb[idx] = TLBEntry((addr & kTLBMask), page, true);
 }
 
 const TLB::TLBStats &TLB::getTLBStats() const { return stats; }

@@ -35,6 +35,7 @@ constexpr std::uint16_t kPageSize = 4096;
 constexpr std::uint16_t kTLBSize = 1024;
 constexpr std::uint16_t kTLBBits = 10;
 constexpr std::uint16_t kOffsetBits = 12;
+constexpr std::uint32_t kTLBMask = 0xFFFFF000;
 
 constexpr std::string_view kCosimLoggerName = "cosim";
 

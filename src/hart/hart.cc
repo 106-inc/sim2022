@@ -121,10 +121,10 @@ void Hart::run() {
     exec_.execute(bb.begin(), bb.end(), state_);
   }
   auto stats = state_.mem.getTLBStats();
-  std::cout << "Hits: "
+  std::cout << "TLB HitRate: " << std::fixed << std::setprecision(2)
             << static_cast<double>(stats.TLBHits) /
                    static_cast<double>(stats.TLBRequests) * 100.0
-            << std::endl;
+            << "%" << std::endl;
 }
 
 } // namespace sim

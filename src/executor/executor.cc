@@ -81,8 +81,8 @@ void executeJAL(const Instruction &inst, State &state) {
 
 void executeJALR(const Instruction &inst, State &state) {
   state.branchIsTaken = true;
-  state.regs.set(inst.rd, state.pc + kXLENInBytes);
   auto rs1 = state.regs.get(inst.rs1);
+  state.regs.set(inst.rd, state.pc + kXLENInBytes);
   state.npc = setBit<0, 0>(rs1 + inst.imm); // setting the least-significant
                                             // bit of the result to zero.
 }

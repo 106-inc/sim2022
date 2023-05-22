@@ -136,13 +136,8 @@ public:
   Memory &operator=(Memory &&) = delete;
   ~Memory() = default;
 
-  Word loadWord(Addr addr);
-  void storeWord(Addr addr, Word word);
-
-  Half loadHalf(Addr addr);
-  void storeHalf(Addr addr, Half half);
-  Byte loadByte(Addr addr);
-  void storeByte(Addr addr, Byte Byte);
+  template <isSimType Type> Type loadEntity(Addr addr);
+  template <isSimType Type> void storeEntity(Addr addr, Type entity);
 
   void setProgramStoredFlag() { isProgramStored = true; }
 
@@ -155,13 +150,12 @@ public:
   [[nodiscard]] TLB::TLBStats getTLBStats() { return physMem.getTLBStats(); }
 };
 
+//~~~~~PhysMemory class templated functions~~~~~
 template <isSimType T, PhysMemory::MemoryOp op>
 inline T *PhysMemory::getEntity(Addr addr) {
-#ifdef MISALIGNED_CHECK
   if (addr % sizeof(T) || ((getOffset(addr) + sizeof(T)) > (1 << kOffsetBits)))
     throw PhysMemory::MisAlignedAddrException(
         "Misaligned memory access is not supported!");
-#endif
   AddrSections sections(addr);
   auto offset = sections.offset;
   auto addrZerored =
@@ -197,99 +191,36 @@ PagePtr PhysMemory::pageTableLookup(const AddrSections &sect) {
   }
   return &pageTable.at(index);
 }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//~~~~~Memory class templated functions~~~~~
 
 template <std::forward_iterator It>
-void Memory::storeRange(Addr start, It begin, It end) {
+inline void Memory::storeRange(Addr start, It begin, It end) {
   std::for_each(begin, end, [&start, this](auto curWord) {
-    storeWord(start, curWord);
+    storeEntity<Word>(start, curWord);
     start += kXLENInBytes;
   });
 }
 
-inline void Memory::printMemStats(std::ostream &ost) const {
-  ost << "Memory stats:" << std::endl;
-  ost << "Loads: " << stats.numLoads << std::endl;
-  ost << "Stores: " << stats.numStores << std::endl;
-  ost << "End of memory stats." << std::endl;
-}
-
-inline const Memory::MemoryStats &Memory::getMemStats() const { return stats; }
-
-inline uint16_t PhysMemory::getOffset(Addr addr) {
-  return static_cast<uint16_t>(getBits<kOffsetBits - 1, 0>(addr));
-}
-
-inline Word Memory::loadWord(Addr addr) {
+template <isSimType Type> inline Type Memory::loadEntity(Addr addr) {
   stats.numLoads++;
-  Word loadedWord = *physMem.getEntity<Word, PhysMemory::MemoryOp::LOAD>(addr);
-
-  return loadedWord;
+  Type loadedEntity =
+      *physMem.getEntity<Type, PhysMemory::MemoryOp::LOAD>(addr);
+  return loadedEntity;
 }
 
-inline void Memory::storeWord(Addr addr, Word word) {
+template <isSimType Type>
+inline void Memory::storeEntity(Addr addr, Type entity) {
   stats.numStores++;
-  *physMem.getEntity<Word, PhysMemory::MemoryOp::STORE>(addr) = word;
+  *physMem.getEntity<Type, PhysMemory::MemoryOp::STORE>(addr) = entity;
 #ifdef SPDLOG
   if (isProgramStored) {
-    cosimLog("M[0x{:08x}]=0x{:08x}", addr, word);
+    cosimLog("M[0x{:08x}]=0x{:08x}", addr, entity);
   }
 #endif
 }
-
-inline Half Memory::loadHalf(Addr addr) {
-  stats.numLoads++;
-  Half loadedWord = *physMem.getEntity<Half, PhysMemory::MemoryOp::LOAD>(addr);
-
-  return loadedWord;
-}
-
-inline void Memory::storeHalf(Addr addr, Half half) {
-  stats.numStores++;
-  *physMem.getEntity<Half, PhysMemory::MemoryOp::STORE>(addr) = half;
-}
-
-inline Byte Memory::loadByte(Addr addr) {
-  stats.numLoads++;
-  Byte loadedWord = *physMem.getEntity<Byte, PhysMemory::MemoryOp::LOAD>(addr);
-
-  return loadedWord;
-}
-
-inline void Memory::storeByte(Addr addr, Byte byte) {
-  stats.numStores++;
-  *physMem.getEntity<Byte, PhysMemory::MemoryOp::STORE>(addr) = byte;
-}
-
-inline TLB::TLBIndex TLB::getTLBIndex(Addr addr) {
-  return static_cast<TLB::TLBIndex>(
-      getBits<(kTLBBits + kOffsetBits - 1), kOffsetBits>(addr));
-}
-
-inline PagePtr TLB::tlbLookup(Addr addr) {
-  stats.TLBRequests++;
-  auto idx = getTLBIndex(addr);
-  auto found = tlb[idx];
-  if (!found.valid) {
-    stats.TLBMisses++;
-    return nullptr;
-  }
-  if (found.virtualAddress != addr) {
-    stats.TLBMisses++;
-    return nullptr;
-  }
-  stats.TLBHits++;
-  return found.physPage;
-}
-
-inline void TLB::tlbUpdate(Addr addr, PagePtr page) {
-
-  auto idx = getTLBIndex(addr);
-  tlb[idx] = TLBEntry(addr, page, true);
-}
-
-inline const TLB::TLBStats &TLB::getTLBStats() const { return stats; }
-
-inline void TLB::tlbFlush() { tlb.clear(); }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 } // namespace sim
 

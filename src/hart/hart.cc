@@ -82,7 +82,7 @@ Hart::Hart(const fs::path &executable, std::int64_t bbCacheSize) {
     auto fileSize = static_cast<Addr>(loader.getSegmentFileSize(segmentIdx));
     auto memSize = static_cast<Addr>(loader.getSegmentMemorySize(segmentIdx));
     for (; fileSize < memSize; fileSize += kXLENInBytes)
-      getMem().storeWord(addr + fileSize, Word{});
+      getMem().storeEntity<Word>(addr + fileSize, Word{});
   }
 
   getMem().setProgramStoredFlag();
@@ -95,7 +95,7 @@ BasicBlock Hart::createBB(Addr addr) {
   spdlog::trace("Creating basic block:");
 #endif
   for (bool isBranch = false; !isBranch; addr += kXLENInBytes) {
-    auto inst = decoder_.decode(getMem().loadWord(addr));
+    auto inst = decoder_.decode(getMem().loadEntity<Word>(addr));
     if (inst.type == OpType::UNKNOWN)
       throw std::logic_error{
           "Unknown instruction found while decoding basic block" + inst.str()};

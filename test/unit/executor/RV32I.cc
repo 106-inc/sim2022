@@ -1,6 +1,10 @@
 #include "executor_test.hh"
 #include "test_header.hh"
 
+using Word = sim::Word;
+using Byte = sim::Byte;
+using Half = sim::Half;
+
 TEST(execute, ADD) {
   simulationState.regs.set(2, 42);
   sim::Instruction instr = {1, // rs1
@@ -36,7 +40,7 @@ TEST(execute, lWAndSW) {
                             0, // rd
                             0, 0, sim::OpType::SW, 0x0, false, sim::executeSW};
   executor.execute(instr, simulationState);
-  ASSERT_EQ(simulationState.mem.loadWord(0xA0), 0xFF);
+  ASSERT_EQ(simulationState.mem.loadEntity<Word>(0xA0), 0xFF);
   instr = {1, // rs1
            2, // rs2
            0,
@@ -54,7 +58,7 @@ TEST(execute, lWAndSW) {
            0, // rd
            0, 0, sim::OpType::SW, 0xFFFFFFF0, false, sim::executeSW};
   executor.execute(instr, simulationState);
-  ASSERT_EQ(simulationState.mem.loadWord(0x90), 0xFF);
+  ASSERT_EQ(simulationState.mem.loadEntity<Word>(0x90), 0xFF);
   instr = {1, // rs1
            2, // rs2
            0,

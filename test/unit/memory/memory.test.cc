@@ -10,15 +10,18 @@ using AddrSections = sim::PhysMemory::AddrSections;
 using Page = sim::Page;
 using PagePtr = sim::PagePtr;
 using MemOp = sim::PhysMemory::MemoryOp;
+using Word = sim::Word;
+using Byte = sim::Byte;
+using Half = sim::Half;
 
 TEST(Memory, Memory_store_load) {
   sim::Memory mem;
 
   // Load value which was stored  previously
   for (Addr i = 0; i < kNumReqs; ++i)
-    mem.storeWord(i * 4, i * i);
+    mem.storeEntity<Word>(i * 4, i * i);
   for (Addr i = 0; i < kNumReqs; ++i)
-    EXPECT_EQ(mem.loadWord(i * 4), i * i);
+    EXPECT_EQ(mem.loadEntity<Word>(i * 4), i * i);
 }
 
 TEST(Memory, Mem_stats) {
@@ -28,11 +31,11 @@ TEST(Memory, Mem_stats) {
   // kNumReqs stores
   // 2 * kNumReqs loads (kNumReqs pageFaults + kNumReqs real loads)
   for (Addr i = 0; i < kNumReqs; ++i)
-    mem.storeWord(i * 4, i * i);
+    mem.storeEntity<Word>(i * 4, i * i);
   for (Addr i = 0; i < kNumReqs; ++i)
-    mem.loadWord(i * 4);
+    mem.loadEntity<Word>(i * 4);
   for (Addr i = kNumReqs; i < 2 * kNumReqs; ++i)
-    mem.loadWord(i * 4);
+    mem.loadEntity<Word>(i * 4);
 
   stats = mem.getMemStats();
   EXPECT_EQ(stats.numStores, kNumReqs);
@@ -78,14 +81,14 @@ TEST(PhysMemory, pageTableLookup) {
 
 TEST(PhysMemory, MixingWordHalf) {
   sim::Memory mem;
-  mem.storeWord(0x10000000, 0xAABBCCDD);
-  EXPECT_EQ(mem.loadWord(0x10000000), 0xAABBCCDD);
-  EXPECT_EQ(mem.loadHalf(0x10000000), 0xCCDD);
-  EXPECT_EQ(mem.loadHalf(0x10000002), 0xAABB);
-  EXPECT_EQ(mem.loadByte(0x10000000), 0xDD);
-  EXPECT_EQ(mem.loadByte(0x10000001), 0xCC);
-  EXPECT_EQ(mem.loadByte(0x10000002), 0xBB);
-  EXPECT_EQ(mem.loadByte(0x10000003), 0xAA);
+  mem.storeEntity<Word>(0x10000000, 0xAABBCCDD);
+  EXPECT_EQ(mem.loadEntity<Word>(0x10000000), 0xAABBCCDD);
+  EXPECT_EQ(mem.loadEntity<Half>(0x10000000), 0xCCDD);
+  EXPECT_EQ(mem.loadEntity<Half>(0x10000002), 0xAABB);
+  EXPECT_EQ(mem.loadEntity<Byte>(0x10000000), 0xDD);
+  EXPECT_EQ(mem.loadEntity<Byte>(0x10000001), 0xCC);
+  EXPECT_EQ(mem.loadEntity<Byte>(0x10000002), 0xBB);
+  EXPECT_EQ(mem.loadEntity<Byte>(0x10000003), 0xAA);
 }
 
 TEST(PhysMemory, getOffset) {
@@ -99,21 +102,21 @@ TEST(PhysMemory, getEntity) {
   sim::Memory mem;
 #ifdef MISALIGNED_CHECK
   // Misaligned Address (Not alogned to word_size)
-  EXPECT_THROW(mem.storeWord(0xDEADBE01, 0x0),
+  EXPECT_THROW(mem.storeEntity<Word>(0xDEADBE01, 0x0),
                sim::PhysMemory::MisAlignedAddrException);
   // Misaligned Address (Between the pages)
-  EXPECT_THROW(mem.storeWord(0xDEADFFFE, 0x0),
+  EXPECT_THROW(mem.storeEntity<Word>(0xDEADFFFE, 0x0),
                sim::PhysMemory::MisAlignedAddrException);
 #endif
   // Load on unmapped region
-  EXPECT_THROW(mem.loadWord(0x0), sim::PhysMemory::PageFaultException);
+  EXPECT_THROW(mem.loadEntity<Word>(0x0), sim::PhysMemory::PageFaultException);
 
-  mem.storeWord(0x10000000, 42);
-  EXPECT_EQ(mem.loadWord(0x10000000), 42);
+  mem.storeEntity<Word>(0x10000000, 42);
+  EXPECT_EQ(mem.loadEntity<Word>(0x10000000), 42);
 
   // Rewriting word
-  mem.storeWord(0x10000000, 21);
-  EXPECT_EQ(mem.loadWord(0x10000000), 21);
+  mem.storeEntity<Word>(0x10000000, 21);
+  EXPECT_EQ(mem.loadEntity<Word>(0x10000000), 21);
 }
 
 TEST(TLB, getTLBIndex) {

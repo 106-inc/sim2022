@@ -158,17 +158,15 @@ inline T *PhysMemory::getEntity(Addr addr) {
         "Misaligned memory access is not supported!");
   AddrSections sections(addr);
   auto offset = sections.offset;
-  auto addrZerored =
-      getBitsNoShift<sizeofBits<decltype(addr)>() - 1, kOffsetBits>(addr);
 
-  auto isInTLB = tlb.tlbLookup(addrZerored);
+  auto isInTLB = tlb.tlbLookup(addr);
   PagePtr page{};
 
   if (isInTLB) {
     page = isInTLB;
   } else {
     page = PhysMemory::pageTableLookup<op>(sections);
-    tlb.tlbUpdate(addrZerored, page);
+    tlb.tlbUpdate(addr, page);
   }
   Word *word = &page->wordStorage.at(offset / sizeof(Word));
   Byte *byte = reinterpret_cast<Byte *>(word) + (offset % sizeof(Word));
@@ -198,20 +196,20 @@ PagePtr PhysMemory::pageTableLookup(const AddrSections &sect) {
 template <std::forward_iterator It>
 inline void Memory::storeRange(Addr start, It begin, It end) {
   std::for_each(begin, end, [&start, this](auto curWord) {
-    storeEntity<Word>(start, curWord);
+    // Warning elimination (2-phase name searching)
+    this->storeEntity<Word>(start, curWord);
     start += kXLENInBytes;
   });
 }
 
-template <isSimType Type> inline Type Memory::loadEntity(Addr addr) {
+template <isSimType Type> Type Memory::loadEntity(Addr addr) {
   stats.numLoads++;
   Type loadedEntity =
       *physMem.getEntity<Type, PhysMemory::MemoryOp::LOAD>(addr);
   return loadedEntity;
 }
 
-template <isSimType Type>
-inline void Memory::storeEntity(Addr addr, Type entity) {
+template <isSimType Type> void Memory::storeEntity(Addr addr, Type entity) {
   stats.numStores++;
   *physMem.getEntity<Type, PhysMemory::MemoryOp::STORE>(addr) = entity;
 #ifdef SPDLOG

@@ -39,9 +39,10 @@ int main(int argc, char *argv[]) try {
     auto bin_word = *reinterpret_cast<const sim::Word *>(start + i);
 
     auto inst = sim::Decoder::decode(bin_word);
-    std::cout << std::hex << std::setw(4) << std::setfill('0') << i << "  "
-              << std::setw(8) << toBE(bin_word) << std::dec
-              << " :: " << inst.str() << std::endl;
+    std::cout << std::hex << std::setw(8) << std::setfill('0')
+              << text_sec->get_address() + i << "  " << std::setw(8)
+              << toBE(bin_word) << std::dec << " :: " << inst.str()
+              << std::endl;
   }
 
 } catch (std::exception &ex) {

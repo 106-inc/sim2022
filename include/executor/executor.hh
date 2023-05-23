@@ -99,13 +99,14 @@ void executeCSRRSI(const Instruction &inst, State &state);
 void executeCSRRCI(const Instruction &inst, State &state);
 
 /* Glang support */
+
 void executeGBOOL(const Instruction &inst, State &state);
-[[noreturn]] void executeCRWND(const Instruction &inst, State &state);
-[[noreturn]] void executeISOPEN(const Instruction &inst, State &state);
-[[noreturn]] void executeHANDEV(const Instruction &inst, State &state);
-[[noreturn]] void executeCLRWND(const Instruction &inst, State &state);
-[[noreturn]] void executePUPI(const Instruction &inst, State &state);
-[[noreturn]] void executeFLWND(const Instruction &inst, State &state);
+void executeCRWND(const Instruction &inst, State &state);
+void executeISOPEN(const Instruction &inst, State &state);
+void executeHANDEV(const Instruction &inst, State &state);
+void executeCLRWND(const Instruction &inst, State &state);
+void executePUPI(const Instruction &inst, State &state);
+void executeFLWND(const Instruction &inst, State &state);
 
 /* unrealized */
 

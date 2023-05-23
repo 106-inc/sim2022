@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <cstdint>
+#include <type_traits>
 
 #include "common/common.hh"
 #include "common/state.hh"
@@ -86,8 +88,8 @@ void executeJAL(const Instruction &inst, State &state) {
 
 void executeJALR(const Instruction &inst, State &state) {
   state.branchIsTaken = true;
-  state.regs.set(inst.rd, state.pc + kXLENInBytes);
   auto rs1 = state.regs.get(inst.rs1);
+  state.regs.set(inst.rd, state.pc + kXLENInBytes);
   state.npc = setBit<0, 0>(rs1 + inst.imm); // setting the least-significant
                                             // bit of the result to zero.
 }
@@ -244,30 +246,34 @@ void executeCSRRCI(const Instruction &inst, State &state) {
 /* Glang support functions */
 
 void executeGBOOL(const Instruction &, State &state) {
-  auto val = static_cast<std::uint64_t>(genRandomBool());
-  static_assert(sizeof(val) == 8);
+  auto val = genRandomBool();
 
-  state.regs.set(RegFile::A0, static_cast<RegVal>(val));
-  state.regs.set(RegFile::A1, static_cast<RegVal>(getBits<63, 32>(val)));
+  state.regs.set(RegFile::A0, val);
 }
+
 void executeCRWND(const Instruction &inst, State &state) {
-  throw std::runtime_error{"Not implemented yet"};
+  createWindow(state.regs.get(RegFile::A0), state.regs.get(RegFile::A1));
 }
-void executeISOPEN(const Instruction &inst, State &state) {
-  throw std::runtime_error{"Not implemented yet"};
+
+void executeISOPEN(const Instruction &, State &state) {
+  auto isopen = isWindowOpen();
+  state.regs.set(RegFile::A0, isopen);
 }
-void executeHANDEV(const Instruction &inst, State &state) {
-  throw std::runtime_error{"Not implemented yet"};
-}
+
+void executeHANDEV(const Instruction &inst, State &state) { handleEvents(); }
+
 void executeCLRWND(const Instruction &inst, State &state) {
-  throw std::runtime_error{"Not implemented yet"};
+  clearWindow(state.regs.get(RegFile::A0), state.regs.get(RegFile::A1),
+              state.regs.get(RegFile::A2));
 }
+
 void executePUPI(const Instruction &inst, State &state) {
-  throw std::runtime_error{"Not implemented yet"};
+  putPixel(state.regs.get(RegFile::A0), state.regs.get(RegFile::A1),
+           state.regs.get(RegFile::A2), state.regs.get(RegFile::A3),
+           state.regs.get(RegFile::A4));
 }
-void executeFLWND(const Instruction &inst, State &state) {
-  throw std::runtime_error{"Not implemented yet"};
-}
+
+void executeFLWND(const Instruction &, State &) { flushWindow(); }
 
 /* End of glang functions */
 

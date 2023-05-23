@@ -38,7 +38,7 @@ option(BUILD_TESTS "Build tests" ON)
 # add -Werror option
 option(ENABLE_WERROR "Enable -Werror option (CI)" OFF)
 # enable spdlog
-option(ENABLE_LOG "Enable spdlog" OFF)
+option(ENABLE_LOG "Enable spdlog" ON)
 # Test running stuff
 if(BUILD_TESTS)
   enable_testing()
@@ -77,14 +77,16 @@ foreach(TARGET ${TARGETS})
 
   if(ENABLE_LOG)
     target_compile_definitions(${TARGET} PUBLIC -DSPDLOG=1)
-  endif()
-endforeach()
+    endif()
+  target_compile_definitions(${TARGET} PUBLIC -DMISALIGNED_CHECK=1)
+  endforeach()
 
-foreach(TOOL ${TOOLLIST})
+  foreach(TOOL ${TOOLLIST})
   target_link_libraries(${TOOL} PRIVATE ${LIBLIST})
   if(ENABLE_LOG)
-    target_compile_definitions(${TOOL} PRIVATE SPDLOG=1)
+  target_compile_definitions(${TOOL} PRIVATE SPDLOG=1)
   endif()
+  target_compile_definitions(${TOOL} PUBLIC -DMISALIGNED_CHECK=1)
 endforeach()
 
 add_compile_options(-g3 -O3)

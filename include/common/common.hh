@@ -40,7 +40,7 @@ constexpr std::uint32_t kTLBMask = -1U << kOffsetBits;
 constexpr std::string_view kCosimLoggerName = "cosim";
 
 template <typename... Args>
-void cosimLog(fmt::format_string<Args...> str, Args &&...args) {
+void cosimLog(fmt::format_string<Args...> str, Args &&... args) {
   auto coSimLogger = spdlog::get(kCosimLoggerName.data());
   if (coSimLogger) {
     coSimLogger->info(str, std::forward<Args>(args)...);

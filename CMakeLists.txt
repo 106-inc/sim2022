@@ -60,6 +60,8 @@ add_subdirectory(thirdparty)
 message("Collected libs: ${LIBLIST}")
 message("Collected tools: ${TOOLLIST}")
 
+set(CMAKE_CXX_STANDARD 20)
+
 set(TARGETS)
 list(APPEND TARGETS ${LIBLIST} ${TOOLLIST})
 
